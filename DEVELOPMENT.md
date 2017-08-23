@@ -2,6 +2,8 @@
 
 [![Circle CI](https://circleci.com/gh/ARMmbed/mbed-linux-cli.svg?style=shield&circle-token=367893aefffecc72cf7d17201667cd2f75d6d5c7)](https://circleci.com/gh/ARMmbed/mbed-linux-cli/)
 
+[![Builds](https://img.shields.io/badge/mbed linux cli-builds-blue.svg)](http://armmbed.github.io/mbed-linux-cli/builds/)
+
 ## Prerequisites
 
 [Node.js > v6.0.0](https://nodejs.org), which includes `npm`.
