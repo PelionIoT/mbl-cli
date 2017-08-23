@@ -1,0 +1,36 @@
+{
+  "name": "mbed-linux-cli",
+  "version": "1.0.0",
+  "description": "Command-line interface for developing with Mbed Linux",
+  "homepage": "https://www.mbed.com",
+  "author": "Rob Moran <rob.moran@arm.com>",
+  "license": "Apache-2.0",
+  "types": "./types/index.d.ts",
+  "main": "./index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ARMmbed/mbed-linux-cli"
+  },
+  "keywords": [
+    "mbed",
+    "linux",
+    "cli"
+  ],
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "scripts": {
+    "gulp": "gulp"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.24",
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-typedoc": "^2.0.3",
+    "gulp-typescript": "^3.2.2",
+    "merge2": "^1.1.0",
+    "typedoc": "^0.8.0",
+    "typescript": "^2.4.2"
+  },
+  "dependencies": {}
+}
