@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
 * Mbed Linux CLI
 * Copyright ARM Limited 2017
@@ -15,4 +16,4 @@
 * limitations under the License.
 */
 
-module.exports = require("./lib/index");
+require('../dist/index');

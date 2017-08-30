@@ -1,16 +1,18 @@
 var path        = require("path");
 var del         = require("del");
 var merge       = require('merge2');
+var tslint      = require("tslint");
 var gulp        = require("gulp");
-var typedoc     = require("gulp-typedoc");
-var ts          = require("gulp-typescript");
+var gulpTs      = require("gulp-typescript");
+var gulpTslint  = require("gulp-tslint");
+var gulpTypedoc = require("gulp-typedoc");
 
 var name = "Mbed Linux CLI";
 var docsToc = "";
 
 var srcDir = "src";
 var docsDir = "docs";
-var nodeDir = "lib";
+var nodeDir = "dist";
 var typesDir = "types";
 var watching = false;
 
@@ -24,16 +26,30 @@ gulp.task("clean", function() {
     return del([nodeDir, typesDir]);
 });
 
+// Lint the source
+gulp.task("lint", function() {
+    var program = tslint.Linter.createProgram();
+
+    gulp.src(srcDir + "/**/*.ts")
+    .pipe(gulpTslint({
+        program: program,
+        formatter: "stylish"
+    }))
+    .pipe(gulpTslint.report({
+        emitError: false
+    }))
+});
+
 // Create documentation
 gulp.task("doc", function() {
     return gulp.src(srcDir + "/**/*.ts")
-    .pipe(typedoc({
+    .pipe(gulpTypedoc({
         name: name,
         readme: "src/documentation.md",
         theme: "src/theme",
-        module: "commonjs",
-        target: "es6",
         mode: "file",
+        target: "es6",
+        module: "commonjs",
         out: docsDir,
         excludeExternals: true,
         excludePrivate: true,
@@ -44,11 +60,11 @@ gulp.task("doc", function() {
 });
 
 // Build TypeScript source into CommonJS Node modules
-gulp.task("typescript", function() {
+gulp.task("compile", function() {
     var tsResult = gulp.src(srcDir + "/**/*.ts")
-    .pipe(ts({
-        target: "es5",
-        lib: ["dom", "es5", "es2015.promise"],
+    .pipe(gulpTs({
+        target: "es6",
+        module: "commonjs",        
         alwaysStrict: true,
         noEmitOnError: true,
         noUnusedLocals: true,
@@ -67,4 +83,4 @@ gulp.task("watch", ["default"], function() {
     gulp.watch(srcDir + "/**/*.*", ["default"]);
 });
 
-gulp.task("default", ["clean", "doc", "typescript"]);
+gulp.task("default", ["clean", "lint", "doc", "compile"]);

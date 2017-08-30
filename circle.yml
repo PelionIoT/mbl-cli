@@ -36,7 +36,7 @@ deployment:
     commands:
       - echo Syncing $PRODUCT_NAME to $PRODUCT_BRANCH on GitHub...
       - mkdir $PRODUCT_TMP
-      - cp -r docs lib types $PRODUCT_TMP
+      - cp -r dist docs types $PRODUCT_TMP
       - git checkout $PRODUCT_BRANCH
       - rm -rf node_modules
       - cp -r $PRODUCT_TMP/* ./
