@@ -25,6 +25,8 @@
     "gulp": "gulp"
   },
   "devDependencies": {
+    "@types/commander": "^2.9.2",
+    "@types/dockerode": "^2.4.5",
     "@types/node": "^8.0.24",
     "del": "^3.0.0",
     "gulp": "^3.9.1",

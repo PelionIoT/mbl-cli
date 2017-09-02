@@ -34,7 +34,7 @@ gulp.task("clean", function() {
 
 // Lint the source
 gulp.task("lint", function() {
-    var program = tslint.Linter.createProgram();
+    var program = tslint.Linter.createProgram("./");
 
     gulp.src(srcFiles)
     .pipe(gulpTslint({
