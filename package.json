@@ -6,7 +6,9 @@
   "author": "Rob Moran <rob.moran@arm.com>",
   "license": "Apache-2.0",
   "types": "./types/index.d.ts",
-  "main": "./index.js",
+  "bin": {
+    "mbed-linux": "./bin/mbed-linux"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/ARMmbed/mbed-linux-cli"
@@ -26,11 +28,20 @@
     "@types/node": "^8.0.24",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
+    "gulp-tslint": "^8.1.2",
     "gulp-typedoc": "^2.0.3",
     "gulp-typescript": "^3.2.2",
     "merge2": "^1.1.0",
+    "tslint": "^5.7.0",
+    "tslint-eslint-rules": "^4.1.1",
     "typedoc": "^0.8.0",
     "typescript": "^2.4.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "commander": "^2.11.0",
+    "dockerode": "^2.5.0",
+    "tar-fs": "^1.15.3",
+    "tar-stream": "^1.5.4",
+    "update-notifier": "^2.2.0"
+  }
 }

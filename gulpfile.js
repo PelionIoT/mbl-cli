@@ -11,6 +11,7 @@ var name = "Mbed Linux CLI";
 var docsToc = "";
 
 var srcDir = "src";
+var srcFiles = srcDir + "/**/*.ts";
 var docsDir = "docs";
 var nodeDir = "dist";
 var typesDir = "types";
@@ -21,6 +22,11 @@ function handleError() {
     else process.exit(1);
 }
 
+// Set watching
+gulp.task("setWatch", function() {
+    watching = true;
+});
+
 // Clear built directories
 gulp.task("clean", function() {
     return del([nodeDir, typesDir]);
@@ -30,19 +36,19 @@ gulp.task("clean", function() {
 gulp.task("lint", function() {
     var program = tslint.Linter.createProgram();
 
-    gulp.src(srcDir + "/**/*.ts")
+    gulp.src(srcFiles)
     .pipe(gulpTslint({
         program: program,
         formatter: "stylish"
     }))
     .pipe(gulpTslint.report({
-        emitError: false
+        emitError: !watching
     }))
 });
 
 // Create documentation
 gulp.task("doc", function() {
-    return gulp.src(srcDir + "/**/*.ts")
+    return gulp.src(srcFiles)
     .pipe(gulpTypedoc({
         name: name,
         readme: "src/documentation.md",
@@ -60,8 +66,8 @@ gulp.task("doc", function() {
 });
 
 // Build TypeScript source into CommonJS Node modules
-gulp.task("compile", function() {
-    var tsResult = gulp.src(srcDir + "/**/*.ts")
+gulp.task("compile", ["clean"], function() {
+    var tsResult = gulp.src(srcFiles)
     .pipe(gulpTs({
         target: "es6",
         module: "commonjs",        
@@ -78,9 +84,8 @@ gulp.task("compile", function() {
     ]);
 });
 
-gulp.task("watch", ["default"], function() {
-    watching = true;
-    gulp.watch(srcDir + "/**/*.*", ["default"]);
+gulp.task("watch", ["setWatch", "default"], function() {
+    gulp.watch(srcFiles, ["default"]);
 });
 
-gulp.task("default", ["clean", "lint", "doc", "compile"]);
+gulp.task("default", ["lint", "doc", "compile"]);
