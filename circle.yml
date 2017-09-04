@@ -1,6 +1,7 @@
 general:
   artifacts:
     - ~/docs
+    - ~/tpip
   branches:
     ignore:
       - build
@@ -13,6 +14,7 @@ machine:
     PRODUCT_TAG: ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
     PRODUCT_BRANCH: build
     PRODUCT_DOCS: ${HOME}/docs
+    PRODUCT_TPIP: ${HOME}/tpip
     PRODUCT_TMP: /tmp/tmp.${PRODUCT_NAME}
 
 checkout:
@@ -23,8 +25,11 @@ checkout:
 dependencies:
   post:
     - npm run gulp
+    - npm run tpip
     - mkdir ${PRODUCT_DOCS}
+    - mkdir ${PRODUCT_TPIP}
     - cp -r docs/* ${PRODUCT_DOCS}/
+    - cp tpip.csv ${PRODUCT_TPIP}/
 
 test:
   override:
