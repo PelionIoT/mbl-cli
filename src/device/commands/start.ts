@@ -15,24 +15,14 @@
 * limitations under the License.
 */
 
-import * as path from "path";
-import * as notifier from "update-notifier";
-import * as yargs from "yargs";
-
-// tslint:disable-next-line:no-var-requires
-const pkg = require(path.join("..", "package.json"));
-notifier({ pkg }).notify();
-
-// tslint:disable-next-line:no-unused-expression
-yargs
-    .commandDir(".", {
-        include: /cmd_/,
-        recurse: true
-    })
-    .demandCommand(1, "You need to specify an action")
-    .version()
-    .alias("v", "version")
-    .help()
-    .alias("h", "help")
-    .epilogue("for more information, find our manual at http://example.com")
-    .argv;
+exports.command = "start [device]";
+exports.desc = "Start the application on a device";
+exports.builder = {
+    device: {
+        description: "address of the device"
+    }
+};
+exports.handler = argv => {
+    // tslint:disable-next-line:no-console
+    console.log(argv);
+};
