@@ -15,7 +15,6 @@ machine:
     PRODUCT_BRANCH: build
     PRODUCT_DOCS: ${HOME}/docs
     PRODUCT_TPIP: ${HOME}/tpip
-    PRODUCT_TMP: /tmp/tmp.${PRODUCT_NAME}
 
 checkout:
   post:
@@ -40,16 +39,15 @@ deployment:
     branch: master
     commands:
       - echo Syncing $PRODUCT_NAME to $PRODUCT_BRANCH on GitHub...
-      - mkdir $PRODUCT_TMP
-      - cp -r dist docs types $PRODUCT_TMP
+      - git add --force dist docs types
+      - git stash save
       - git checkout $PRODUCT_BRANCH
-      - rm -rf node_modules
-      - cp -r $PRODUCT_TMP/* ./
-      - git add --force --all
+      - git merge master --no-commit
+      - git checkout stash -- .
       - git commit --allow-empty --message "Automatic Deployment"
       - git push
   release:
-    branch: /release-.*/
+    branch: release
     commands:
       - echo Tagging $PRODUCT_NAME in GitHub...
       - git tag ${PRODUCT_TAG}
