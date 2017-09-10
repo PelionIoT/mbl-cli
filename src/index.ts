@@ -25,14 +25,14 @@ notifier({ pkg }).notify();
 
 // tslint:disable-next-line:no-unused-expression
 yargs
-    .commandDir(".", {
-        include: /cmd_/,
-        recurse: true
-    })
-    .demandCommand(1, "You need to specify an action")
     .version()
     .alias("v", "version")
     .help()
     .alias("h", "help")
-    .epilogue("for more information, find our manual at http://example.com")
+    .commandDir(".", {
+        include: /cmd_/,
+        recurse: true
+    })
+    .demandCommand(1, "")
+    .epilogue("For more information, find our manual at http://mbed.com")
     .argv;

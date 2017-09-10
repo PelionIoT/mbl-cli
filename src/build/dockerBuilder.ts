@@ -54,7 +54,7 @@ export class DockerBuilder {
         if (host === "local") {
             options.socketPath = "/var/run/docker.sock";
         } else {
-            options.dockerHost = "htp://armserver.com";
+            options.dockerHost = "http://mbed.com";
             options.dockerPort = 2376;
         }
 
