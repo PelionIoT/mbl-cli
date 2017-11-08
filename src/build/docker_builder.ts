@@ -158,12 +158,14 @@ export class DockerBuilder {
                     return reject(error);
                 }
                 response
-                    .pipe(prettifyStream)
-                    .pipe(process.stdout);
-
-                const image = this.docker.getImage(tag);
-                image.get()
-                .then(imageStream => resolve(imageStream));
+                .on("end", () => {
+                    const image = this.docker.getImage(tag);
+                    image.get()
+                    .then(imageStream => resolve(imageStream));
+                })
+                .on("error", reject)
+                .pipe(prettifyStream)
+                .pipe(process.stdout);
             });
         });
     }
