@@ -5,17 +5,15 @@
         "chrome"
     ],
     "node": {
-        "suites": "dist/_tests/**/*.js"
+        "suites": "lib/_tests/**/*.js"
     },
     "coverage": [
-        "dist/**/*.js",
-        "!dist/_tests/**"
+        "lib/**/*.js",
+        "!lib/_tests/**"
     ],
     "reporters+": [
-        "jsoncoverage",
         "htmlcoverage",
         { "name": "lcov", "options": { "filename": "lcov.info" }},
-        { "name": "cobertura", "options": { "filename": "cobertura.xml" }},
         { "name": "junit", "options": { "filename": "junit.xml" }}
     ]
 }

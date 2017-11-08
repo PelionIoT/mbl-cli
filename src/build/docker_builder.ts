@@ -145,7 +145,7 @@ export class DockerBuilder {
                 stream.pipe(imageStream.entry(header, callback));
             });
 
-            extract.on("finish",  () => {
+            extract.on("finish", () => {
                 imageStream.finalize();
                 resolve(imageStream);
             });
