@@ -120,7 +120,7 @@ export class DockerBuilder {
         return new Promise((resolve, reject) => {
 
             const extract = extractStream();
-            const imageStream = packStream();
+            const dockerStream = packStream();
 
             // Add check for Dockerfile
             extract.on("entry", (header, stream, callback) => {
@@ -136,22 +136,21 @@ export class DockerBuilder {
                         const index = contents.indexOf("RUN");
                         const command = `COPY ${join(this.toolsPath, this.qemuName)} /tmp/${this.qemuName}`;
                         contents = `${contents.substr(0, index)}\n${command}\n${contents.substr(index)}`;
-                        imageStream.entry({ name: header.name }, contents);
+                        dockerStream.entry({ name: header.name }, contents);
                         callback();
                     });
                     return;
                 }
 
-                stream.pipe(imageStream.entry(header, callback));
+                stream.pipe(dockerStream.entry(header, callback));
             });
 
             extract.on("finish", () => {
-                imageStream.finalize();
-                resolve(imageStream);
+                dockerStream.finalize();
             });
 
             sourceStream.pipe(extract);
-            this.docker.buildImage(imageStream, {
+            this.docker.buildImage(dockerStream, {
                 nocache: force,
                 t: tag,
             }, (error, response) => {
@@ -161,6 +160,10 @@ export class DockerBuilder {
                 response
                     .pipe(prettifyStream)
                     .pipe(process.stdout);
+
+                const image = this.docker.getImage(tag);
+                image.get()
+                .then(imageStream => resolve(imageStream));
             });
         });
     }

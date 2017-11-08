@@ -18,6 +18,7 @@
 import { createWriteStream, existsSync, mkdirSync } from "fs";
 import { dirname } from "path";
 import { Stream } from "stream";
+import { DevNull } from "../util/dev_null";
 
 /**
  * Image Deployer
@@ -44,18 +45,21 @@ export class ImageDeployer {
      */
     public deployStream(stream: Stream, fileName?: string): Promise<any> {
         return new Promise((resolve, reject) => {
+
+            let sink = new DevNull();
+
             if (fileName) {
                 // Save file
-                try {
-                    this.ensureDirectory(dirname(fileName));
-                    stream.pipe(createWriteStream(fileName));
-                    resolve();
-                } catch (error) {
-                    reject(error);
-                }
+                this.ensureDirectory(dirname(fileName));
+                sink = createWriteStream(fileName);
             } else {
-                // Otherwise find  adevice to deploy to
+                // Otherwise find a device to deploy to
             }
+
+            stream
+            .on("end", resolve)
+            .on("error", reject)
+            .pipe(sink);
         });
     }
 }
