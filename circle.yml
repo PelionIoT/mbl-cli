@@ -1,7 +1,7 @@
 general:
   artifacts:
     - ~/docs
-    - ~/tpip
+    - ~/reports
   branches:
     ignore:
       - build
@@ -10,15 +10,13 @@ machine:
   node:
     version: 6.0.0
   environment:
-    PRODUCT_NAME: ${CIRCLE_PROJECT_REPONAME}
-    PRODUCT_TAG: ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
-    PRODUCT_BRANCH: build
-    PRODUCT_DOCS: ${HOME}/docs
-    PRODUCT_TPIP: ${HOME}/tpip
+    PROJECT_NAME: ${CIRCLE_PROJECT_REPONAME}
+    PROJECT_TAG: ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
+    PROJECT_LIVE_BRANCH: build
+    PROJECT_DOCS: ${HOME}/docs
     PROJECT_REPORTS: ${HOME}/reports
     COVERAGE_REPORTS: ${PROJECT_REPORTS}/coverage
     FILE_UNITTESTS: ${PROJECT_REPORTS}/unittests.html
-    FILE_RAW: ${PROJECT_REPORTS}/raw.txt
 
 checkout:
   post:
@@ -27,16 +25,22 @@ checkout:
 
 dependencies:
   post:
+    - npm install -g ansi-html-stream
+
+compile:
+  override:
     - npm run gulp
+    - mkdir -p ${PROJECT_DOCS}
+    - cp -r docs/* ${PROJECT_DOCS}/
     - npm run tpip
-    - mkdir ${PRODUCT_DOCS}
-    - mkdir ${PRODUCT_TPIP}
-    - cp -r docs/* ${PRODUCT_DOCS}/
-    - cp tpip.csv ${PRODUCT_TPIP}/
+    - mkdir -p ${PROJECT_REPORTS}
+    - cp tpip.csv ${PROJECT_REPORTS}/
 
 test:
   override:
-    - npm test
+    - echo "<h1>${PROJECT_NAME} unit tests (build ${CIRCLE_BUILD_NUM})</h1>" >> ${FILE_UNITTESTS}
+    - set -o pipefail && npm test 2>&1 | tee /dev/tty | grep -v '^Tunnel d' | ansi-html >> ${FILE_UNITTESTS}
+    - mkdir -p ${COVERAGE_REPORTS}
     - mkdir -p ${COVERAGE_REPORTS}
     - cp -r coverage/* ${COVERAGE_REPORTS}
     - mkdir -p ${CIRCLE_TEST_REPORTS}/junit
@@ -46,17 +50,17 @@ deployment:
   staging:
     branch: master
     commands:
-      - echo Syncing $PRODUCT_NAME to $PRODUCT_BRANCH on GitHub...
-      - git add --force dist docs types
+      - echo Syncing $PROJECT_NAME to $PROJECT_LIVE_BRANCH on GitHub...
+      - git add --force docs lib types
       - git stash save
-      - git checkout $PRODUCT_BRANCH
+      - git checkout $PROJECT_LIVE_BRANCH
       - git merge master --no-commit
       - git checkout stash -- .
       - git commit --allow-empty --message "Automatic Deployment"
       - git push
   release:
-    branch: release
+    branch: /[0-9]+\.[0-9]+.*/
     commands:
-      - echo Tagging $PRODUCT_NAME in GitHub...
-      - git tag ${PRODUCT_TAG}
+      - echo Tagging $PROJECT_NAME in GitHub...
+      - git tag ${PROJECT_TAG}
       - git push --tags
