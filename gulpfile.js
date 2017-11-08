@@ -13,11 +13,9 @@ var docsToc = "";
 var srcDir = "src";
 var srcFiles = srcDir + "/**/*.ts";
 var docsDir = "docs";
-var nodeDir = "dist";
+var nodeDir = "lib";
 var typesDir = "types";
 var watching = false;
-
-var tsProject = gulpTs.createProject("tsconfig.json");
 
 function handleError() {
     if (watching) this.emit("end");
@@ -69,6 +67,8 @@ gulp.task("doc", function() {
 
 // Build TypeScript source into CommonJS Node modules
 gulp.task("compile", ["clean"], function() {
+    var tsProject = gulpTs.createProject("tsconfig.json");
+
     var tsResult = gulp.src(srcFiles)
     .pipe(tsProject())
     .on("error", handleError);
