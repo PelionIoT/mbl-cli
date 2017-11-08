@@ -16,4 +16,4 @@
 * limitations under the License.
 */
 
-require('../dist/index');
+require('../lib/index');
