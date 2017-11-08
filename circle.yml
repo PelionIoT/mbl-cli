@@ -15,6 +15,10 @@ machine:
     PRODUCT_BRANCH: build
     PRODUCT_DOCS: ${HOME}/docs
     PRODUCT_TPIP: ${HOME}/tpip
+    PROJECT_REPORTS: ${HOME}/reports
+    COVERAGE_REPORTS: ${PROJECT_REPORTS}/coverage
+    FILE_UNITTESTS: ${PROJECT_REPORTS}/unittests.html
+    FILE_RAW: ${PROJECT_REPORTS}/raw.txt
 
 checkout:
   post:
@@ -32,7 +36,11 @@ dependencies:
 
 test:
   override:
-    - exit 0;
+    - npm test
+    - mkdir -p ${COVERAGE_REPORTS}
+    - cp -r coverage/* ${COVERAGE_REPORTS}
+    - mkdir -p ${CIRCLE_TEST_REPORTS}/junit
+    - cp junit.xml $CIRCLE_TEST_REPORTS/junit/test-results.xml
 
 deployment:
   staging:

@@ -22,6 +22,7 @@ import * as request from "request";
 import * as tarFs from "tar-fs";
 import * as tarStream from "tar-stream";
 import * as zlib from "zlib";
+import { prettifyStream } from "../util/transform";
 
 export type typeEnum = "local" | "remote";
 
@@ -139,7 +140,7 @@ export class DockerBuilder {
                 stream.pipe(imageStream.entry(header, callback));
             });
 
-            extract.on("finish", () => {
+            extract.on("finish",  () => {
                 imageStream.finalize();
                 resolve(imageStream);
             });
@@ -152,7 +153,9 @@ export class DockerBuilder {
                 if (error) {
                     return reject(error);
                 }
-                response.pipe(process.stdout);
+                response
+                    .pipe(prettifyStream)
+                    .pipe(process.stdout);
             });
         });
     }

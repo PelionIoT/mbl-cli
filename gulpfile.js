@@ -17,6 +17,8 @@ var nodeDir = "dist";
 var typesDir = "types";
 var watching = false;
 
+var tsProject = gulpTs.createProject("tsconfig.json");
+
 function handleError() {
     if (watching) this.emit("end");
     else process.exit(1);
@@ -68,15 +70,8 @@ gulp.task("doc", function() {
 // Build TypeScript source into CommonJS Node modules
 gulp.task("compile", ["clean"], function() {
     var tsResult = gulp.src(srcFiles)
-    .pipe(gulpTs({
-        target: "es6",
-        module: "commonjs",        
-        alwaysStrict: true,
-        noEmitOnError: true,
-        noUnusedLocals: true,
-        declaration: true,
-        noUnusedParameters: true
-    })).on("error", handleError);
+    .pipe(tsProject())
+    .on("error", handleError);
 
     return merge([
         tsResult.dts.pipe(gulp.dest(typesDir)),

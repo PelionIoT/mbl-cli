@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "types": "./types/index.d.ts",
   "bin": {
-    "mbed-linux": "./bin/mbed-linux"
+    "mbed-linux": "./bin/mbed-linux.js"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,8 @@
   },
   "scripts": {
     "gulp": "gulp",
-    "tpip": "nlf --csv --no-dev --reach 1 > tpip.csv"
+    "tpip": "nlf --csv --no-dev --reach 1 > tpip.csv",
+    "test": "intern"
   },
   "devDependencies": {
     "@types/dockerode": "^2.4.5",
@@ -35,6 +36,7 @@
     "gulp-tslint": "^8.1.2",
     "gulp-typedoc": "^2.0.3",
     "gulp-typescript": "^3.2.2",
+    "intern": "^4.1.0",
     "merge2": "^1.1.0",
     "nlf": "^2.0.0",
     "tslint": "^5.7.0",

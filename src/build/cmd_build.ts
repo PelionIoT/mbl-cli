@@ -15,7 +15,7 @@
 * limitations under the License.
 */
 
-import { DockerBuilder } from "./dockerBuilder";
+import { DockerBuilder } from "./docker_builder";
 
 exports.command = "build [path] [host] [tag] [force]";
 exports.desc = "Build a directory and output a docker image";
