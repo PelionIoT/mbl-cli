@@ -15,14 +15,19 @@
 * limitations under the License.
 */
 
-import * as dockerode from "dockerode";
-import * as fs from "fs";
-import * as path from "path";
-import * as request from "request";
-import * as tarFs from "tar-fs";
-import * as tarStream from "tar-stream";
-import * as zlib from "zlib";
+import { createWriteStream, existsSync, mkdirSync } from "fs";
+import { join } from "path";
+import { Stream } from "stream";
+import { pack as packFS } from "tar-fs";
+import {
+    extract as extractStream,
+    pack as packStream
+} from "tar-stream";
+import { createGunzip } from "zlib";
 import { prettifyStream } from "../util/transform";
+
+import * as dockerode from "dockerode";
+import * as request from "request";
 
 export type typeEnum = "local" | "remote";
 
@@ -88,20 +93,20 @@ export class DockerBuilder {
                 return resolve();
             }
 
-            const toolsPath = `${path.join(buildPath, this.toolsPath)}`;
-            const qemuPath = `${path.join(toolsPath, this.qemuName)}`;
+            const toolsPath = `${join(buildPath, this.toolsPath)}`;
+            const qemuPath = `${join(toolsPath, this.qemuName)}`;
 
-            if (fs.existsSync(qemuPath)) {
+            if (existsSync(qemuPath)) {
                 return resolve();
             }
 
-            if (!fs.existsSync(toolsPath)) {
-                fs.mkdirSync(toolsPath);
+            if (!existsSync(toolsPath)) {
+                mkdirSync(toolsPath);
             }
 
             request(this.qemuUrl)
-                .pipe(zlib.createGunzip())
-                .pipe(fs.createWriteStream(qemuPath))
+                .pipe(createGunzip())
+                .pipe(createWriteStream(qemuPath))
                 .on("close", resolve)
                 .on("error", reject);
         });
@@ -111,11 +116,11 @@ export class DockerBuilder {
      * Run the build stream
      * @param sourceStream The stream to build
      */
-    private buildStream(sourceStream, tag: string, force: boolean): Promise<any> {
+    private buildStream(sourceStream: Stream, tag: string, force: boolean): Promise<Stream> {
         return new Promise((resolve, reject) => {
 
-            const extract = tarStream.extract();
-            const imageStream = tarStream.pack();
+            const extract = extractStream();
+            const imageStream = packStream();
 
             // Add check for Dockerfile
             extract.on("entry", (header, stream, callback) => {
@@ -129,7 +134,7 @@ export class DockerBuilder {
                     stream.on("end", () => {
                         // Add command to the Dockerfile
                         const index = contents.indexOf("RUN");
-                        const command = `COPY ${path.join(this.toolsPath, this.qemuName)} /tmp/${this.qemuName}`;
+                        const command = `COPY ${join(this.toolsPath, this.qemuName)} /tmp/${this.qemuName}`;
                         contents = `${contents.substr(0, index)}\n${command}\n${contents.substr(index)}`;
                         imageStream.entry({ name: header.name }, contents);
                         callback();
@@ -170,7 +175,7 @@ export class DockerBuilder {
         return this.checkQemu()
         .then(() => this.downloadQemu(buildPath))
         .then(() => {
-            const source = tarFs.pack(buildPath, {
+            const source = packFS(buildPath, {
                 ignore: name => {
                     return name.indexOf(ignore) >= 0;
                 }
