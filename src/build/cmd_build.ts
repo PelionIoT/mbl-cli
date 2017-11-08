@@ -15,15 +15,20 @@
 * limitations under the License.
 */
 
+import { ImageDeployer } from "../deploy/image_deployer";
 import { DockerBuilder } from "./docker_builder";
 
-exports.command = "build [path] [host] [tag] [force]";
+exports.command = "build [path] [file] [host] [tag] [force]";
 exports.desc = "Build a directory and output a docker image";
 exports.builder = {
     buildhost: {
         choices: [ "local", "remote" ],
         default: "local",
         description: "build the image locally or remotely"
+    },
+    file: {
+        default: null,
+        description: "path to save image to"
     },
     force: {
         default: false,
@@ -42,7 +47,12 @@ exports.builder = {
 exports.handler = argv => {
 
     const builder = new DockerBuilder(argv.buildhost);
+    const deployer = new ImageDeployer();
+
     builder.build(argv.path, argv.tag, argv.force)
+    .then(stream => {
+        return deployer.deployStream(stream, argv.file);
+    })
     .catch(error => {
         // tslint:disable-next-line:no-console
         console.log(error);

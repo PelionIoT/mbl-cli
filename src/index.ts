@@ -15,12 +15,13 @@
 * limitations under the License.
 */
 
-import * as path from "path";
+import { join } from "path";
+
 import * as notifier from "update-notifier";
 import * as yargs from "yargs";
 
 // tslint:disable-next-line:no-var-requires
-const pkg = require(path.join("..", "package.json"));
+const pkg = require(join("..", "package.json"));
 notifier({ pkg }).notify();
 
 // tslint:disable-next-line:no-unused-expression
