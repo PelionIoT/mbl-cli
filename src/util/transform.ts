@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*
 * Mbed Linux CLI
 * Copyright ARM Limited 2017
@@ -18,14 +17,35 @@
 
 import { Transform } from "stream";
 
-export const prettifyStream = new Transform({
-    transform(chunk: any, encoding: any, callback: any) {
+/**
+ * PrettifyStream
+ */
+export class PrettifyStream extends Transform {
+    /**
+     * @param options Stream options
+     */
+    constructor(options?) {
+        super(options);
+    }
+
+    /**
+     * @param chunk Buffer or string data chunk
+     * @param encoding Encoding of chunk
+     * @param callback Callback func
+     */
+    // tslint:disable-next-line:no-empty
+    public _transform(chunk: Buffer | string, encoding: string, callback: any = () => {} ) {
+        if (!chunk) { return null; }
         if (encoding !== "buffer") {
-            return callback(null, chunk.toString(encoding));
+            return callback(null, (chunk as Buffer).toString(encoding));
         }
 
         const chunkStr: string = chunk.toString();
-        if (chunkStr) {
+
+        if (chunkStr.indexOf("{") < 0) {
+            this.push(chunkStr);
+            return callback();
+        } else {
             chunkStr.split("\n").forEach(strObj => {
                 if (!strObj) { return null; }
                 const { stream = "" } = JSON.parse(strObj);
@@ -35,4 +55,4 @@ export const prettifyStream = new Transform({
 
         callback();
     }
-});
+}

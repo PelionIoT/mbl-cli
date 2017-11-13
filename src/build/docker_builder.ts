@@ -15,7 +15,6 @@
 * limitations under the License.
 */
 
-import { createWriteStream, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import { Stream } from "stream";
 import { pack as packFS } from "tar-fs";
@@ -23,100 +22,29 @@ import {
     extract as extractStream,
     pack as packStream
 } from "tar-stream";
-import { createGunzip } from "zlib";
-import { prettifyStream } from "../util/transform";
+import { qemuName, QemuUtils, toolsPath } from "../util/qemu";
+import { PrettifyStream } from "../util/transform";
 
-import * as dockerode from "dockerode";
-import * as request from "request";
-
-export type typeEnum = "local" | "remote";
+import * as Dockerode from "dockerode";
 
 /**
  * Docker Builder
  */
 export class DockerBuilder {
-
-    private readonly toolsPath: string = ".mbed";
-    private readonly qemuUrl: string = "https://github.com/resin-io/qemu/releases/download/v2.5.50-resin-execve/qemu-execve.gz";
-    private readonly qemuName: string = "qemu-execve";
-
     /**
-     * The docker API
+     * @param docker Instance of the docker API
      */
-    private docker: dockerode;
-
-    /**
-     * Whether the docker build needs qemu injecting to run on a-class
-     */
-    private needsQemu: boolean;
-
-    /**
-     * @param host Where to undertake the build
-     */
-    constructor(host: typeEnum) {
-
-        const options: { [key: string]: string | number } = {};
-
-        if (host === "local") {
-            options.socketPath = "/var/run/docker.sock";
-        } else {
-            options.dockerHost = "http://mbed.com";
-            options.dockerPort = 2376;
-        }
-
-        this.docker = new dockerode(options);
-    }
-
-    /**
-     * Check the docker architecture to see if we need injection
-     */
-    private checkQemu(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.docker.version((error, info) => {
-                if (error) {
-                    return reject("No docker available!");
-                }
-
-                this.needsQemu = (info.Arch !== "ARM");
-                resolve();
-            });
-        });
-    }
-
-    /**
-     * Download qemu as necessary
-     * @param buildPath The directory being built
-     */
-    private downloadQemu(buildPath: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            if (!this.needsQemu) {
-                return resolve();
-            }
-
-            const toolsPath = `${join(buildPath, this.toolsPath)}`;
-            const qemuPath = `${join(toolsPath, this.qemuName)}`;
-
-            if (existsSync(qemuPath)) {
-                return resolve();
-            }
-
-            if (!existsSync(toolsPath)) {
-                mkdirSync(toolsPath);
-            }
-
-            request(this.qemuUrl)
-                .pipe(createGunzip())
-                .pipe(createWriteStream(qemuPath))
-                .on("close", resolve)
-                .on("error", reject);
-        });
+    constructor(private docker: Dockerode) {
     }
 
     /**
      * Run the build stream
      * @param sourceStream The stream to build
+     * @param tag Image tag name
+     * @param force No-cache force
+     * @param needsQemu Flag if qemu is needed inside the new image
      */
-    private buildStream(sourceStream: Stream, tag: string, force: boolean): Promise<Stream> {
+    private buildStream(sourceStream: Stream, tag: string, force: boolean, needsQemu: boolean): Promise<void> {
         return new Promise((resolve, reject) => {
 
             const extract = extractStream();
@@ -124,7 +52,7 @@ export class DockerBuilder {
 
             // Add check for Dockerfile
             extract.on("entry", (header, stream, callback) => {
-                if (this.needsQemu && header.name === "Dockerfile") {
+                if (needsQemu && header.name === "Dockerfile") {
                     let contents = "";
 
                     stream.on("data", chunk => {
@@ -134,7 +62,7 @@ export class DockerBuilder {
                     stream.on("end", () => {
                         // Add command to the Dockerfile
                         const index = contents.indexOf("RUN");
-                        const command = `COPY ${join(this.toolsPath, this.qemuName)} /tmp/${this.qemuName}`;
+                        const command = `COPY ${join(toolsPath, qemuName)} /tmp/${qemuName}`;
                         contents = `${contents.substr(0, index)}\n${command}\n${contents.substr(index)}`;
                         dockerStream.entry({ name: header.name }, contents);
                         callback();
@@ -158,13 +86,9 @@ export class DockerBuilder {
                     return reject(error);
                 }
                 response
-                .on("end", () => {
-                    const image = this.docker.getImage(tag);
-                    image.get()
-                    .then(imageStream => resolve(imageStream));
-                })
+                .on("end", resolve)
                 .on("error", reject)
-                .pipe(prettifyStream)
+                .pipe(new PrettifyStream())
                 .pipe(process.stdout);
             });
         });
@@ -176,17 +100,16 @@ export class DockerBuilder {
      * @param tag The name to use to tag the docker image
      * @param ignore A folder pattern to ignore
      */
-    public build(buildPath: string, tag: string, force: boolean = false, ignore: string = ".git"): Promise<any> {
-        return this.checkQemu()
-        .then(() => this.downloadQemu(buildPath))
-        .then(() => {
+    public build( buildPath: string, tag: string, qemu: QemuUtils, force: boolean = false, ignore: string = ".git"): Promise<any> {
+        return qemu.setupQemu(buildPath)
+        .then(needsQemu => {
             const source = packFS(buildPath, {
                 ignore: name => {
                     return name.indexOf(ignore) >= 0;
                 }
             });
 
-            return this.buildStream(source, tag, force);
+            return this.buildStream(source, tag, force, needsQemu);
         });
     }
 }

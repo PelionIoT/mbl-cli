@@ -17,13 +17,14 @@
 */
 
 import { assert } from "chai";
-import { before, suite, test } from "intern/lib/interfaces/tdd";
+import { before, beforeEach, suite, test } from "intern/lib/interfaces/tdd";
 import { Readable, Writable } from "stream";
-import { prettifyStream } from "../util/transform";
+import { PrettifyStream } from "../util/transform";
 
 suite("Stream format", () => {
     let writable: Writable;
     let readable: Readable;
+    let pretty: PrettifyStream;
 
     before(() => {
         writable = new Writable({
@@ -33,7 +34,13 @@ suite("Stream format", () => {
         });
     });
 
+    beforeEach(() => {
+        pretty = new PrettifyStream();
+    });
+
     test("Should be able to transform a null stream", () => {
+        pretty._transform(null, null, null);
+
         let output: string;
         readable = new Readable({
             read() {
@@ -50,11 +57,13 @@ suite("Stream format", () => {
         });
 
         readable
-            .pipe(prettifyStream)
+            .pipe(pretty)
             .pipe(writable);
     });
 
     test("Should be able to handle non JSON streams gracefully", () => {
+        pretty._transform("Non JSON message", "utf8");
+
         let output: string;
         readable = new Readable({
             read() {
@@ -70,9 +79,15 @@ suite("Stream format", () => {
         writable.on("end", () => {
             assert(output === "Non JSON message");
         });
+
+        readable
+            .pipe(pretty)
+            .pipe(writable);
     });
 
     test("Should be able to transform a json stream", () => {
+        pretty._transform("{\"stream\":\"message\"}", "utf8");
+
         let output: string;
         readable = new Readable({
             read() {
@@ -90,7 +105,32 @@ suite("Stream format", () => {
         });
 
         readable
-            .pipe(prettifyStream)
+            .pipe(pretty)
+            .pipe(writable);
+    });
+
+    test("Should be able to transform buffers", () => {
+        const stringBuffer: Buffer = new Buffer("{\"stream\":\"message\"}");
+        pretty._transform(stringBuffer, "buffer");
+
+        let output: string;
+        readable = new Readable({
+            read() {
+                this.push(stringBuffer);
+                this.push(null);
+            }
+        });
+
+        writable.on("data", (chunk: Buffer | string) => {
+            output += chunk.toString();
+        });
+
+        writable.on("end", () => {
+            assert(output === "message");
+        });
+
+        readable
+            .pipe(pretty)
             .pipe(writable);
     });
 });

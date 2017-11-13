@@ -15,25 +15,20 @@
 * limitations under the License.
 */
 
-import { Writable } from "stream";
+import * as Dockerode from "dockerode";
+
+export type typeEnum = "local" | "remote";
 
 /**
- * DevNull
+ * @param host Type of host to deploy to
  */
-export class DevNull extends Writable {
-    /**
-     * @param options Stream options
-     */
-    constructor(options: {} = {}) {
-        super(options);
+export function createDockerode(host: typeEnum): Dockerode {
+    const options: { [key: string]: string | number } = {};
+    if (host === "local") {
+        options.socketPath = "/var/run/docker.sock";
+    } else {
+        options.host = "10.6.44.215";
+        options.port = 2376;
     }
-
-    /**
-     * @param _chunk Chunk to write
-     * @param _encoding Encoding of chunk
-     * @param callback Callback
-     */
-    public _write(_chunk, _encoding, callback) {
-        callback();
-    }
+    return new Dockerode(options);
 }

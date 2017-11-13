@@ -16,6 +16,8 @@
 */
 
 import { ImageDeployer } from "../deploy/image_deployer";
+import { createDockerode } from "../util/docker_factory";
+import { QemuUtils } from "../util/qemu";
 import { DockerBuilder } from "./docker_builder";
 
 exports.command = "build [path] [file] [host] [tag] [force]";
@@ -45,16 +47,13 @@ exports.builder = {
     }
 };
 exports.handler = argv => {
+    const docker = createDockerode(argv.buildhost);
+    const dockerBuilder: DockerBuilder = new DockerBuilder(docker);
+    const imageDeployer: ImageDeployer = new ImageDeployer(docker);
+    const qemuUtils: QemuUtils = new QemuUtils(docker);
 
-    const builder = new DockerBuilder(argv.buildhost);
-    const deployer = new ImageDeployer();
-
-    builder.build(argv.path, argv.tag, argv.force)
-    .then(stream => {
-        return deployer.deployStream(stream, argv.file);
-    })
-    .catch(error => {
+    dockerBuilder.build(argv.path, argv.tag, qemuUtils, argv.force)
+    .then(() => imageDeployer.deployStream(argv.tag, argv.file))
         // tslint:disable-next-line:no-console
-        console.log(error);
-    });
+    .catch(error => console.log(error));
 };

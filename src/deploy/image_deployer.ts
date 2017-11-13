@@ -17,13 +17,19 @@
 
 import { createWriteStream, existsSync, mkdirSync } from "fs";
 import { dirname } from "path";
-import { Stream } from "stream";
 import { DevNull } from "../util/dev_null";
+
+import * as Dockerode from "dockerode";
 
 /**
  * Image Deployer
  */
 export class ImageDeployer {
+    /**
+     * @param docker Instance of the docker API
+     */
+    constructor(private docker: Dockerode) {
+    }
 
     /**
      * Ensure a directory exists
@@ -43,11 +49,11 @@ export class ImageDeployer {
      * @param stream The stream to deploy
      * @param fileName The file name to save the image to
      */
-    public deployStream(stream: Stream, fileName?: string): Promise<any> {
+    public deployStream(tag: string, fileName?: string): Promise<void> {
         return new Promise((resolve, reject) => {
+            if (!tag) { reject("No image tag specified"); }
 
             let sink = new DevNull();
-
             if (fileName) {
                 // Save file
                 this.ensureDirectory(dirname(fileName));
@@ -56,10 +62,19 @@ export class ImageDeployer {
                 // Otherwise find a device to deploy to
             }
 
-            stream
-            .on("end", resolve)
-            .on("error", reject)
-            .pipe(sink);
+            const image: Dockerode.Image = this.docker.getImage(tag);
+            if (!image) { return reject("No image found"); }
+            if (sink instanceof DevNull) { return resolve(); }
+
+            image
+            .get()
+            .then(stream => {
+                // tslint:disable-next-line:no-console
+                console.log("Deploying image..");
+                stream.on("end", resolve)
+                .on("error", reject)
+                .pipe(sink);
+            });
         });
     }
 }
