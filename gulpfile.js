@@ -3,6 +3,7 @@ var del         = require("del");
 var merge       = require('merge2');
 var tslint      = require("tslint");
 var gulp        = require("gulp");
+var sourcemaps  = require("gulp-sourcemaps");
 var gulpTs      = require("gulp-typescript");
 var gulpTslint  = require("gulp-tslint");
 var gulpTypedoc = require("gulp-typedoc");
@@ -12,6 +13,10 @@ var docsToc = "";
 
 var srcDir = "src";
 var srcFiles = srcDir + "/**/*.ts";
+var srcFilesOnly = [
+    srcFiles,
+    "!" + srcDir + "/_tests/**"
+];
 var docsDir = "docs";
 var nodeDir = "lib";
 var typesDir = "types";
@@ -67,15 +72,19 @@ gulp.task("doc", function() {
 
 // Build TypeScript source into CommonJS Node modules
 gulp.task("compile", ["clean"], function() {
-    var tsProject = gulpTs.createProject("tsconfig.json");
-
-    var tsResult = gulp.src(srcFiles)
-    .pipe(tsProject())
-    .on("error", handleError);
-
     return merge([
-        tsResult.dts.pipe(gulp.dest(typesDir)),
-        tsResult.js.pipe(gulp.dest(nodeDir))
+        gulp.src(srcFiles)
+        .pipe(sourcemaps.init())
+        .pipe(gulpTs.createProject("tsconfig.json")())
+        .on("error", handleError).js
+        .pipe(sourcemaps.write(".", {
+            sourceRoot: path.relative(nodeDir, srcDir)
+        }))
+        .pipe(gulp.dest(nodeDir)),
+        gulp.src(srcFilesOnly)
+        .pipe(gulpTs.createProject("tsconfig.json")())
+        .on("error", handleError).dts
+        .pipe(gulp.dest(typesDir))
     ]);
 });
 
