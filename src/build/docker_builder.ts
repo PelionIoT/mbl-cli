@@ -15,6 +15,7 @@
 * limitations under the License.
 */
 
+import { EventEmitter } from "events";
 import { join } from "path";
 import { Stream } from "stream";
 import { pack as packFS } from "tar-fs";
@@ -22,6 +23,7 @@ import {
     extract as extractStream,
     pack as packStream
 } from "tar-stream";
+import { DockerUtils } from "../util/docker";
 import { qemuName, QemuUtils, toolsPath } from "../util/qemu";
 import { PrettifyStream } from "../util/transform";
 
@@ -30,11 +32,18 @@ import * as Dockerode from "dockerode";
 /**
  * Docker Builder
  */
-export class DockerBuilder {
+export class DockerBuilder extends EventEmitter {
+    /**
+     * Log event
+     * @event
+     */
+    public static EVENT_LOG: string = "log";
+
     /**
      * @param docker Instance of the docker API
      */
     constructor(private docker: Dockerode) {
+        super();
     }
 
     /**
@@ -100,8 +109,11 @@ export class DockerBuilder {
      * @param tag The name to use to tag the docker image
      * @param ignore A folder pattern to ignore
      */
-    public build( buildPath: string, tag: string, qemu: QemuUtils, force: boolean = false, ignore: string = ".git"): Promise<any> {
-        return qemu.setupQemu(buildPath)
+    public build(buildPath: string, tag: string, qemu: QemuUtils, dockerUtils: DockerUtils, force: boolean = false, ignore: string = ".git"): Promise<any> {
+        this.emit(DockerBuilder.EVENT_LOG, `building ${buildPath} with tag '${tag}'`);
+
+        return dockerUtils.checkDocker(buildPath, this.docker)
+        .then(() => qemu.setupQemu(buildPath))
         .then(needsQemu => {
             const source = packFS(buildPath, {
                 ignore: name => {

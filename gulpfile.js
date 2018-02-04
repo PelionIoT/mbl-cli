@@ -1,26 +1,25 @@
-var path        = require("path");
-var del         = require("del");
-var merge       = require('merge2');
-var tslint      = require("tslint");
-var gulp        = require("gulp");
-var sourcemaps  = require("gulp-sourcemaps");
-var gulpTs      = require("gulp-typescript");
-var gulpTslint  = require("gulp-tslint");
-var gulpTypedoc = require("gulp-typedoc");
+let path        = require("path");
+let del         = require("del");
+let merge       = require('merge2');
+let gulp        = require("gulp");
+let tslint      = require("gulp-tslint");
+let typedoc     = require("gulp-typedoc");
+let typescript  = require("gulp-typescript");
+let sourcemaps  = require("gulp-sourcemaps");
 
-var name = "Mbed Linux CLI";
-var docsToc = "";
+let name = "Mbed Linux CLI";
+let configPath = "tsconfig.json";
 
-var srcDir = "src";
-var srcFiles = srcDir + "/**/*.ts";
-var srcFilesOnly = [
+let srcDir = "src";
+let srcFiles = srcDir + "/**/*.ts";
+let srcFilesOnly = [
     srcFiles,
     "!" + srcDir + "/_tests/**"
 ];
-var docsDir = "docs";
-var nodeDir = "lib";
-var typesDir = "types";
-var watching = false;
+let docsDir = "docs";
+let nodeDir = "lib";
+let typesDir = "types";
+let watching = false;
 
 function handleError() {
     if (watching) this.emit("end");
@@ -28,33 +27,30 @@ function handleError() {
 }
 
 // Set watching
-gulp.task("setWatch", function() {
+gulp.task("setWatch", () => {
     watching = true;
 });
 
 // Clear built directories
-gulp.task("clean", function() {
-    return del([nodeDir, typesDir]);
+gulp.task("clean", () => {
+    if (!watching) del([nodeDir, typesDir]);
 });
 
 // Lint the source
-gulp.task("lint", function() {
-    var program = tslint.Linter.createProgram("./");
-
+gulp.task("lint", () => {
     gulp.src(srcFiles)
-    .pipe(gulpTslint({
-        program: program,
+    .pipe(tslint({
         formatter: "stylish"
     }))
-    .pipe(gulpTslint.report({
+    .pipe(tslint.report({
         emitError: !watching
     }))
 });
 
 // Create documentation
-gulp.task("doc", function() {
-    return gulp.src(srcFiles)
-    .pipe(gulpTypedoc({
+gulp.task("doc", () => {
+    return gulp.src(srcFilesOnly)
+    .pipe(typedoc({
         name: name,
         readme: "src/documentation.md",
         theme: "src/theme",
@@ -64,31 +60,30 @@ gulp.task("doc", function() {
         out: docsDir,
         excludeExternals: true,
         excludePrivate: true,
-        hideGenerator: true,
-        toc: docsToc
+        hideGenerator: true
     }))
     .on("error", handleError);
 });
 
 // Build TypeScript source into CommonJS Node modules
-gulp.task("compile", ["clean"], function() {
+gulp.task("compile", ["clean"], () => {
     return merge([
         gulp.src(srcFiles)
         .pipe(sourcemaps.init())
-        .pipe(gulpTs.createProject("tsconfig.json")())
+        .pipe(typescript.createProject(configPath)())
         .on("error", handleError).js
         .pipe(sourcemaps.write(".", {
             sourceRoot: path.relative(nodeDir, srcDir)
         }))
         .pipe(gulp.dest(nodeDir)),
         gulp.src(srcFilesOnly)
-        .pipe(gulpTs.createProject("tsconfig.json")())
+        .pipe(typescript.createProject(configPath)())
         .on("error", handleError).dts
         .pipe(gulp.dest(typesDir))
     ]);
 });
 
-gulp.task("watch", ["setWatch", "default"], function() {
+gulp.task("watch", ["setWatch", "default"], () => {
     gulp.watch(srcFiles, ["default"]);
 });
 

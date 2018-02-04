@@ -15,20 +15,7 @@
 * limitations under the License.
 */
 
-import * as Dockerode from "dockerode";
-
-export type typeEnum = "local" | "remote";
-
-/**
- * @param host Type of host to deploy to
- */
-export function createDockerode(host: typeEnum): Dockerode {
-    const options: { [key: string]: string | number } = {};
-    if (host === "local") {
-        options.socketPath = "/var/run/docker.sock";
-    } else {
-        options.host = "10.6.44.215";
-        options.port = 2376;
-    }
-    return new Dockerode(options);
+export function log(message) {
+    // tslint:disable-next-line:no-console
+    console.log(message);
 }

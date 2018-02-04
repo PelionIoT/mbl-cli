@@ -5,6 +5,7 @@
   "homepage": "https://www.mbed.com",
   "author": "Rob Moran <rob.moran@arm.com>",
   "license": "Apache-2.0",
+  "private": true,
   "types": "./types/index.d.ts",
   "bin": {
     "mbed-linux": "./bin/mbed-linux.js"
@@ -27,32 +28,32 @@
     "test": "intern"
   },
   "devDependencies": {
-    "@types/dockerode": "^2.4.5",
-    "@types/node": "^8.0.24",
-    "@types/request": "^2.0.3",
-    "@types/sinon": "^2.3.7",
-    "@types/yargs": "^8.0.2",
+    "@types/dockerode": "^2.5.3",
+    "@types/node": "^9.4.0",
+    "@types/request": "^2.47.0",
+    "@types/sinon": "^4.1.3",
+    "@types/yargs": "^10.0.1",
     "del": "^3.0.0",
     "gulp": "^3.9.1",
-    "gulp-sourcemaps": "^2.6.1",
+    "gulp-sourcemaps": "^2.6.4",
     "gulp-tslint": "^8.1.2",
-    "gulp-typedoc": "^2.0.3",
-    "gulp-typescript": "^3.2.2",
-    "intern": "^4.1.0",
-    "merge2": "^1.1.0",
-    "nlf": "^2.0.0",
-    "sinon": "^4.1.2",
-    "tslint": "^5.7.0",
+    "gulp-typedoc": "^2.2.0",
+    "gulp-typescript": "^3.2.4",
+    "intern": "4.1.2",
+    "merge2": "^1.2.1",
+    "nlf": "^2.0.1",
+    "sinon": "^4.2.2",
+    "tslint": "^5.9.1",
     "tslint-eslint-rules": "^4.1.1",
-    "typedoc": "^0.8.0",
-    "typescript": "^2.4.2"
+    "typedoc": "^0.10.0",
+    "typescript": "~2.6.2"
   },
   "dependencies": {
-    "dockerode": "^2.5.0",
-    "request": "^2.81.0",
+    "dockerode": "^2.5.3",
+    "request": "^2.83.0",
     "tar-fs": "^1.16.0",
-    "tar-stream": "^1.5.4",
-    "update-notifier": "^2.2.0",
-    "yargs": "^8.0.2"
+    "tar-stream": "^1.5.5",
+    "update-notifier": "^2.3.0",
+    "yargs": "^11.0.0"
   }
 }

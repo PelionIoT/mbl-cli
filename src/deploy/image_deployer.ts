@@ -15,20 +15,31 @@
 * limitations under the License.
 */
 
-import { createWriteStream, existsSync, mkdirSync } from "fs";
-import { dirname } from "path";
+import { EventEmitter } from "events";
+import { createWriteStream, existsSync, lstatSync, mkdirSync } from "fs";
+import { dirname, join } from "path";
 import { DevNull } from "../util/dev_null";
 
 import * as Dockerode from "dockerode";
 
+export const DEFAULT_IMAGE_NAME = "mbed.image";
+
 /**
  * Image Deployer
  */
-export class ImageDeployer {
+export class ImageDeployer extends EventEmitter {
+
+    /**
+     * Log event
+     * @event
+     */
+    public static EVENT_LOG: string = "log";
+
     /**
      * @param docker Instance of the docker API
      */
     constructor(private docker: Dockerode) {
+        super();
     }
 
     /**
@@ -55,26 +66,32 @@ export class ImageDeployer {
 
             let sink = new DevNull();
             if (fileName) {
+                // If existing directory passed in, add a filename
+                if (existsSync(fileName) && lstatSync(fileName).isDirectory()) {
+                    fileName = join(fileName, DEFAULT_IMAGE_NAME);
+                }
+
                 // Save file
                 this.ensureDirectory(dirname(fileName));
                 sink = createWriteStream(fileName);
+
+                this.emit(ImageDeployer.EVENT_LOG, `Saving '${tag}' to ${fileName}`);
             } else {
                 // Otherwise find a device to deploy to
+                this.emit(ImageDeployer.EVENT_LOG, `Sending '${tag}' to device`);
             }
 
             const image: Dockerode.Image = this.docker.getImage(tag);
             if (!image) { return reject("No image found"); }
-            if (sink instanceof DevNull) { return resolve(); }
 
             image
             .get()
             .then(stream => {
-                // tslint:disable-next-line:no-console
-                console.log("Deploying image..");
                 stream.on("end", resolve)
                 .on("error", reject)
                 .pipe(sink);
-            });
+            })
+            .catch(reject);
         });
     }
 }

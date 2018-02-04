@@ -35,7 +35,11 @@ suite("DockerBuilder", () => {
             setupQemu: stub().returns(Promise.resolve(false))
         };
 
-        builder.build("", "", qemuUtils)
+        const dockerUtils: any = {
+            checkDocker: stub().returns(Promise.resolve())
+        };
+
+        builder.build("", "", qemuUtils, dockerUtils)
         .then(() => {
             assert(qemuUtils.called && docker.buildImage.called);
         });

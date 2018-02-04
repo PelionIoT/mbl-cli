@@ -15,45 +15,62 @@
 * limitations under the License.
 */
 
-import { ImageDeployer } from "../deploy/image_deployer";
-import { createDockerode } from "../util/docker_factory";
+import { DEFAULT_IMAGE_NAME, ImageDeployer } from "../deploy/image_deployer";
+import { log } from "../logger";
+import { DockerUtils } from "../util/docker";
 import { QemuUtils } from "../util/qemu";
 import { DockerBuilder } from "./docker_builder";
 
-exports.command = "build [path] [file] [host] [tag] [force]";
-exports.desc = "Build a directory and output a docker image";
-exports.builder = {
-    buildhost: {
-        choices: [ "local", "remote" ],
-        default: "local",
-        description: "build the image locally or remotely"
+export interface BuildCommand {
+    directory;
+    file;
+    force;
+    remote;
+    tag;
+}
+
+export const command = "build [directory] [file]";
+export const describe = "Build a directory and create an image";
+
+export const builder: BuildCommand = {
+    directory: {
+        default: ".",
+        description: "the directory to build"
     },
     file: {
-        default: null,
-        description: "path to save image to"
+        default: DEFAULT_IMAGE_NAME,
+        description: "file or directory to save the image to"
     },
     force: {
+        alias: "f",
         default: false,
         description: "force a rebuild",
         type: "boolean"
     },
-    path: {
-        default: ".",
-        description: "the directory to build"
+    remote: {
+        alias: "r",
+        default: false,
+        description: "build the image remotely",
+        type: "boolean"
     },
     tag: {
+        alias: "t",
         default: "mbed-app",
-        description: "The tag name for the image"
+        description: "the tag name for the image"
     }
 };
-exports.handler = argv => {
-    const docker = createDockerode(argv.buildhost);
+
+export function handler(argv: BuildCommand) {
+    const dockerUtils = new DockerUtils();
+    const docker = dockerUtils.createDockerode(argv.remote);
     const dockerBuilder: DockerBuilder = new DockerBuilder(docker);
     const imageDeployer: ImageDeployer = new ImageDeployer(docker);
-    const qemuUtils: QemuUtils = new QemuUtils(docker);
+    const qemuUtils = new QemuUtils(docker);
 
-    dockerBuilder.build(argv.path, argv.tag, qemuUtils, argv.force)
+    dockerBuilder.addListener(DockerBuilder.EVENT_LOG, log);
+    imageDeployer.addListener(ImageDeployer.EVENT_LOG, log);
+
+    dockerBuilder.build(argv.directory, argv.tag, qemuUtils, dockerUtils, argv.force)
     .then(() => imageDeployer.deployStream(argv.tag, argv.file))
-        // tslint:disable-next-line:no-console
-    .catch(error => console.log(error));
-};
+    .catch(error => log(`Error: ${error}`));
+}

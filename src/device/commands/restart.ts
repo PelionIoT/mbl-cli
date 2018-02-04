@@ -15,14 +15,21 @@
 * limitations under the License.
 */
 
-exports.command = "restart [device]";
-exports.desc = "Restart the application on a device";
-exports.builder = {
-    device: {
+import { log } from "../../logger";
+
+export const command = "restart [address]";
+export const describe = "Restart the application on a device";
+
+export interface DeviceCommand {
+    address;
+}
+
+export const builder: DeviceCommand = {
+    address: {
         description: "address of the device"
     }
 };
-exports.handler = argv => {
-    // tslint:disable-next-line:no-console
-    console.log(argv);
-};
+
+export function handler(argv: DeviceCommand) {
+    log(`command not implemented ${JSON.stringify(argv)}`);
+}

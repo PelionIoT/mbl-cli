@@ -30,24 +30,26 @@ export const qemuUrl: string = "https://github.com/resin-io/qemu/releases/downlo
  * QemuUtils
  */
 export class QemuUtils {
-    constructor(private docker: Dockerode) {
-    }
+    constructor(private docker: Dockerode) {}
 
     /**
      * @param buildPath Image build path
      */
     public setupQemu(buildPath: string): Promise<boolean> {
         return this.check()
-        .then(needsQemu => this.download(buildPath, needsQemu));
+        .then(needsQemu => {
+            if (!needsQemu) return false;
+            return this.download(buildPath)
+            .then(() => {
+                return true;
+            });
+        });
     }
 
     private check(): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.docker.version((error, info) => {
-                if (error) {
-                    return reject("No docker available!");
-                }
-
+                if (error) return reject("No docker available");
                 resolve(info.Arch !== "arm64");
             });
         });
@@ -55,22 +57,20 @@ export class QemuUtils {
 
     /**
      * @param buildPath Image build path
-     * @param needsQemu If qemu is needed
      */
-    private download(buildPath: string, needsQemu: boolean): Promise<boolean> {
+    private download(buildPath: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (!needsQemu) { return resolve(needsQemu); }
 
-            const fullPath = `${join(buildPath, toolsPath)}`;
-            const qemuPath = `${join(toolsPath, qemuName)}`;
+            const mbedPath = join(buildPath, toolsPath);
+            const qemuPath = join(mbedPath, qemuName);
 
-            if (existsSync(qemuPath)) { return resolve(needsQemu); }
-            if (!existsSync(fullPath)) { mkdirSync(fullPath); }
+            if (existsSync(qemuPath)) return resolve();
+            if (!existsSync(mbedPath)) mkdirSync(mbedPath);
 
             request(qemuUrl)
             .pipe(createGunzip())
             .pipe(createWriteStream(qemuPath))
-            .on("close", () => resolve(needsQemu))
+            .on("close", resolve)
             .on("error", reject);
         });
     }

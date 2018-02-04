@@ -20,6 +20,7 @@
         "no-unused-variable": [true],
         "object-curly-spacing": [true, "always"],
         "object-literal-shorthand": false,
+        "radix": false,
         "semicolon": [true, "always"],
         "ter-indent": [true, 4],
         "ter-no-irregular-whitespace": [true],

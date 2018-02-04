@@ -18,24 +18,47 @@
 // deploy could rsync app files to docker container over ssh,
 // perhaps watching for local file changes and updating automagically?
 
-exports.command = "deploy [path] [device] [host]";
-exports.desc = "Deploy an application to a device (building as necessary)";
-exports.builder = {
-    buildhost: {
-        choices: [ "local", "remote" ],
-        default: "local",
-        description: "build the image locally or remotely"
-    },
-    device: {
+import { log } from "../logger";
+
+export interface DeployCommand {
+    address;
+    force;
+    path;
+    remote;
+    tag;
+}
+
+export const command = "deploy [path] [address]";
+export const describe = "Deploy a directory or image to a device";
+
+export const builder: DeployCommand = {
+    address: {
         description: "address of the device"
+    },
+    force: {
+        alias: "f",
+        default: false,
+        description: "force a rebuild",
+        type: "boolean"
     },
     path: {
         default: ".",
-        description: "the directory to build or path of image to deploy"
+        description: "the directory or image path to deploy"
+    },
+    remote: {
+        alias: "r",
+        default: false,
+        description: "build the image remotely",
+        type: "boolean"
+    },
+    tag: {
+        alias: "t",
+        default: "mbed-app",
+        description: "the tag name for the image"
     }
 };
-exports.handler = argv => {
+
+export function handler(argv: DeployCommand) {
     // scan for devices and give options to user using "inquirer" if count > 1
-    // tslint:disable-next-line:no-console
-    console.log(argv);
-};
+    log(`command not implemented ${JSON.stringify(argv)}`);
+}

@@ -15,9 +15,11 @@
 * limitations under the License.
 */
 
-exports.command = "scan";
-exports.desc = "Scan for devices";
-exports.handler = argv => {
-    // tslint:disable-next-line:no-console
-    console.log(argv);
-};
+import { log } from "../../logger";
+
+export const command = "scan";
+export const describe = "Scan for devices";
+
+export function handler(argv) {
+    log(`command not implemented ${JSON.stringify(argv)}`);
+}

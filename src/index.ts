@@ -26,14 +26,13 @@ notifier({ pkg }).notify();
 
 // tslint:disable-next-line:no-unused-expression
 yargs
-    .version()
-    .alias("v", "version")
-    .help()
-    .alias("h", "help")
+    .usage("$0 <command> [arguments]")
+    .version().alias("v", "version")
+    .help().alias("h", "help")
     .commandDir(".", {
         include: /cmd_/,
         recurse: true
     })
     .demandCommand(1, "")
-    .epilogue("For more information, find our manual at http://mbed.com")
+    .epilogue("For more information on Mbed Linux, please visit http://mbed.com")
     .argv;

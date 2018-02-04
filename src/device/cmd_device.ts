@@ -15,9 +15,10 @@
 * limitations under the License.
 */
 
-exports.command = "device <command>";
-exports.desc = "Device commands";
-exports.builder = yargs => {
+export const command = "device <command> [address]";
+export const describe = "Device management commands";
+
+export const builder = yargs => {
     return yargs
         .commandDir("commands")
         .demandCommand(1, "You need to specify an action");
