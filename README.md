@@ -9,7 +9,7 @@ The Mbed Linux CLI is a toolbox for building your Mbed Linux applications and ma
 
 [Docker > v17.0.0](https://www.docker.com)
 
-[Node.js > v6.0.0](https://nodejs.org), which includes `npm`.
+[Node.js > v6.0.0](https://nodejs.org), which includes `npm`
 
 ## Installation
 
@@ -25,16 +25,29 @@ $ npm install -g ARMmbed/mbed-linux-cli#build
 $ mbed-linux <command> [arguments]
 ```
 
-Commands:
-- mbed-linux build [directory] [file] - Build a directory and create an image
-- mbed-linux deploy [path] [address] - Deploy a directory or image to a device
-- mbed-linux device <command> [address] - Device management commands
+### Commands
 
-Options:
+Build a directory and create an image:
+```bash
+$ mbed-linux build [directory] [file]
+```
+
+Deploy a directory or image to a device:
+```
+$ mbed-linux deploy [path] [address]
+```
+
+Device management commands:
+```
+$ mbed-linux device <command> [address]
+```
+
+### Options
+
 - -v, --version - Show version number
 - -h, --help - Show help
 
-These commands can be used to build applications in the [example applications](https://github.com/ARMMbed/mbed-linux-cli/tree/master/example_apps/) directory.
+These commands can be used to build applications in the [example applications](https://github.com/ARMMbed/mbed-linux-cli/tree/master/example_apps/) directory
 
 ## Implementation Status
 
@@ -51,4 +64,4 @@ These commands can be used to build applications in the [example applications](h
 
 ## Development
 
-Please refer to the [development documentation](DEVELOPMENT.md).
+Please refer to the [development documentation](DEVELOPMENT.md)
