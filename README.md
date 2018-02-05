@@ -7,6 +7,8 @@ The Mbed Linux CLI is a toolbox for building your Mbed Linux applications and ma
 
 ## Prerequisites
 
+[Docker > v17.0.0](https://www.docker.com)
+
 [Node.js > v6.0.0](https://nodejs.org), which includes `npm`.
 
 ## Installation
@@ -14,5 +16,39 @@ The Mbed Linux CLI is a toolbox for building your Mbed Linux applications and ma
 The CLI is distributed using npm. To install the tool globally:
 
 ```bash
-$ npm install -g mbed-linux-cli
+$ npm install -g ARMmbed/mbed-linux-cli#build
 ```
+
+## Usage
+
+```bash
+$ mbed-linux <command> [arguments]
+```
+
+Commands:
+- mbed-linux build [directory] [file] - Build a directory and create an image
+- mbed-linux deploy [path] [address] - Deploy a directory or image to a device
+- mbed-linux device <command> [address] - Device management commands
+
+Options:
+- -v, --version - Show version number
+- -h, --help - Show help
+
+These commands can be used to build applications in the [example applications](https://github.com/ARMMbed/mbed-linux-cli/tree/master/example_apps/) directory.
+
+## Implementation Status
+
+- [x] build locally
+- [x] build remotely
+- [ ] discover devices
+- [ ] deploy to a device
+- [ ] start an application on a device
+- [ ] stop a application on a device
+- [ ] restart an application on a device
+- [ ] configure a device
+- [ ] get logs from a device
+- [ ] ssh to a device
+
+## Development
+
+Please refer to the [development documentation](DEVELOPMENT.md).

@@ -61,8 +61,13 @@ export const builder: BuildCommand = {
 };
 
 export function handler(argv: BuildCommand) {
+
+    let remoteHost = "10.6.44.215";
+    if (argv.remote) log(`using remote docker host ${remoteHost}`);
+    else remoteHost = null;
+
     const dockerUtils = new DockerUtils();
-    const docker = dockerUtils.createDockerode(argv.remote);
+    const docker = dockerUtils.createDockerode(remoteHost);
     const dockerBuilder: DockerBuilder = new DockerBuilder(docker);
     const imageDeployer: ImageDeployer = new ImageDeployer(docker);
     const qemuUtils = new QemuUtils(docker);

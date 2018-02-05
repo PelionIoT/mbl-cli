@@ -21,10 +21,10 @@ import { join } from "path";
 
 export class DockerUtils {
 
-    public createDockerode(remote: boolean): Dockerode {
+    public createDockerode(remoteHost?: string): Dockerode {
         const options: { [key: string]: string | number } = {};
-        if (remote) {
-            options.host = "10.6.44.215";
+        if (remoteHost) {
+            options.host = remoteHost;
             options.port = 2376;
         } else {
             options.socketPath = "/var/run/docker.sock";

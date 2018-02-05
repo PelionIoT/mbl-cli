@@ -117,7 +117,9 @@ export class DockerBuilder extends EventEmitter {
         .then(needsQemu => {
             const source = packFS(buildPath, {
                 ignore: name => {
-                    return name.indexOf(ignore) >= 0;
+                    if (name.indexOf(toolsPath) >= 0) return true;
+                    if (name.indexOf(ignore) >= 0) return true;
+                    return false;
                 }
             });
 
