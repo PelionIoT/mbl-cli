@@ -56,7 +56,7 @@ export const builder: BuildCommand = {
     tag: {
         alias: "t",
         default: "mbed-app",
-        description: "the tag name for the image"
+        description: "name and optional tag for the image in the form 'name:tag'"
     }
 };
 

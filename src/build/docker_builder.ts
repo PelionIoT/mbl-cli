@@ -16,7 +16,7 @@
 */
 
 import { EventEmitter } from "events";
-import { join } from "path";
+import { basename, join } from "path";
 import { Stream } from "stream";
 import { pack as packFS } from "tar-fs";
 import {
@@ -85,8 +85,9 @@ export class DockerBuilder extends EventEmitter {
             extract.on("finish", () => {
                 dockerStream.finalize();
             });
-
             sourceStream.pipe(extract);
+
+            // https://docs.docker.com/engine/api/v1.35/#operation/ImageBuild
             this.docker.buildImage(dockerStream, {
                 nocache: force,
                 t: tag,
@@ -109,7 +110,7 @@ export class DockerBuilder extends EventEmitter {
      * @param tag The name to use to tag the docker image
      * @param ignore A folder pattern to ignore
      */
-    public build(buildPath: string, tag: string, qemu: QemuUtils, dockerUtils: DockerUtils, force: boolean = false, ignore: string = ".git"): Promise<any> {
+    public build(buildPath: string, tag: string, qemu: QemuUtils, dockerUtils: DockerUtils, force: boolean = false, ignore: string[] = [ ".git" ]): Promise<any> {
         this.emit(DockerBuilder.EVENT_LOG, `building ${buildPath} with tag '${tag}'`);
 
         return dockerUtils.checkDocker(buildPath, this.docker)
@@ -117,9 +118,7 @@ export class DockerBuilder extends EventEmitter {
         .then(needsQemu => {
             const source = packFS(buildPath, {
                 ignore: name => {
-                    if (name.indexOf(toolsPath) >= 0) return true;
-                    if (name.indexOf(ignore) >= 0) return true;
-                    return false;
+                    return ignore.indexOf(basename(name)) >= 0;
                 }
             });
 
