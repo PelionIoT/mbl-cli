@@ -62,7 +62,7 @@ export const builder: BuildCommand = {
 
 export function handler(argv: BuildCommand) {
 
-    let remoteHost = "10.6.44.215";
+    let remoteHost = "vm-isg-mbed.on.arm.com";
     if (argv.remote) log(`using remote docker host ${remoteHost}`);
     else remoteHost = null;
 
