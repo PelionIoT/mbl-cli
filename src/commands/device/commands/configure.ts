@@ -15,24 +15,23 @@
 * limitations under the License.
 */
 
-import { join } from "path";
+import { DEFAULT_IMAGE_ADDRESS } from "../../../deployers/docker_deployer";
+import { log } from "../../../utils/logger";
 
-import * as notifier from "update-notifier";
-import * as yargs from "yargs";
+export const command = "configure [address]";
+export const describe = "Configure a device";
 
-// tslint:disable-next-line:no-var-requires
-const pkg = require(join("..", "package.json"));
-notifier({ pkg }).notify();
+export interface DeviceCommand {
+    address;
+}
 
-// tslint:disable-next-line:no-unused-expression
-yargs
-.usage("$0 <command> [arguments]")
-.version().alias("v", "version")
-.help().alias("h", "help")
-.commandDir("commands", {
-    include: /command.js/,
-    recurse: true
-})
-.demandCommand(1, "")
-.epilogue("For more information on Mbed Linux, please visit http://mbed.com")
-.argv;
+export const builder: DeviceCommand = {
+    address: {
+        default: DEFAULT_IMAGE_ADDRESS,
+        description: "address of the device"
+    }
+};
+
+export function handler(args: DeviceCommand) {
+    log(`command not implemented ${JSON.stringify(args)}`);
+}

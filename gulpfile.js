@@ -84,7 +84,7 @@ gulp.task("compile", ["clean"], () => {
 });
 
 gulp.task("watch", ["setWatch", "default"], () => {
-    gulp.watch(srcFiles, ["default"]);
+    gulp.watch(srcFiles, ["lint", "compile"]);
 });
 
 gulp.task("default", ["lint", "doc", "compile"]);

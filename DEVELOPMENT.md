@@ -31,3 +31,11 @@ To continually watch for changes, use the gulp `watch` task:
 ```bash
 > npm run gulp watch
 ```
+
+## Testing
+
+Link the executable to make it globally available as `mbed-linux` by running:
+
+```bash
+> npm link
+```

@@ -28,7 +28,6 @@
     "test": "intern"
   },
   "devDependencies": {
-    "@types/dockerode": "^2.5.3",
     "@types/node": "^9.4.0",
     "@types/request": "^2.47.0",
     "@types/sinon": "^4.1.3",

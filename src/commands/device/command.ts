@@ -15,24 +15,14 @@
 * limitations under the License.
 */
 
-import { join } from "path";
+export const command = "device <command> [address]";
+export const describe = "Device management commands";
 
-import * as notifier from "update-notifier";
-import * as yargs from "yargs";
-
-// tslint:disable-next-line:no-var-requires
-const pkg = require(join("..", "package.json"));
-notifier({ pkg }).notify();
-
-// tslint:disable-next-line:no-unused-expression
-yargs
-.usage("$0 <command> [arguments]")
-.version().alias("v", "version")
-.help().alias("h", "help")
-.commandDir("commands", {
-    include: /command.js/,
-    recurse: true
-})
-.demandCommand(1, "")
-.epilogue("For more information on Mbed Linux, please visit http://mbed.com")
-.argv;
+export const builder = yargs => {
+    return yargs
+    .commandDir("commands", {
+        exclude: /configure|scan|ssh/,
+        recurse: true
+    })
+    .demandCommand(1, "You need to specify an action");
+};

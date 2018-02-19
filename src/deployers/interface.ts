@@ -15,21 +15,8 @@
 * limitations under the License.
 */
 
-import { log } from "../../logger";
+import { EventEmitter } from "events";
 
-export const command = "logs [address]";
-export const describe = "Get debug logs from a device";
-
-export interface DeviceCommand {
-    address;
-}
-
-export const builder: DeviceCommand = {
-    address: {
-        description: "address of the device"
-    }
-};
-
-export function handler(argv: DeviceCommand) {
-    log(`command not implemented ${JSON.stringify(argv)}`);
+export interface Deployer extends EventEmitter {
+    deploy(stream: NodeJS.ReadableStream): Promise<void>;
 }

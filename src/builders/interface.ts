@@ -15,11 +15,8 @@
 * limitations under the License.
 */
 
-import { log } from "../../logger";
+import { EventEmitter } from "events";
 
-export const command = "scan";
-export const describe = "Scan for devices";
-
-export function handler(argv) {
-    log(`command not implemented ${JSON.stringify(argv)}`);
+export interface Builder extends EventEmitter {
+    build(source: string, force: boolean): Promise<void>;
 }

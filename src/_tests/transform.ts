@@ -19,7 +19,7 @@
 import { assert } from "chai";
 import { before, beforeEach, suite, test } from "intern/lib/interfaces/tdd";
 import { Readable, Writable } from "stream";
-import { PrettifyStream } from "../util/transform";
+import { PrettifyStream } from "../utils/transform";
 
 suite("Stream format", () => {
     let writable: Writable;

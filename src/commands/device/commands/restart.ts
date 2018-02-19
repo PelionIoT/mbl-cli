@@ -15,10 +15,12 @@
 * limitations under the License.
 */
 
-import { log } from "../../logger";
+import { DEFAULT_IMAGE_ADDRESS } from "../../../deployers/docker_deployer";
+import { Docker } from "../../../utils/docker";
+import { log } from "../../../utils/logger";
 
-export const command = "stop [address]";
-export const describe = "Stop the application on a device";
+export const command = "restart [address]";
+export const describe = "Restart the application on a device";
 
 export interface DeviceCommand {
     address;
@@ -26,10 +28,14 @@ export interface DeviceCommand {
 
 export const builder: DeviceCommand = {
     address: {
+        default: DEFAULT_IMAGE_ADDRESS,
         description: "address of the device"
     }
 };
 
-export function handler(argv: DeviceCommand) {
-    log(`command not implemented ${JSON.stringify(argv)}`);
+export function handler(args: DeviceCommand) {
+    const docker = new Docker(args.address);
+
+    docker.restartContainer()
+    .catch(error => log(`Error: ${error}`));
 }

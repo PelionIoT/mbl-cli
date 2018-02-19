@@ -53,13 +53,13 @@ These commands can be used to build applications in the [example applications](h
 
 - [x] build locally
 - [x] build remotely
+- [x] deploy to a device
+- [x] start an application on a device
+- [x] stop a application on a device
+- [x] restart an application on a device
+- [x] get logs from a device
 - [ ] discover devices
-- [ ] deploy to a device
-- [ ] start an application on a device
-- [ ] stop a application on a device
-- [ ] restart an application on a device
 - [ ] configure a device
-- [ ] get logs from a device
 - [ ] ssh to a device
 
 ## Development

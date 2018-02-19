@@ -15,11 +15,11 @@
 * limitations under the License.
 */
 
-export const command = "device <command> [address]";
-export const describe = "Device management commands";
+import { log } from "../../../utils/logger";
 
-export const builder = yargs => {
-    return yargs
-        .commandDir("commands")
-        .demandCommand(1, "You need to specify an action");
-};
+export const command = "scan";
+export const describe = "Scan for devices";
+
+export function handler(args) {
+    log(`command not implemented ${JSON.stringify(args)}`);
+}

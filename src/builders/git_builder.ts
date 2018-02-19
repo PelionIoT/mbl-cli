@@ -15,21 +15,24 @@
 * limitations under the License.
 */
 
-import { log } from "../../logger";
+import { EventEmitter } from "events";
+import { Builder } from "./interface";
 
-export const command = "restart [address]";
-export const describe = "Restart the application on a device";
+/**
+ * Git Builder
+ */
+export class DirectoryBuilder extends EventEmitter implements Builder {
+    /**
+     * Log event
+     * @event
+     */
+    public static EVENT_LOG: string = "log";
 
-export interface DeviceCommand {
-    address;
-}
-
-export const builder: DeviceCommand = {
-    address: {
-        description: "address of the device"
+    constructor(_useEmulation: boolean = true) {
+        super();
     }
-};
 
-export function handler(argv: DeviceCommand) {
-    log(`command not implemented ${JSON.stringify(argv)}`);
+    public build(_url: string, _force: boolean = false): Promise<void> {
+        return Promise.reject("Git Builder not implemented");
+    }
 }

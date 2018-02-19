@@ -16,30 +16,25 @@
 */
 
 import { assert } from "chai";
-import { suite, test } from "intern/lib/interfaces/tdd";
-import { QemuUtils } from "../util/qemu";
+import { beforeEach, suite, test } from "intern/lib/interfaces/tdd";
+import { FileDeployer } from "../deployers/file_deployer";
 
-suite("setupQemu", () => {
-    const docker: any = {
-        version: {}
-    };
+suite("ImageDeployer", () => {
+    let deployer: FileDeployer;
 
-    test("Should reject if no docker is available", () => {
-        docker.version = (some: (err, info) => {}) => { some("error", ""); };
+    beforeEach(() => {
+        deployer = new FileDeployer("");
+    });
 
-        new QemuUtils(docker).setupQemu("./")
+    test("Should reject if no image tag is specified", () => {
+        deployer.deploy(null)
         .then(() => assert(false))
         .catch(err => assert(err ? true : false));
     });
 
-    test("Should not need qemu if architecture is ARM", () => {
-        docker.version = (some: (err, info) => {}) => {
-            const info = { Arch: "arm64" };
-            some(null, info);
-        };
-
-        new QemuUtils(docker).setupQemu("./")
-        .then(needsQemu => assert(!needsQemu))
-        .catch(() => assert(false));
+    test("Should reject if no tag image is found", () => {
+        deployer.deploy(null)
+        .then(() => assert(false))
+        .catch(err => assert(err ? true : false));
     });
 });

@@ -15,10 +15,11 @@
 * limitations under the License.
 */
 
-import { log } from "../../logger";
+import { DEFAULT_IMAGE_ADDRESS } from "../../../deployers/docker_deployer";
+import { log } from "../../../utils/logger";
 
-export const command = "configure [address]";
-export const describe = "Configure a device";
+export const command = "ssh [address]";
+export const describe = "SSH to a device";
 
 export interface DeviceCommand {
     address;
@@ -26,10 +27,11 @@ export interface DeviceCommand {
 
 export const builder: DeviceCommand = {
     address: {
+        default: DEFAULT_IMAGE_ADDRESS,
         description: "address of the device"
     }
 };
 
-export function handler(argv: DeviceCommand) {
-    log(`command not implemented ${JSON.stringify(argv)}`);
+export function handler(args: DeviceCommand) {
+    log(`command not implemented ${JSON.stringify(args)}`);
 }

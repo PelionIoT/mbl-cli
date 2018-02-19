@@ -18,16 +18,15 @@
 import { EventEmitter } from "events";
 import { createWriteStream, existsSync, lstatSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
-import { DevNull } from "../util/dev_null";
+import { DevNull } from "../utils/dev_null";
+import { Deployer } from "./interface";
 
-import * as Dockerode from "dockerode";
-
-export const DEFAULT_IMAGE_NAME = "mbed.image";
+export const DEFAULT_IMAGE_NAME = "mbed-image.tar";
 
 /**
- * Image Deployer
+ * File Deployer
  */
-export class ImageDeployer extends EventEmitter {
+export class FileDeployer extends EventEmitter implements Deployer {
 
     /**
      * Log event
@@ -38,7 +37,7 @@ export class ImageDeployer extends EventEmitter {
     /**
      * @param docker Instance of the docker API
      */
-    constructor(private docker: Dockerode) {
+    constructor(private path: string) {
         super();
     }
 
@@ -56,42 +55,30 @@ export class ImageDeployer extends EventEmitter {
     }
 
     /**
-     * Deploy a build stream
-     * @param stream The stream to deploy
+     * Deploy an image stream
      * @param fileName The file name to save the image to
      */
-    public deployStream(tag: string, fileName?: string): Promise<void> {
+    public deploy(stream: NodeJS.ReadableStream): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (!tag) { reject("No image tag specified"); }
 
             let sink = new DevNull();
-            if (fileName) {
+
+            if (this.path) {
                 // If existing directory passed in, add a filename
-                if (existsSync(fileName) && lstatSync(fileName).isDirectory()) {
-                    fileName = join(fileName, DEFAULT_IMAGE_NAME);
+                if (existsSync(this.path) && lstatSync(this.path).isDirectory()) {
+                    this.path = join(this.path, DEFAULT_IMAGE_NAME);
                 }
 
                 // Save file
-                this.ensureDirectory(dirname(fileName));
-                sink = createWriteStream(fileName);
+                this.ensureDirectory(dirname(this.path));
+                sink = createWriteStream(this.path);
 
-                this.emit(ImageDeployer.EVENT_LOG, `Saving '${tag}' to ${fileName}`);
-            } else {
-                // Otherwise find a device to deploy to
-                this.emit(ImageDeployer.EVENT_LOG, `Sending '${tag}' to device`);
+                this.emit(FileDeployer.EVENT_LOG, `Saving to '${this.path}'...`);
             }
 
-            const image: Dockerode.Image = this.docker.getImage(tag);
-            if (!image) { return reject("No image found"); }
-
-            image
-            .get()
-            .then(stream => {
-                stream.on("end", resolve)
-                .on("error", reject)
-                .pipe(sink);
-            })
-            .catch(reject);
+            stream.on("end", resolve)
+            .on("error", reject)
+            .pipe(sink);
         });
     }
 }

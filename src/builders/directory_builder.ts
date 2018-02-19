@@ -16,6 +16,7 @@
 */
 
 import { EventEmitter } from "events";
+import { existsSync } from "fs";
 import { basename, join } from "path";
 import { Stream } from "stream";
 import { pack as packFS } from "tar-fs";
@@ -23,16 +24,14 @@ import {
     extract as extractStream,
     pack as packStream
 } from "tar-stream";
-import { DockerUtils } from "../util/docker";
-import { qemuName, QemuUtils, toolsPath } from "../util/qemu";
-import { PrettifyStream } from "../util/transform";
-
-import * as Dockerode from "dockerode";
+import { Docker } from "../utils/docker";
+import { PrettifyStream } from "../utils/transform";
+import { Builder } from "./interface";
 
 /**
- * Docker Builder
+ * Directory Builder
  */
-export class DockerBuilder extends EventEmitter {
+export class DirectoryBuilder extends EventEmitter implements Builder {
     /**
      * Log event
      * @event
@@ -42,18 +41,17 @@ export class DockerBuilder extends EventEmitter {
     /**
      * @param docker Instance of the docker API
      */
-    constructor(private docker: Dockerode) {
+    constructor(private docker: Docker, private useEmulation: boolean = true) {
         super();
     }
 
     /**
      * Run the build stream
      * @param sourceStream The stream to build
-     * @param tag Image tag name
      * @param force No-cache force
-     * @param needsQemu Flag if qemu is needed inside the new image
+     * @param needsEmulation Flag if emulation is needed while building the new image
      */
-    private buildStream(sourceStream: Stream, tag: string, force: boolean, needsQemu: boolean): Promise<void> {
+    private buildStream(sourceStream: Stream, force: boolean, needsEmulation: boolean): Promise<void> {
         return new Promise((resolve, reject) => {
 
             const extract = extractStream();
@@ -61,7 +59,7 @@ export class DockerBuilder extends EventEmitter {
 
             // Add check for Dockerfile
             extract.on("entry", (header, stream, callback) => {
-                if (needsQemu && header.name === "Dockerfile") {
+                if (needsEmulation && header.name === "Dockerfile") {
                     let contents = "";
 
                     stream.on("data", chunk => {
@@ -69,10 +67,12 @@ export class DockerBuilder extends EventEmitter {
                     });
 
                     stream.on("end", () => {
-                        // Add command to the Dockerfile
-                        const index = contents.indexOf("RUN");
-                        const command = `COPY ${join(toolsPath, qemuName)} /tmp/${qemuName}`;
-                        contents = `${contents.substr(0, index)}\n${command}\n${contents.substr(index)}`;
+                        // Add commands to the Dockerfile
+                        // const copyCommand = `COPY ./${join(toolsPath, binPath)}/ /usr/bin/`;
+                        const startCommand = `RUN [ "cross-build-start" ]`;
+                        const endCommand = `RUN [ "cross-build-end" ]`;
+                        contents = contents.replace(/^FROM.*$/im, match => `${match}\n${startCommand}`);
+                        contents += `\n${endCommand}`;
                         dockerStream.entry({ name: header.name }, contents);
                         callback();
                     });
@@ -87,42 +87,59 @@ export class DockerBuilder extends EventEmitter {
             });
             sourceStream.pipe(extract);
 
-            // https://docs.docker.com/engine/api/v1.35/#operation/ImageBuild
-            this.docker.buildImage(dockerStream, {
-                nocache: force,
-                t: tag,
-            }, (error, response) => {
-                if (error) {
-                    return reject(error);
-                }
+            this.docker.buildImage(dockerStream, force)
+            .then(response => {
                 response
                 .on("end", resolve)
                 .on("error", reject)
                 .pipe(new PrettifyStream())
                 .pipe(process.stdout);
-            });
+            })
+            .catch(error => reject(error));
         });
     }
 
     /**
      * Build a docker image
      * @param buildPath The directory to build
-     * @param tag The name to use to tag the docker image
      * @param ignore A folder pattern to ignore
      */
-    public build(buildPath: string, tag: string, qemu: QemuUtils, dockerUtils: DockerUtils, force: boolean = false, ignore: string[] = [ ".git" ]): Promise<any> {
-        this.emit(DockerBuilder.EVENT_LOG, `building ${buildPath} with tag '${tag}'`);
+    public build(buildPath: string, force: boolean = false, ignore: string[] = [ ".git" ]): Promise<void> {
+        this.emit(DirectoryBuilder.EVENT_LOG, `Building '${buildPath}'...`);
 
-        return dockerUtils.checkDocker(buildPath, this.docker)
-        .then(() => qemu.setupQemu(buildPath))
-        .then(needsQemu => {
+        return this.checkDocker(buildPath)
+        .then(() => this.requiresEmulation())
+        .then(needsEmulation => {
             const source = packFS(buildPath, {
                 ignore: name => {
                     return ignore.indexOf(basename(name)) >= 0;
                 }
             });
 
-            return this.buildStream(source, tag, force, needsQemu);
+            return this.buildStream(source, force, needsEmulation);
+        });
+    }
+
+    public requiresEmulation(arch: string = "arm"): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            if (!this.useEmulation) return resolve(false);
+
+            this.docker.getVersion()
+            .then(info => {
+                resolve(info.Arch !== arch);
+            })
+            .catch(() => reject("No docker available"));
+        });
+    }
+
+    public checkDocker(buildPath: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const dockerFile = join(buildPath, "Dockerfile");
+            if (!existsSync(dockerFile)) reject("Dockerfile not found, check directory is a valid Mbed Linux application");
+
+            this.docker.getVersion()
+            .then(() => resolve())
+            .catch(() => reject("Docker not found, check it's installed and running or build using a remote host"));
         });
     }
 }
