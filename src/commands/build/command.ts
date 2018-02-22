@@ -30,13 +30,13 @@ export const builder: BuildCommand = {
     force: {
         alias: "f",
         default: false,
-        description: "force a rebuild",
+        description: "force a complete rebuild",
         type: "boolean"
     },
     noemulation: {
         alias: "n",
         default: false,
-        description: "don't use emulation during build",
+        description: "turn off emulation during build",
         type: "boolean"
     },
     path: {

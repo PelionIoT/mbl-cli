@@ -46,7 +46,7 @@ export const builder: DeployCommand = {
     noemulation: {
         alias: "n",
         default: false,
-        description: "don't use emulation if building",
+        description: "turn off emulation if building",
         type: "boolean"
     },
     remote: {
