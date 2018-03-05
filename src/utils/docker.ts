@@ -38,7 +38,11 @@ export class Docker extends EventEmitter {
             const parts = host.split(":");
             options.host = this._host = parts[0];
             options.port = parts[1] || DEFAULT_DOCKER_PORT;
+        } else if (process.platform === "win32") {
+            // Windows
+            options.socketPath = "//./pipe/docker_engine";
         } else {
+            // *nix
             options.socketPath = "/var/run/docker.sock";
         }
 
