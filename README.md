@@ -1,7 +1,7 @@
 # Mbed Linux CLI
 Command-line interface for developing with Mbed Linux
 
-[![Circle CI](https://circleci.com/gh/ARMmbed/mbed-linux-cli.svg?style=shield&circle-token=367893aefffecc72cf7d17201667cd2f75d6d5c7)](https://circleci.com/gh/ARMmbed/mbed-linux-cli/)
+[![Circle CI](https://circleci.com/gh/ARMmbed/mbl-cli.svg?style=shield&circle-token=367893aefffecc72cf7d17201667cd2f75d6d5c7)](https://circleci.com/gh/ARMmbed/mbl-cli/)
 
 The Mbed Linux CLI is a toolbox for building your Mbed Linux applications and managing them on your target device.
 
@@ -16,13 +16,13 @@ The Mbed Linux CLI is a toolbox for building your Mbed Linux applications and ma
 The CLI is distributed using npm. To install the tool globally:
 
 ```bash
-$ npm install -g ARMmbed/mbed-linux-cli#build
+$ npm install -g ARMmbed/mbl-cli#build
 ```
 
 ## Usage
 
 ```bash
-$ mbed-linux <command> [arguments]
+$ mbl-cli <command> [arguments]
 ```
 
 ### Options
@@ -37,10 +37,10 @@ $ mbed-linux <command> [arguments]
 Build an Mbed Linux application from a source directory.
 
 ```bash
-$ mbed-linux build [source] [path]
+$ mbl-cli build [source] [path]
 ```
 
-Where `[source]` is the directory to the application source (defaults to the current working directory) and `[path]` is an optional path to save the output image file to (defaults to `mbed-image.tar` in the current working directory).
+Where `[source]` is the directory to the application source (defaults to the current working directory) and `[path]` is an optional path to save the output image file to (defaults to `mbl-image.tar` in the current working directory).
 
 _Flags:_
 ```
@@ -55,7 +55,7 @@ _Flags:_
 Deploy an application to a device, building as necessary.
 
 ```
-$ mbed-linux deploy [source] [address]
+$ mbl-cli deploy [source] [address]
 ```
 
 Where `[source]` is the path to a built application image or the directory of the application source to deploy. `[address]` is the address of he device to deploy to.
@@ -74,29 +74,29 @@ _Flags:_
 Device management commands.
 
 ```
-$ mbed-linux device <command> [address]
+$ mbl-cli device <command> [address]
 ```
 
 _Commands:_
 
 Get output logs from a device, optionally attaching to the device output.
 ```
-mbed-linux device logs [address] [--attach]
+mbl-cli device logs [address] [--attach]
 ```
 
 Start the application on a device.
 ```
-mbed-linux device start [address]
+mbl-cli device start [address]
 ```
 
 Stop the application on a device.
 ```
-mbed-linux device stop [address]
+mbl-cli device stop [address]
 ```
 
 Restart the application on a device.
 ```
-mbed-linux device restart [address]
+mbl-cli device restart [address]
 ```
 
 ## Implementation Status

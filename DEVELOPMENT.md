@@ -1,8 +1,8 @@
 # Mbed Linux CLI
 
-[![Circle CI](https://circleci.com/gh/ARMmbed/mbed-linux-cli.svg?style=shield&circle-token=367893aefffecc72cf7d17201667cd2f75d6d5c7)](https://circleci.com/gh/ARMmbed/mbed-linux-cli/)
+[![Circle CI](https://circleci.com/gh/ARMmbed/mbl-cli.svg?style=shield&circle-token=367893aefffecc72cf7d17201667cd2f75d6d5c7)](https://circleci.com/gh/ARMmbed/mbl-cli/)
 
-[![Builds](https://img.shields.io/badge/mbed%20linux%20cli-builds-blue.svg)](http://armmbed.github.io/mbed-linux-cli/builds/)
+[![Builds](https://img.shields.io/badge/mbed%20linux%20cli-builds-blue.svg)](http://armmbed.github.io/mbl-cli/builds/)
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ To continually watch for changes, use the gulp `watch` task:
 
 ## Testing
 
-Link the executable to make it globally available as `mbed-linux` by running:
+Link the executable to make it globally available as `mbl-cli` by running:
 
 ```bash
 > npm link

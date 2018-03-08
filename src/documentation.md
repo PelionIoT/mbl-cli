@@ -11,5 +11,5 @@ The Mbed Linux CLI is a toolbox for building your Mbed Linux applications and ma
 The CLI is distributed using npm. To install the tool globally:
 
 ```bash
-$ npm install -g mbed-linux-cli
+$ npm install -g mbl-cli
 ```

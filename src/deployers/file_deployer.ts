@@ -21,7 +21,7 @@ import { dirname, join } from "path";
 import { DevNull } from "../utils/dev_null";
 import { Deployer } from "./interface";
 
-export const DEFAULT_IMAGE_NAME = "mbed-image.tar";
+export const DEFAULT_IMAGE_NAME = "mbl-image.tar";
 
 /**
  * File Deployer

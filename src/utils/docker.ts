@@ -19,7 +19,7 @@ import * as Dockerode from "dockerode";
 import { EventEmitter } from "events";
 
 const DEFAULT_DOCKER_PORT = 2375;
-const DEFAULT_IMAGE_NAME = "mbed-app";
+const DEFAULT_IMAGE_NAME = "mbl-app";
 
 export class Docker extends EventEmitter {
 

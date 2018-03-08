@@ -1,5 +1,5 @@
 {
-  "name": "mbed-linux-cli",
+  "name": "mbl-cli",
   "version": "1.0.0",
   "description": "Command-line interface for developing with Mbed Linux",
   "homepage": "https://www.mbed.com",
@@ -8,11 +8,11 @@
   "private": true,
   "types": "./types/index.d.ts",
   "bin": {
-    "mbed-linux": "./bin/mbed-linux.js"
+    "mbl-cli": "./bin/mbl-cli.js"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/ARMmbed/mbed-linux-cli"
+    "url": "git://github.com/ARMmbed/mbl-cli"
   },
   "keywords": [
     "mbed",
