@@ -11,6 +11,8 @@ The Mbed Linux CLI is a toolbox for building your Mbed Linux applications and ma
 
 [Node.js > v6.0.0](https://nodejs.org), which includes `npm v3`
 
+- It is recommended to install Node.js via the [Node version manager](https://github.com/creationix/nvm) as the installation below will require usage of your github SSH credentials.
+
 ## Installation
 
 The CLI is distributed using npm. To install the tool globally:
