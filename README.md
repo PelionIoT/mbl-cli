@@ -11,7 +11,7 @@ The Mbed Linux CLI is a toolbox for building your Mbed Linux applications and ma
 
 [Node.js > v6.0.0](https://nodejs.org), which includes `npm v3`
 
-- It is recommended to install Node.js via the [Node version manager](https://github.com/creationix/nvm) as the installation below will require usage of your github SSH credentials.
+- We recommend installing Node.js using the [Node version manager](https://github.com/creationix/nvm), as the installation below requires usage of your github SSH credentials.
 
 ## Installation
 
@@ -60,7 +60,7 @@ Deploy an application to a device, building as necessary.
 $ mbl-cli deploy [source] [address]
 ```
 
-Where `[source]` is the path to a built application image or the directory of the application source to deploy. `[address]` is the address of he device to deploy to.
+Where `[source]` is the path to a built application image or the directory of the application source to deploy. `[address]` is the address of the device to deploy to.
 
 _Flags:_
 ```
