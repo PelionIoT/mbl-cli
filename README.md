@@ -81,6 +81,16 @@ $ mbl-cli device <command> [address]
 
 _Commands:_
 
+Scan for devices connected to the system.
+```
+mbl-cli device scan
+```
+
+SSH onto a device, optionally specifying the device address to use
+```
+mbl-cli device ssh [address]
+```
+
 Get output logs from a device, optionally attaching to the device output.
 ```
 mbl-cli device logs [address] [--attach]
@@ -110,9 +120,9 @@ mbl-cli device restart [address]
 - [x] stop a application on a device
 - [x] restart an application on a device
 - [x] get logs from a device
-- [ ] discover devices
+- [x] discover devices
+- [x] ssh to a device
 - [ ] configure a device
-- [ ] ssh to a device
 
 ## Development
 
