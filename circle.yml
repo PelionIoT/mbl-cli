@@ -24,6 +24,8 @@ checkout:
     - git config --global user.email monty-bot@arm.com
 
 dependencies:
+  pre:
+    - sudo apt-get update; sudo apt-get install libavahi-compat-libdnssd-dev
   post:
     - npm install -g ansi-html-stream
 

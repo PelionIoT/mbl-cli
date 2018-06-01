@@ -15,8 +15,9 @@
 * limitations under the License.
 */
 
-import { DEFAULT_IMAGE_ADDRESS } from "../../../deployers/docker_deployer";
+import { Discovery } from "../../../utils/discovery";
 import { log } from "../../../utils/logger";
+import { SSH } from "../../../utils/ssh";
 
 export const command = "ssh [address]";
 export const describe = "SSH to a device";
@@ -27,11 +28,33 @@ export interface DeviceCommand {
 
 export const builder: DeviceCommand = {
     address: {
-        default: DEFAULT_IMAGE_ADDRESS,
         description: "address of the device"
     }
 };
 
 export function handler(args: DeviceCommand) {
-    log(`command not implemented ${JSON.stringify(args)}`);
+
+    function connect(address: string): Promise<void> {
+        const ssh = new SSH(address);
+        return ssh.interact();
+    }
+
+    if (args.address) return connect(args.address);
+
+    const discovery = new Discovery();
+    discovery.choose()
+    .then(device => {
+        if (!device) {
+            log("Error: No devices found");
+            return;
+        }
+
+        log(`Connecting to ${device.address}...`);
+        return connect(device.address)
+        .then(() => process.exit());
+    })
+    .catch(error => {
+        if (error) log(error);
+        process.exit(1);
+    });
 }

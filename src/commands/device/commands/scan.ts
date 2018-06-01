@@ -15,11 +15,24 @@
 * limitations under the License.
 */
 
+import { Discovery } from "../../../utils/discovery";
 import { log } from "../../../utils/logger";
 
 export const command = "scan";
 export const describe = "Scan for devices";
 
-export function handler(args) {
-    log(`command not implemented ${JSON.stringify(args)}`);
+export function handler() {
+    const discovery = new Discovery();
+    discovery.discoverAll()
+    .then(devices => {
+        if (devices.length === 0) return log("Error: No devices found");
+
+        log(`Found ${devices.length} device(s):`);
+        devices.forEach(device => {
+            log(`${device.name} (${device.address})`);
+        });
+
+        process.exit();
+    })
+    .catch(error => log(`Error: ${error}`));
 }

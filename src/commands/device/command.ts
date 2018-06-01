@@ -21,7 +21,7 @@ export const describe = "Device management commands";
 export const builder = yargs => {
     return yargs
     .commandDir("commands", {
-        exclude: /configure|scan|ssh/,
+        exclude: /configure/,
         recurse: true
     })
     .demandCommand(1, "You need to specify an action");
