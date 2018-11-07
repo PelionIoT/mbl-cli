@@ -15,24 +15,13 @@
 * limitations under the License.
 */
 
-import { EventEmitter } from "events";
-import { Builder } from "./interface";
+export const command = "app <action> [address]";
+export const describe = "Application management actions";
 
-/**
- * Git Builder
- */
-export class DirectoryBuilder extends EventEmitter implements Builder {
-    /**
-     * Log event
-     * @event
-     */
-    public static EVENT_LOG: string = "log";
-
-    constructor(_useEmulation: boolean = true) {
-        super();
-    }
-
-    public build(_url: string, _force: boolean = false): Promise<void> {
-        return Promise.reject("Git Builder not implemented");
-    }
-}
+export const builder = yargs => {
+    return yargs
+    .commandDir("commands", {
+        recurse: true
+    })
+    .demandCommand(1, "You need to specify an action");
+};

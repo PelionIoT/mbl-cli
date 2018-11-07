@@ -15,27 +15,18 @@
 * limitations under the License.
 */
 
-import { DEFAULT_IMAGE_ADDRESS } from "../../../deployers/docker_deployer";
-import { Docker } from "../../../utils/docker";
 import { log } from "../../../utils/logger";
+import { DeviceCommand } from "../../deviceCommand";
 
-export const command = "restart [address]";
-export const describe = "Restart the application on a device";
-
-export interface DeviceCommand {
-    address;
-}
+export const command = "start [address]";
+export const describe = "Start the application";
 
 export const builder: DeviceCommand = {
     address: {
-        default: DEFAULT_IMAGE_ADDRESS,
         description: "address of the device"
     }
 };
 
 export function handler(args: DeviceCommand) {
-    const docker = new Docker(args.address);
-
-    docker.restartContainer()
-    .catch(error => log(`Error: ${error}`));
+    log(`command not implemented ${JSON.stringify(args)}`);
 }

@@ -15,23 +15,25 @@
 * limitations under the License.
 */
 
-import { DEFAULT_IMAGE_ADDRESS } from "../../../deployers/docker_deployer";
-import { log } from "../../../utils/logger";
+import { log } from "../../utils/logger";
+import { DeviceCommand } from "../deviceCommand";
 
-export const command = "configure [address]";
-export const describe = "Configure a device";
+export const command = "run <command> [address]";
+export const describe = "Run a command on a device";
 
-export interface DeviceCommand {
-    address;
+export interface RunCommand extends DeviceCommand {
+    command;
 }
 
-export const builder: DeviceCommand = {
+export const builder: RunCommand = {
     address: {
-        default: DEFAULT_IMAGE_ADDRESS,
         description: "address of the device"
+    },
+    command: {
+        description: "command to run"
     }
 };
 
-export function handler(args: DeviceCommand) {
+export function handler(args: RunCommand) {
     log(`command not implemented ${JSON.stringify(args)}`);
 }

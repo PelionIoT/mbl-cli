@@ -15,8 +15,18 @@
 * limitations under the License.
 */
 
-import { EventEmitter } from "events";
+import { log } from "../../../utils/logger";
+import { DeviceCommand } from "../../deviceCommand";
 
-export interface Builder extends EventEmitter {
-    build(source: string, force: boolean): Promise<void>;
+export const command = "restart [address]";
+export const describe = "Restart the application";
+
+export const builder: DeviceCommand = {
+    address: {
+        description: "address of the device"
+    }
+};
+
+export function handler(args: DeviceCommand) {
+    log(`command not implemented ${JSON.stringify(args)}`);
 }

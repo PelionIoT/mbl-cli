@@ -15,16 +15,13 @@
 * limitations under the License.
 */
 
-import { Discovery } from "../../../utils/discovery";
-import { log } from "../../../utils/logger";
-import { SSH } from "../../../utils/ssh";
+import { Discovery } from "../../utils/discovery";
+import { log } from "../../utils/logger";
+import { SSH } from "../../utils/ssh";
+import { DeviceCommand } from "../deviceCommand";
 
-export const command = "ssh [address]";
-export const describe = "SSH to a device";
-
-export interface DeviceCommand {
-    address;
-}
+export const command = "shell [address]";
+export const describe = "Get a shell on a device";
 
 export const builder: DeviceCommand = {
     address: {

@@ -15,27 +15,29 @@
 * limitations under the License.
 */
 
-import { DEFAULT_IMAGE_ADDRESS } from "../../../deployers/docker_deployer";
-import { Docker } from "../../../utils/docker";
-import { log } from "../../../utils/logger";
+import { DeviceCommand } from "../deviceCommand";
+import { Handler } from "./handler";
 
-export const command = "stop [address]";
-export const describe = "Stop the application on a device";
-
-export interface DeviceCommand {
-    address;
+export interface CopyCommand extends DeviceCommand {
+    dest;
+    src;
 }
 
-export const builder: DeviceCommand = {
+export const command = "copy <src> <dest> [address]";
+export const describe = "Copy a file/folder to a device";
+
+export const builder: CopyCommand = {
     address: {
-        default: DEFAULT_IMAGE_ADDRESS,
         description: "address of the device"
+    },
+    dest: {
+        description: "the destination for the file on the device"
+    },
+    src: {
+        description: "the file to deploy"
     }
 };
 
-export function handler(args: DeviceCommand) {
-    const docker = new Docker(args.address);
-
-    docker.stopContainer()
-    .catch(error => log(`Error: ${error}`));
+export function handler(args: CopyCommand) {
+    new Handler(args).run();
 }

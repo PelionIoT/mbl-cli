@@ -15,14 +15,24 @@
 * limitations under the License.
 */
 
-export const command = "device <command> [address]";
-export const describe = "Device management commands";
+import { Discovery } from "../../utils/discovery";
+import { log } from "../../utils/logger";
 
-export const builder = yargs => {
-    return yargs
-    .commandDir("commands", {
-        exclude: /configure/,
-        recurse: true
+export const command = "select";
+export const describe = "Select a device";
+
+export function handler() {
+    const discovery = new Discovery();
+    discovery.discoverAll()
+    .then(devices => {
+        if (devices.length === 0) return log("Error: No devices found");
+
+        log(`Found ${devices.length} device(s):`);
+        devices.forEach(device => {
+            log(`${device.name} (${device.address})`);
+        });
+
+        process.exit();
     })
-    .demandCommand(1, "You need to specify an action");
-};
+    .catch(error => log(`Error: ${error}`));
+}

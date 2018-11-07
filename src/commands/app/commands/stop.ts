@@ -15,34 +15,18 @@
 * limitations under the License.
 */
 
-import { DEFAULT_IMAGE_ADDRESS } from "../../../deployers/docker_deployer";
-import { Docker } from "../../../utils/docker";
 import { log } from "../../../utils/logger";
+import { DeviceCommand } from "../../deviceCommand";
 
-export const command = "logs [address]";
-export const describe = "Get output logs from a device";
-
-export interface DeviceCommand {
-    address;
-    attach;
-}
+export const command = "stop [address]";
+export const describe = "Stop the application";
 
 export const builder: DeviceCommand = {
     address: {
-        default: DEFAULT_IMAGE_ADDRESS,
         description: "address of the device"
-    },
-    attach: {
-        alias: "a",
-        default: false,
-        description: "attach to the device output",
-        type: "boolean"
-    },
+    }
 };
 
 export function handler(args: DeviceCommand) {
-    const docker = new Docker(args.address);
-
-    docker.getContainerLogs(args.attach)
-    .catch(error => log(`Error: ${error}`));
+    log(`command not implemented ${JSON.stringify(args)}`);
 }

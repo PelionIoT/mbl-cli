@@ -41,7 +41,7 @@ gulp.task("clean", () => {
 gulp.task("lint", () => {
     gulp.src(srcFiles)
     .pipe(gulpTslint({
-        program: tslint.Linter.createProgram("./tsconfig.json"),
+        program: tslint.Linter.createProgram(configPath),
         formatter: "stylish"
     }))
     .pipe(gulpTslint.report({

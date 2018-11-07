@@ -15,24 +15,14 @@
 * limitations under the License.
 */
 
-import { Discovery } from "../../../utils/discovery";
-import { log } from "../../../utils/logger";
+import { CopyCommand } from "./command";
 
-export const command = "scan";
-export const describe = "Scan for devices";
+export class Handler {
 
-export function handler() {
-    const discovery = new Discovery();
-    discovery.discoverAll()
-    .then(devices => {
-        if (devices.length === 0) return log("Error: No devices found");
+    public constructor(private args: CopyCommand) {
+    }
 
-        log(`Found ${devices.length} device(s):`);
-        devices.forEach(device => {
-            log(`${device.name} (${device.address})`);
-        });
-
-        process.exit();
-    })
-    .catch(error => log(`Error: ${error}`));
+    public run(): CopyCommand {
+        return this.args;
+    }
 }
