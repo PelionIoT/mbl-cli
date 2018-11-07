@@ -1,11 +1,12 @@
-let path        = require("path");
-let del         = require("del");
-let merge       = require('merge2');
-let gulp        = require("gulp");
-let tslint      = require("gulp-tslint");
-let typedoc     = require("gulp-typedoc");
-let typescript  = require("gulp-typescript");
-let sourcemaps  = require("gulp-sourcemaps");
+let path            = require("path");
+let del             = require("del");
+let merge           = require('merge2');
+let tslint          = require("tslint");
+let gulp            = require("gulp");
+let gulpTslint      = require("gulp-tslint");
+let gulpTypedoc     = require("gulp-typedoc");
+let gulpTypescript  = require("gulp-typescript");
+let gulpSourcemaps  = require("gulp-sourcemaps");
 
 let name = "Mbed Linux CLI";
 let configPath = "tsconfig.json";
@@ -39,10 +40,11 @@ gulp.task("clean", () => {
 // Lint the source
 gulp.task("lint", () => {
     gulp.src(srcFiles)
-    .pipe(tslint({
+    .pipe(gulpTslint({
+        program: tslint.Linter.createProgram("./tsconfig.json"),
         formatter: "stylish"
     }))
-    .pipe(tslint.report({
+    .pipe(gulpTslint.report({
         emitError: !watching
     }))
 });
@@ -50,7 +52,7 @@ gulp.task("lint", () => {
 // Create documentation
 gulp.task("doc", () => {
     return gulp.src(srcFilesOnly)
-    .pipe(typedoc({
+    .pipe(gulpTypedoc({
         name: name,
         readme: "src/documentation.md",
         theme: "src/theme",
@@ -69,15 +71,15 @@ gulp.task("doc", () => {
 gulp.task("compile", ["clean"], () => {
     return merge([
         gulp.src(srcFiles)
-        .pipe(sourcemaps.init())
-        .pipe(typescript.createProject(configPath)())
+        .pipe(gulpSourcemaps.init())
+        .pipe(gulpTypescript.createProject(configPath)())
         .on("error", handleError).js
-        .pipe(sourcemaps.write(".", {
+        .pipe(gulpSourcemaps.write(".", {
             sourceRoot: path.relative(nodeDir, srcDir)
         }))
         .pipe(gulp.dest(nodeDir)),
         gulp.src(srcFilesOnly)
-        .pipe(typescript.createProject(configPath)())
+        .pipe(gulpTypescript.createProject(configPath)())
         .on("error", handleError).dts
         .pipe(gulp.dest(typesDir))
     ]);
