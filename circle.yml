@@ -1,68 +1,50 @@
-general:
-  artifacts:
-    - ~/docs
-    - ~/reports
-  branches:
-    ignore:
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8
+    steps:
+      - run: sudo apt-get update
+      - run: sudo apt-get install libavahi-compat-libdnssd-dev
+      - checkout
+      - run: npm install
+      - run: npm run gulp
+      - store_artifacts:
+          path: docs
+      - run: npm run tpip
+      - store_artifacts:
+          path: tpip.csv
+      - persist_to_workspace:
+          root: ../
+          paths:
+            - project
+
+  deploy:
+    docker:
+      - image: circleci/node:8
+    steps:
+      - attach_workspace:
+          at: ../
+      - run: mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+      - run: git config --global user.name monty-bot
+      - run: git config --global user.email monty-bot@arm.com
+      - run: git add --force lib types docs
+      - run: git stash save
+      - run: git checkout build
+      - run: git merge master --no-commit
+      - run: git checkout stash -- .
+      - run: git commit --allow-empty --message "Automatic Deployment [skip ci]"
+      - run: git push
+
+workflows:
+  version: 2
+  commit:
+    jobs:
       - build
-
-machine:
-  node:
-    version: 6.0.0
-  environment:
-    PROJECT_NAME: ${CIRCLE_PROJECT_REPONAME}
-    PROJECT_TAG: ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
-    PROJECT_LIVE_BRANCH: build
-    PROJECT_DOCS: ${HOME}/docs
-    PROJECT_REPORTS: ${HOME}/reports
-    COVERAGE_REPORTS: ${PROJECT_REPORTS}/coverage
-    FILE_UNITTESTS: ${PROJECT_REPORTS}/unittests.html
-
-checkout:
-  post:
-    - git config --global user.name monty-bot
-    - git config --global user.email monty-bot@arm.com
-
-dependencies:
-  pre:
-    - sudo apt-get update; sudo apt-get install libavahi-compat-libdnssd-dev
-  post:
-    - npm install -g ansi-html-stream
-
-compile:
-  override:
-    - npm run gulp
-    - mkdir -p ${PROJECT_DOCS}
-    - cp -r docs/* ${PROJECT_DOCS}/
-    - npm run tpip
-    - mkdir -p ${PROJECT_REPORTS}
-    - cp tpip.csv ${PROJECT_REPORTS}/
-
-test:
-  override:
-    - echo "<h1>${PROJECT_NAME} unit tests (build ${CIRCLE_BUILD_NUM})</h1>" >> ${FILE_UNITTESTS}
-    - set -o pipefail && npm test 2>&1 | tee /dev/tty | grep -v '^Tunnel d' | ansi-html >> ${FILE_UNITTESTS}
-    - mkdir -p ${COVERAGE_REPORTS}
-    - mkdir -p ${COVERAGE_REPORTS}
-    - cp -r coverage/* ${COVERAGE_REPORTS}
-    - mkdir -p ${CIRCLE_TEST_REPORTS}/junit
-    - cp junit.xml $CIRCLE_TEST_REPORTS/junit/test-results.xml
-
-deployment:
-  staging:
-    branch: master
-    commands:
-      - echo Syncing $PROJECT_NAME to $PROJECT_LIVE_BRANCH on GitHub...
-      - git add --force docs lib types
-      - git stash save
-      - git checkout $PROJECT_LIVE_BRANCH
-      - git merge master --no-commit
-      - git checkout stash -- .
-      - git commit --allow-empty --message "Automatic Deployment"
-      - git push
-  release:
-    branch: /[0-9]+\.[0-9]+.*/
-    commands:
-      - echo Tagging $PROJECT_NAME in GitHub...
-      - git tag ${PROJECT_TAG}
-      - git push --tags
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
