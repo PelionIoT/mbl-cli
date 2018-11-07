@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-[Node.js > v6.0.0](https://nodejs.org), which includes `npm v3`.
+[Node.js > v8.10.0](https://nodejs.org), which includes `npm v3`.
 
 ## Installing
 

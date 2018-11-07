@@ -3,15 +3,11 @@ Command-line interface for developing with Mbed Linux
 
 [![Circle CI](https://circleci.com/gh/ARMmbed/mbl-cli.svg?style=shield&circle-token=367893aefffecc72cf7d17201667cd2f75d6d5c7)](https://circleci.com/gh/ARMmbed/mbl-cli/)
 
-The Mbed Linux CLI is a toolbox for building your Mbed Linux applications and managing them on your target device.
+The Mbed Linux CLI is a toolbox for managing target devices running Mbed Linux.
 
 ## Prerequisites
 
-[Docker > v17.0.0](https://www.docker.com), recommended for local application building
-
-[Node.js > v6.0.0](https://nodejs.org), which includes `npm v3`
-
-- We recommend installing Node.js using the [Node version manager](https://github.com/creationix/nvm), as the installation below requires usage of your github SSH credentials.
+[Node.js > v8.10.0](https://nodejs.org), which includes `npm v3`
 
 ## Installation
 
@@ -34,95 +30,59 @@ $ mbl-cli <command> [arguments]
 
 ### Commands
 
-#### Build
+#### Discovery and Select
 
-Build an Mbed Linux application from a source directory.
+Discover connected Mbed Linux devices and allow the user to select one for further commands.
 
 ```bash
-$ mbl-cli build [source] [path]
+$ mbl-cli select
 ```
 
-Where `[source]` is the directory to the application source (defaults to the current working directory) and `[path]` is an optional path to save the output image file to (defaults to `mbl-image.tar` in the current working directory).
+#### Shell
 
-_Flags:_
-```
---force, -f                 force a complete rebuild
---noemulation, -n           turn off emulation during build
---remote [host], -r [host]  build the application on a remote host, optionally
-                            passing the host to use in the form `host:port`
-```
-
-#### Deploy
-
-Deploy an application to a device, building as necessary.
+Obtain a shell on a device, optionally specifying the device address to use
 
 ```
-$ mbl-cli deploy [source] [address]
+$ mbl-cli shell [address]
 ```
 
-Where `[source]` is the path to a built application image or the directory of the application source to deploy. `[address]` is the address of the device to deploy to.
+#### Application Management
 
-_Flags:_
-```
---force, -f                 force a complete rebuild if building
---noemulation, -n           turn off emulation if building
---remote [host], -r [host]  build any application on a remote host, optionally
-                            passing the host to use in the form `host:port`
---detached, -d              don't attach to application output
-```
-
-#### Device Management
-
-Device management commands.
+Application management commands.
 
 ```
-$ mbl-cli device <command> [address]
+$ mbl-cli app <command> [address]
 ```
 
 _Commands:_
 
-Scan for devices connected to the system.
-```
-$ mbl-cli device scan
-```
-
-SSH onto a device, optionally specifying the device address to use
-```
-$ mbl-cli device ssh [address]
-```
-
-Get output logs from a device, optionally attaching to the device output.
-```
-$ mbl-cli device logs [address] [--attach]
-```
-
 Start the application on a device.
 ```
-$ mbl-cli device start [address]
+$ mbl-cli app start [address]
 ```
 
 Stop the application on a device.
 ```
-$ mbl-cli device stop [address]
+$ mbl-cli app stop [address]
 ```
 
 Restart the application on a device.
 ```
-$ mbl-cli device restart [address]
+$ mbl-cli app restart [address]
 ```
 
 ## Implementation Status
 
-- [x] build locally
-- [x] build remotely
-- [x] deploy to a device
-- [x] start an application on a device
-- [x] stop a application on a device
-- [x] restart an application on a device
-- [x] get logs from a device
-- [x] discover devices
-- [x] ssh to a device
-- [ ] configure a device
+- [ ] discover and select a device
+- [ ] shell onto a device
+- [ ] run a remote command on a device
+- [ ] copy files to a device
+- [ ] deploy an application image on a device
+- [ ] deploy a firmware component on a device
+- [ ] start an application on a device
+- [ ] stop an application on a device
+- [ ] restart an application on a device
+- [ ] configure the network for a device
 
 ## Development
 
