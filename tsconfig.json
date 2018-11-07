@@ -7,7 +7,6 @@
             "es2015.promise",
             "es2015.symbol.wellknown"
         ],
-        "types": ["intern"],
         "module": "commonjs",
         "declaration": true,
         "sourceMap": true,
