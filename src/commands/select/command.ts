@@ -15,6 +15,9 @@
 * limitations under the License.
 */
 
+import { DeviceConfig } from "../../device";
+import { Chooser } from "../../utils/chooser";
+import { ConfigStore } from "../../utils/configStore";
 import { Discovery } from "../../utils/discovery";
 import { log } from "../../utils/logger";
 
@@ -23,16 +26,31 @@ export const describe = "Select a device";
 
 export function handler() {
     const discovery = new Discovery();
+    const chooser = new Chooser();
+    const store = new ConfigStore<DeviceConfig>();
+
+    log("Discovering devices...");
     discovery.discoverAll()
     .then(devices => {
         if (devices.length === 0) return log("Error: No devices found");
 
-        log(`Found ${devices.length} device(s):`);
-        devices.forEach(device => {
-            log(`${device.name} (${device.address})`);
+        const items = devices.map(device => {
+            device.name = `${device.name} (${device.address})`;
+            return device;
+        });
+        items.push({
+            address: null,
+            name: "None",
         });
 
-        process.exit();
+        return chooser.choose(items, "Select a device:")
+        .then(device => store.save({
+            selectedDevice: device.address
+        }));
     })
-    .catch(error => log(`Error: ${error}`));
+    .then(() => process.exit())
+    .catch(error => {
+        if (error) log(`Error: ${error}`);
+        process.exit(1);
+    });
 }

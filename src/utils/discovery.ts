@@ -16,16 +16,10 @@
 */
 
 import { Browser, createBrowser, tcp } from "mdns";
-import { Chooser } from "./chooser";
+import { Device } from "../device";
 
 const DEVICE_TYPE = "ssh";
 const TEXT_RECORD = "mblos";
-const IPV4_REGEX = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
-
-export interface Device {
-    name: string;
-    address: string;
-}
 
 export class Discovery {
 
@@ -40,9 +34,8 @@ export class Discovery {
 
     private serviceUp(service) {
         if (service.txtRecord && TEXT_RECORD in service.txtRecord) {
-            const ipv4 = service.addresses.filter(address => address.match(IPV4_REGEX));
-            if (!ipv4.length) {
-                // If a device is found, but doesn't have an IPV4 address, restart scan
+            if (!service.addresses.length) {
+                // If a device is found, but doesn't have an IP address, restart scan
                 if (this.devices.length === 0) {
                     if (!this.found) {
                         // tslint:disable-next-line:no-console
@@ -55,7 +48,7 @@ export class Discovery {
             }
 
             this.devices.push({
-                address: ipv4[0],
+                address: service.addresses[0],
                 name: service.name
             });
 
@@ -92,14 +85,5 @@ export class Discovery {
 
             this.start();
         });
-    }
-
-    public choose(): Promise<Device> {
-        const chooser = new Chooser();
-        return this.discoverAll()
-        .then(devices => chooser.choose(devices.map(device => {
-            device.name = `${device.name} (${device.address})`;
-            return device;
-        }), "Select a device:"));
     }
 }

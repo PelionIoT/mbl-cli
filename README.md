@@ -73,8 +73,8 @@ $ mbl-cli app restart [address]
 
 ## Implementation Status
 
-- [ ] discover and select a device
-- [ ] shell onto a device
+- [x] discover and select a device
+- [x] shell onto a device
 - [ ] run a remote command on a device
 - [ ] copy files to a device
 - [ ] deploy an application image on a device

@@ -15,24 +15,24 @@
 * limitations under the License.
 */
 
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
-import * as notifier from "update-notifier";
-import * as yargs from "yargs";
+const CONFIG_FILE = join(__dirname, ".mbl.cfg");
 
-// tslint:disable-next-line:no-var-requires
-const pkg = require(join("..", "package.json"));
-notifier({ pkg }).notify();
+export class ConfigStore<T> {
+    public load(): T {
+        let data = "{}";
 
-// tslint:disable-next-line:no-unused-expression
-yargs
-.usage("$0 <command> [arguments]")
-.version().alias("v", "version")
-.help().alias("h", "help")
-.commandDir("commands", {
-    include: /command.js/,
-    recurse: true
-})
-.demandCommand(1, "")
-.epilogue("For more information about Mbed Linux, please visit http://mbed.com")
-.argv;
+        if (existsSync(CONFIG_FILE)) {
+            data = readFileSync(CONFIG_FILE).toString();
+        }
+
+        return JSON.parse(data);
+    }
+
+    public save(configuration: T): void {
+        const data = JSON.stringify(configuration);
+        writeFileSync(CONFIG_FILE, data);
+    }
+}

@@ -21,10 +21,13 @@ export interface Item {
 
 export class Chooser {
 
+    constructor(private autoSelect: boolean = false) {
+    }
+
     public choose<T extends Item>(items: T[], message: string): Promise<T> {
         return new Promise((resolve, reject) => {
             // Immeditely resolve with single or null result
-            if (items.length <= 1) return resolve(items[0]);
+            if (this.autoSelect && items.length <= 1) return resolve(items[0]);
 
             process.stdin.setRawMode(true);
             process.stdin.setEncoding("utf8");

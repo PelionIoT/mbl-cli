@@ -2,10 +2,9 @@
     "compilerOptions": {
         "target": "es5",
         "lib": [
-            "dom",
             "es5",
-            "es2015.promise",
-            "es2015.symbol.wellknown"
+            "es2015.core",
+            "es2015.promise"
         ],
         "module": "commonjs",
         "declaration": true,
