@@ -24,7 +24,7 @@ export class Chooser {
     constructor(private autoSelect: boolean = false) {
     }
 
-    public choose<T extends Item>(items: T[], message: string): Promise<T> {
+    public choose<T extends Item>(items: T[], titleFn: (item: T) => string, message: string): Promise<T> {
         return new Promise((resolve, reject) => {
             // Immeditely resolve with single or null result
             if (this.autoSelect && items.length <= 1) return resolve(items[0]);
@@ -49,7 +49,7 @@ export class Chooser {
             console.log(message);
             items.forEach((item, index) => {
                 // tslint:disable-next-line:no-console
-                console.log(`${index + 1}: ${item.name}`);
+                console.log(`${index + 1}: ${titleFn(item)}`);
             });
         });
     }

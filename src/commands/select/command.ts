@@ -34,18 +34,14 @@ export function handler() {
     .then(devices => {
         if (devices.length === 0) return log("Error: No devices found");
 
-        const items = devices.map(device => {
-            device.name = `${device.name} (${device.address})`;
-            return device;
-        });
-        items.push({
+        devices.push({
             address: null,
             name: "None",
         });
 
-        return chooser.choose(items, "Select a device:")
+        return chooser.choose(devices, device => device.address ? `${device.name} (${device.address})` : `${device.name}`, "Select a device:")
         .then(device => store.save({
-            selectedDevice: device.address
+            selectedDevice: device.address ? device : null
         }));
     })
     .then(() => process.exit())

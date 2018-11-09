@@ -16,6 +16,7 @@
 */
 
 import { Browser, createBrowser, tcp } from "mdns";
+import { isIPv6 } from "net";
 import { Device } from "../device";
 
 const DEVICE_TYPE = "ssh";
@@ -47,8 +48,13 @@ export class Discovery {
                 return;
             }
 
+            let address = service.addresses[0];
+            if (isIPv6(address) && service.networkInterface ) {
+                address += `%${service.networkInterface}`;
+            }
+
             this.devices.push({
-                address: service.addresses[0],
+                address,
                 name: service.name
             });
 

@@ -15,31 +15,11 @@
 * limitations under the License.
 */
 
-import { isIPv6 } from "net";
-import { networkInterfaces } from "os";
 import { Client } from "ssh2";
 
-export class SSH {
+export class Shell {
 
-    private host: string;
-
-    constructor(host: string, private username: string = "root", private port: number = 22) {
-        this.resolveHost(host);
-    }
-
-    private resolveHost(host: string) {
-        this.host = host;
-
-        if (!isIPv6(host)) return;
-
-        const interfaces = networkInterfaces();
-        const linkInterface = Object.keys(interfaces).find(key =>
-            interfaces[key].filter(iface =>
-                iface.family.toLowerCase() === "ipv6"
-                && iface.address === host
-            ).length > 0
-        );
-        if (linkInterface) this.host += `%${linkInterface}`;
+    constructor(private host: string, private username: string = "root", private port: number = 22) {
     }
 
     public interact(): Promise<void> {

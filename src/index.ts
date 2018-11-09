@@ -30,6 +30,7 @@ yargs
 .version().alias("v", "version")
 .help().alias("h", "help")
 .commandDir("commands", {
+    exclude: /app/,
     include: /command.js/,
     recurse: true
 })

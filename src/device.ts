@@ -26,7 +26,7 @@ export interface Device {
 }
 
 export interface DeviceConfig {
-    selectedDevice: string;
+    selectedDevice: Device;
 }
 
 export class DeviceGetter {
@@ -34,7 +34,7 @@ export class DeviceGetter {
     private chooser = new Chooser(true);
     private store = new ConfigStore<DeviceConfig>();
 
-    public getAddress(): Promise<string> {
+    public getDevice(): Promise<Device> {
         const config = this.store.load();
         if (config && config.selectedDevice) return Promise.resolve(config.selectedDevice);
 
@@ -42,12 +42,7 @@ export class DeviceGetter {
         return this.discovery.discoverAll()
         .then(devices => {
             if (devices.length === 0) return null;
-
-            return this.chooser.choose(devices.map(device => {
-                device.name = `${device.name} (${device.address})`;
-                return device;
-            }), "Select a device:")
-            .then(device => device.address);
+            return this.chooser.choose(devices, device => `${device.name} (${device.address})`, "Select a device:");
         });
     }
 }

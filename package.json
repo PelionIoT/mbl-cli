@@ -47,8 +47,6 @@
   "dependencies": {
     "mdns": "^2.4.0",
     "ssh2": "^0.6.1",
-    "tar-fs": "^1.16.0",
-    "tar-stream": "^1.5.5",
     "update-notifier": "^2.3.0",
     "yargs": "^11.0.0"
   }

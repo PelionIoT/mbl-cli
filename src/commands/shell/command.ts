@@ -15,9 +15,9 @@
 * limitations under the License.
 */
 
-import { DeviceGetter } from "../../device";
+import { Device, DeviceGetter } from "../../device";
 import { log } from "../../utils/logger";
-import { SSH } from "../../utils/ssh";
+import { Shell } from "../../utils/shell";
 import { DeviceCommand } from "../deviceCommand";
 
 export const command = "shell [address]";
@@ -31,26 +31,31 @@ export const builder: DeviceCommand = {
 
 export function handler(args: DeviceCommand) {
 
-    function connect(address: string): Promise<void> {
-        log(`Connecting to ${address}...`);
-        const ssh = new SSH(address);
-        return ssh.interact();
+    function connect(device: Device): Promise<void> {
+        log(`Connecting to ${device.name}...`);
+        const shell = new Shell(device.address);
+        return shell.interact();
     }
 
     Promise.resolve()
     .then(() => {
-        if (args.address) return args.address;
+        if (args.address) {
+            return {
+                address: args.address,
+                name: args.address
+            };
+        }
 
         const device = new DeviceGetter();
-        return device.getAddress();
+        return device.getDevice();
     })
-    .then(address => {
-        if (!address) {
+    .then(device => {
+        if (!device) {
             log("Error: No devices found");
             return;
         }
 
-        return connect(address);
+        return connect(device);
     })
     .then(() => process.exit())
     .catch(error => {
