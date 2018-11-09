@@ -15,7 +15,9 @@
 * limitations under the License.
 */
 
+import { Device, DeviceGetter } from "../../device";
 import { log } from "../../utils/logger";
+import { Ssh } from "../../utils/ssh";
 import { DeviceCommand } from "../deviceCommand";
 
 export const command = "run <command> [address]";
@@ -35,5 +37,34 @@ export const builder: RunCommand = {
 };
 
 export function handler(args: RunCommand) {
-    log(`command not implemented ${JSON.stringify(args)}`);
+    function connect(device: Device): Promise<void> {
+        const ssh = new Ssh(device.address);
+        return ssh.execute(args.command);
+    }
+
+    Promise.resolve()
+    .then(() => {
+        if (args.address) {
+            return {
+                address: args.address,
+                name: args.address
+            };
+        }
+
+        const device = new DeviceGetter();
+        return device.getDevice();
+    })
+    .then(device => {
+        if (!device) {
+            log("Error: No devices found");
+            return;
+        }
+
+        return connect(device);
+    })
+    .then(() => process.exit())
+    .catch(error => {
+        if (error) log(error);
+        process.exit(1);
+    });
 }

@@ -17,12 +17,12 @@
 
 import { Client } from "ssh2";
 
-export class Shell {
+export class Ssh {
 
     constructor(private host: string, private username: string = "root", private port: number = 22) {
     }
 
-    public interact(): Promise<void> {
+    public shell(): Promise<void> {
         return new Promise((resolve, reject) => {
             const ssh = new Client();
 
@@ -33,15 +33,46 @@ export class Shell {
                 ssh.shell((error, stream) => {
                     if (error) reject(error.message);
 
+                    stream.on("close", () => {
+                        ssh.end();
+                    });
+
                     process.stdin.setRawMode(true);
                     process.stdin.setEncoding("utf8");
                     process.stdin.pipe(stream.stdin, { end: false });
                     stream.stdout.pipe(process.stdout, { end: false });
                     stream.stderr.pipe(process.stderr);
+                });
+            });
+
+            ssh.connect({
+                host: this.host,
+                port: this.port,
+                username: this.username,
+            });
+        });
+    }
+
+    public execute(command: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const ssh = new Client();
+
+            ssh.on("error", error => reject(error.message));
+            ssh.on("close", () => resolve());
+
+            ssh.on("ready", () => {
+                ssh.exec(command, (error, stream) => {
+                    if (error) reject(error.message);
 
                     stream.on("close", () => {
                         ssh.end();
                     });
+
+                    process.stdin.setRawMode(true);
+                    process.stdin.setEncoding("utf8");
+                    process.stdin.pipe(stream.stdin, { end: false });
+                    stream.stdout.pipe(process.stdout, { end: false });
+                    stream.stderr.pipe(process.stderr);
                 });
             });
 

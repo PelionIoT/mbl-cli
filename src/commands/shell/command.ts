@@ -17,7 +17,7 @@
 
 import { Device, DeviceGetter } from "../../device";
 import { log } from "../../utils/logger";
-import { Shell } from "../../utils/shell";
+import { Ssh } from "../../utils/ssh";
 import { DeviceCommand } from "../deviceCommand";
 
 export const command = "shell [address]";
@@ -33,8 +33,8 @@ export function handler(args: DeviceCommand) {
 
     function connect(device: Device): Promise<void> {
         log(`Connecting to ${device.name}...`);
-        const shell = new Shell(device.address);
-        return shell.interact();
+        const ssh = new Ssh(device.address);
+        return ssh.shell();
     }
 
     Promise.resolve()
