@@ -15,8 +15,8 @@
 * limitations under the License.
 */
 
+import { DeviceCommand } from "../../../deviceCommand";
 import { log } from "../../../utils/logger";
-import { DeviceCommand } from "../../deviceCommand";
 
 export const command = "start [address]";
 export const describe = "Start the application";

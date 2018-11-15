@@ -15,11 +15,11 @@
 * limitations under the License.
 */
 
-import { DeviceConfig } from "../../device";
-import { Chooser } from "../../utils/chooser";
-import { ConfigStore } from "../../utils/configStore";
-import { Discovery } from "../../utils/discovery";
-import { log } from "../../utils/logger";
+import { DeviceConfig } from "../device";
+import { Chooser } from "../utils/chooser";
+import { ConfigStore } from "../utils/configStore";
+import { Discovery } from "../utils/discovery";
+import { log } from "../utils/logger";
 
 export const command = "select";
 export const describe = "Select a device";

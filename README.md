@@ -54,6 +54,22 @@ Run a remote command on a device, optionally specifying the device address to us
 $ mbl-cli run <command> [address]
 ```
 
+#### Get
+
+Copy a file from a device, optionally specifying the device address to use
+
+```
+$ mbl-cli get <src> <dest> [address]
+```
+
+#### Put
+
+Copy a file to a device, optionally specifying the device address to use
+
+```
+$ mbl-cli put <src> <dest> [address]
+```
+
 #### Application Management
 
 Application management commands.
@@ -84,7 +100,7 @@ $ mbl-cli app restart [address]
 - [x] discover and select a device
 - [x] shell onto a device
 - [x] run a remote command on a device
-- [ ] copy files to a device
+- [x] copy a file from/to a device
 - [ ] deploy an application image on a device
 - [ ] deploy a firmware component on a device
 - [ ] start an application on a device

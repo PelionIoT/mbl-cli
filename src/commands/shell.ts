@@ -15,10 +15,10 @@
 * limitations under the License.
 */
 
-import { Device, DeviceGetter } from "../../device";
-import { log } from "../../utils/logger";
-import { Ssh } from "../../utils/ssh";
+import { Device, DeviceGetter } from "../device";
 import { DeviceCommand } from "../deviceCommand";
+import { log } from "../utils/logger";
+import { Ssh } from "../utils/ssh";
 
 export const command = "shell [address]";
 export const describe = "Get a shell on a device";
@@ -30,8 +30,7 @@ export const builder: DeviceCommand = {
 };
 
 export function handler(args: DeviceCommand) {
-
-    function connect(device: Device): Promise<void> {
+    function shell(device: Device): Promise<void> {
         log(`Connecting to ${device.name}...`);
         const ssh = new Ssh(device.address);
         return ssh.shell();
@@ -55,7 +54,7 @@ export function handler(args: DeviceCommand) {
             return;
         }
 
-        return connect(device);
+        return shell(device);
     })
     .then(() => process.exit())
     .catch(error => {

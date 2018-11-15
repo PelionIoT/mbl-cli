@@ -30,7 +30,7 @@ export class Discovery {
     private browser: Browser = null;
     private found: boolean;
 
-    constructor(private timeout: number = 90) {
+    constructor(private timeout: number = 60) {
     }
 
     private serviceUp(service) {
@@ -59,7 +59,7 @@ export class Discovery {
             });
 
             // Once found, wait a little longer for any other devices
-            this.wait(0.5);
+            this.wait(1);
         }
     }
 

@@ -15,29 +15,11 @@
 * limitations under the License.
 */
 
-import { DeviceCommand } from "../deviceCommand";
-import { Handler } from "./handler";
+export interface DeviceCommand {
+    address;
+}
 
 export interface CopyCommand extends DeviceCommand {
     dest;
     src;
-}
-
-export const command = "copy <src> <dest> [address]";
-export const describe = "Copy a file/folder to a device";
-
-export const builder: CopyCommand = {
-    address: {
-        description: "address of the device"
-    },
-    dest: {
-        description: "the destination for the file on the device"
-    },
-    src: {
-        description: "the file to deploy"
-    }
-};
-
-export function handler(args: CopyCommand) {
-    new Handler(args).run();
 }
