@@ -59,7 +59,7 @@ export class Discovery {
             });
 
             // Once found, wait a little longer for any other devices
-            this.wait(1);
+            this.wait(200);
         }
     }
 
