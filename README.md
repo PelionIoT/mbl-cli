@@ -14,7 +14,7 @@ The Mbed Linux CLI is a toolbox for managing target devices running Mbed Linux.
 The CLI is distributed using npm. To install the tool globally:
 
 ```bash
-$ npm install -g ARMmbed/mbl-cli#build
+$ npm install -g mbl-cli
 ```
 
 ## Usage
@@ -107,7 +107,3 @@ $ mbl-cli app restart [address]
 - [ ] stop an application on a device
 - [ ] restart an application on a device
 - [ ] configure the network for a device
-
-## Development
-
-Please refer to the [development documentation](DEVELOPMENT.md)

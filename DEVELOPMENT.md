@@ -8,12 +8,20 @@
 
 [Node.js > v8.10.0](https://nodejs.org), which includes `npm v3`.
 
-## Installing
+## Latest Build
+
+To install the latest development build:
+
+```bash
+$ npm install -g ARMmbed/mbl-cli#build
+```
+
+## Setup
 
 After cloning this repository, install the npm dependencies:
 
 ```bash
-> npm install
+$ npm install
 ```
 
 ## Building
@@ -21,7 +29,7 @@ After cloning this repository, install the npm dependencies:
 Simply use the default ```gulp``` task to build the SDK and docs:
 
 ```bash
-> npm run gulp
+$ npm run gulp
 ```
 
 ## Watching
@@ -29,7 +37,7 @@ Simply use the default ```gulp``` task to build the SDK and docs:
 To continually watch for changes, use the gulp `watch` task:
 
 ```bash
-> npm run gulp watch
+$ npm run gulp watch
 ```
 
 ## Testing
@@ -37,5 +45,5 @@ To continually watch for changes, use the gulp `watch` task:
 Link the executable to make it globally available as `mbl-cli` by running:
 
 ```bash
-> npm link
+$ npm link
 ```

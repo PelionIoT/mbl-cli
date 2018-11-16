@@ -5,7 +5,6 @@
   "homepage": "https://www.mbed.com",
   "author": "Rob Moran <rob.moran@arm.com>",
   "license": "Apache-2.0",
-  "private": true,
   "types": "./types/index.d.ts",
   "bin": {
     "mbl-cli": "./bin/mbl-cli.js"
