@@ -1,5 +1,5 @@
 /*
-* Mbed Linux CLI
+* Mbed Linux OS CLI
 * Copyright ARM Limited 2017
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,5 +34,5 @@ yargs
     recurse: true
 })
 .demandCommand(1, "")
-.epilogue("For more information about Mbed Linux, please visit http://mbed.com")
+.epilogue("For more information about Mbed Linux OS, please visit http://mbed.com")
 .argv;

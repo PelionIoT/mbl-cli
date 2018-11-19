@@ -1,4 +1,4 @@
-# Mbed Linux CLI
+# Mbed Linux OS CLI
 
 [![Circle CI](https://circleci.com/gh/ARMmbed/mbl-cli.svg?style=shield&circle-token=367893aefffecc72cf7d17201667cd2f75d6d5c7)](https://circleci.com/gh/ARMmbed/mbl-cli/)
 

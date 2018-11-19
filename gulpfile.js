@@ -8,7 +8,7 @@ let gulpTypedoc     = require("gulp-typedoc");
 let gulpTypescript  = require("gulp-typescript");
 let gulpSourcemaps  = require("gulp-sourcemaps");
 
-let name = "Mbed Linux CLI";
+let name = "Mbed Linux OS CLI";
 let configPath = "tsconfig.json";
 
 let srcDir = "src";

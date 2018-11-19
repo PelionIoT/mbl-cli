@@ -1,7 +1,7 @@
 {
   "name": "mbl-cli",
   "version": "1.1.0",
-  "description": "Command-line interface for developing with Mbed Linux",
+  "description": "Command-line interface for developing with Mbed Linux OS",
   "homepage": "https://www.mbed.com",
   "author": "Rob Moran <rob.moran@arm.com>",
   "license": "Apache-2.0",

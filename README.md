@@ -1,9 +1,9 @@
-# Mbed Linux CLI
-Command-line interface for developing with Mbed Linux
+# Mbed Linux OS CLI
+Command-line interface for developing with Mbed Linux OS
 
 [![Circle CI](https://circleci.com/gh/ARMmbed/mbl-cli.svg?style=shield&circle-token=367893aefffecc72cf7d17201667cd2f75d6d5c7)](https://circleci.com/gh/ARMmbed/mbl-cli/)
 
-The Mbed Linux CLI is a toolbox for managing target devices running Mbed Linux.
+The Mbed Linux OS CLI is a toolbox for managing target devices running Mbed Linux OS.
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ $ mbl-cli <command> [arguments]
 
 #### Discovery and Select
 
-Discover connected Mbed Linux devices and allow the user to select one for further commands.
+Discover connected Mbed Linux OS devices and allow the user to select one for further commands.
 
 ```bash
 $ mbl-cli select

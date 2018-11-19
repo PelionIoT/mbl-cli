@@ -1,5 +1,5 @@
 /*
-* Mbed Linux CLI
+* Mbed Linux OS CLI
 * Copyright ARM Limited 2017
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
