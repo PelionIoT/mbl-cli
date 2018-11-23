@@ -15,7 +15,7 @@
 * limitations under the License.
 */
 
-import { Browser, createBrowser, tcp } from "mdns";
+import * as mdns from "mdns";
 import { isIPv6 } from "net";
 import { Device } from "../device";
 
@@ -27,7 +27,7 @@ export class Discovery {
     private devices: Device[] = [];
     private finishFn = null;
     private timer = null;
-    private browser: Browser = null;
+    private browser: mdns.Browser = null;
     private found: boolean;
 
     constructor(private timeout: number = 60) {
@@ -75,7 +75,16 @@ export class Discovery {
     }
 
     private start() {
-        this.browser = createBrowser(tcp(DEVICE_TYPE));
+        this.browser = mdns.createBrowser(mdns.tcp(DEVICE_TYPE), {
+            resolverSequence: [
+                mdns.rst.DNSServiceResolve(),
+                // tslint:disable-next-line:no-string-literal
+                "DNSServiceGetAddrInfo" in mdns["dns_sd"]
+                    ? mdns.rst.DNSServiceGetAddrInfo()
+                    : mdns.rst.getaddrinfo({ families: [ 0 ] }),
+                mdns.rst.makeAddressesUnique()
+            ]
+        });
         this.browser.on("serviceUp", this.serviceUp.bind(this));
         this.browser.start();
         this.wait();
