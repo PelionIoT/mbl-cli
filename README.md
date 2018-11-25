@@ -7,7 +7,17 @@ The Mbed Linux OS CLI is a toolbox for managing target devices running Mbed Linu
 
 ## Prerequisites
 
-[Node.js > v8.10.0](https://nodejs.org), which includes `npm v3`
+[Node.js > v8.10.0](https://nodejs.org) and `npm`.
+
+These can be installed from the [Node.js website](https://nodejs.org) or from package managers.
+
+e.g. on Ubuntu:
+
+```bash
+$ apt update
+$ apt install nodejs
+$ apt install npm
+```
 
 ## Installation
 
