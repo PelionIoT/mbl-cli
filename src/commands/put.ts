@@ -38,7 +38,7 @@ export const builder: CopyCommand = {
 
 export function handler(args: CopyCommand) {
     const put = (device: Device): Promise<void> => {
-        const ssh = new Ssh(device.address);
+        const ssh = new Ssh(device.address, device.port);
         let progressBar = null;
 
         ssh.on("progress", (event: { chunk: number, total: number }) => {

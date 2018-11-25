@@ -32,7 +32,7 @@ export const builder: DeviceCommand = {
 export function handler(args: DeviceCommand) {
     function shell(device: Device): Promise<void> {
         log(`Connecting to ${device.name}...`);
-        const ssh = new Ssh(device.address);
+        const ssh = new Ssh(device.address, device.port);
         return ssh.shell();
     }
 

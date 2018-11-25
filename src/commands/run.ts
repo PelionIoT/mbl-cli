@@ -38,7 +38,7 @@ export const builder: RunCommand = {
 
 export function handler(args: RunCommand) {
     function execute(device: Device): Promise<void> {
-        const ssh = new Ssh(device.address);
+        const ssh = new Ssh(device.address, device.port);
         return ssh.execute(args.command);
     }
 

@@ -26,7 +26,6 @@
     "tpip": "nlf --csv --no-dev --reach 1 > tpip.csv"
   },
   "devDependencies": {
-    "@types/mdns": "0.0.32",
     "@types/node": "^8.10.37",
     "@types/progress": "^2.0.1",
     "@types/ssh2": "^0.5.35",
@@ -45,7 +44,7 @@
     "typescript": "~2.6.2"
   },
   "dependencies": {
-    "mdns": "^2.4.0",
+    "mdns-server": "thegecko/mdns-server",
     "progress": "^2.0.1",
     "ssh2": "^0.6.1",
     "update-notifier": "^2.3.0",

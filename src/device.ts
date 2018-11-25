@@ -23,6 +23,7 @@ import { log } from "./utils/logger";
 export interface Device {
     name: string;
     address: string;
+    port?: number;
 }
 
 export interface DeviceConfig {

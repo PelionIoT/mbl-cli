@@ -20,9 +20,11 @@ import { existsSync } from "fs";
 import { basename, join, normalize } from "path";
 import { Client } from "ssh2";
 
+const DEFAULT_USERNAME = "root";
+
 export class Ssh extends EventEmitter {
 
-    constructor(private host: string, private username: string = "root", private port: number = 22) {
+    constructor(private host: string, private port: number = 22, private username: string = DEFAULT_USERNAME) {
         super();
     }
 
