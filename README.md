@@ -70,31 +70,6 @@ Copy a file to a device, optionally specifying the device address to use
 $ mbl-cli put <src> <dest> [address]
 ```
 
-#### Application Management
-
-Application management commands.
-
-```
-$ mbl-cli app <command> [address]
-```
-
-_Commands:_
-
-Start the application on a device.
-```
-$ mbl-cli app start [address]
-```
-
-Stop the application on a device.
-```
-$ mbl-cli app stop [address]
-```
-
-Restart the application on a device.
-```
-$ mbl-cli app restart [address]
-```
-
 ## Implementation Status
 
 - [x] discover and select a device
