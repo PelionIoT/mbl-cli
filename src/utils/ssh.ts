@@ -88,10 +88,8 @@ export class Ssh extends EventEmitter {
 
     public get(source: string, destination?: string): Promise<void> {
         if (!destination) {
-            destination = join(process.cwd(), "/");
-        }
-
-        if (destination.endsWith("/")) {
+            destination = basename(source);
+        } else if (destination.endsWith("/")) {
             destination = join(destination, basename(source));
         }
 
