@@ -16,9 +16,10 @@
 */
 
 import { existsSync, readFileSync, writeFileSync } from "fs";
+import { homedir } from "os";
 import { join } from "path";
 
-const CONFIG_FILE = join(__dirname, ".mbl.cfg");
+const CONFIG_FILE = join(homedir(), ".mbl.cfg");
 
 export class ConfigStore<T> {
     public load(): T {
