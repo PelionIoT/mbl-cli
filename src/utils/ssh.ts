@@ -67,11 +67,12 @@ export class Ssh extends EventEmitter {
         });
     }
 
-    public execute(command: string): Promise<void> {
+    public execute(command: string, sourceProfile: boolean = true): Promise<void> {
         return this.getSsh()
         .then(ssh => {
             return new Promise<void>((resolve, reject) => {
                 ssh.on("close", () => resolve());
+                if (sourceProfile) command = `source /etc/profile; ${command}`;
                 ssh.exec(command, (error, stream) => {
                     if (error) return reject(error.message);
 
