@@ -43,21 +43,22 @@ export class Discovery {
     }
 
     private scan() {
+        // Only scan if scanning is on
+        if (!this.scanning) return;
+
         this.browser = mdns({
             loopback: true,
             noInit: true,
             reuseAddr: true
         });
 
+        // Catch exceptions such as "EADDRNOTAVAIL"
+        this.browser.on("error", this.destroyAndScan.bind(this));
         this.browser.on("response", this.onResponse.bind(this));
 
         this.browser.once("ready", () => {
-            if (this.scanning) {
-                this.scanTimer = setTimeout(() => {
-                    this.browser.destroy(this.scan.bind(this));
-                }, SCAN_DELAY);
-            }
-
+            // Queue another scan
+            this.destroyAndScan();
             this.browser.query({
                 questions: [ {
                     name: DEVICE_TYPE,
@@ -66,7 +67,29 @@ export class Discovery {
             });
         });
 
-        this.browser.initServer();
+        try {
+            // Catch errors such as "no available interfaces"
+            this.browser.initServer();
+        } catch (_e) {
+            this.destroyAndScan();
+        }
+    }
+
+    private destroyAndScan() {
+        const destroy = () => {
+            if (!this.browser) return this.scan();
+            try {
+                // This may be in a bad state and throw an error
+                this.browser.destroy(this.scan.bind(this));
+            } catch (_e) {
+                this.scan();
+            }
+        };
+
+        if (this.scanTimer) clearTimeout(this.scanTimer);
+        // If scanning, delay before the destroy and rescan
+        if (this.scanning) this.scanTimer = setTimeout(destroy, SCAN_DELAY);
+        else destroy();
     }
 
     private onResponse(response, info) {
@@ -127,8 +150,7 @@ export class Discovery {
 
             this.finishFn = () => {
                 this.scanning = false;
-                if (this.scanTimer) clearTimeout(this.scanTimer);
-                if (this.browser) this.browser.destroy();
+                this.destroyAndScan();
                 resolve(Object.keys(this.devices).map(key => this.devices[key]));
             };
 
