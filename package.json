@@ -1,6 +1,6 @@
 {
   "name": "mbl-cli",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Command-line interface for developing with Mbed Linux OS",
   "homepage": "https://www.mbed.com",
   "author": "Rob Moran <rob.moran@arm.com>",
@@ -44,7 +44,7 @@
     "typescript": "~2.6.2"
   },
   "dependencies": {
-    "mdns-server": "thegecko/mdns-server",
+    "mdns-server": "^1.0.7",
     "progress": "^2.0.1",
     "ssh2": "^0.6.1",
     "update-notifier": "^2.3.0",
