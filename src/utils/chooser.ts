@@ -39,8 +39,13 @@ export class Chooser {
                 } else if (input) {
                     const index = parseInt(input.toString());
                     if (index && index <= items.length) {
+                        // tslint:disable-next-line:no-console
+                        console.log(`${titleFn(items[index - 1])} selected`);
                         process.stdin.setRawMode(false);
                         resolve(items[index - 1]);
+                    } else {
+                        // tslint:disable-next-line:no-console
+                        console.log(`Invalid selection, please select a number between 1 and ${items.length}`);
                     }
                 }
             });

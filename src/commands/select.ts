@@ -36,7 +36,7 @@ export function handler() {
 
         devices.push({
             address: null,
-            name: "None",
+            name: "No device",
         });
 
         return chooser.choose(devices, device => device.address ? `${device.name} (${device.address})` : `${device.name}`, "Select a device:")
