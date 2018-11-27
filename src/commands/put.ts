@@ -26,7 +26,7 @@ export const describe = "Copy a file to a device";
 
 export const builder: CopyCommand = {
     address: {
-        description: "address of the device"
+        description: "IP address of the device (IPv4 or IPv6)"
     },
     dest: {
         description: "the remote destination for the file"

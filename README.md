@@ -49,7 +49,7 @@ $ mbl-cli select
 
 #### Shell
 
-Obtain a shell on a device, optionally specifying the device address to use
+Obtain a shell on a device, optionally specifying the device IPv4/IPv6 address to use
 
 ```
 $ mbl-cli shell [address]
@@ -57,7 +57,7 @@ $ mbl-cli shell [address]
 
 #### Run
 
-Run a remote command on a device, optionally specifying the device address to use
+Run a remote command on a device, optionally specifying the device IPv4/IPv6 address to use
 
 ```
 $ mbl-cli run <command> [address]
@@ -65,7 +65,7 @@ $ mbl-cli run <command> [address]
 
 #### Get
 
-Copy a file from a device, optionally specifying the device address to use
+Copy a file from a device, optionally specifying the device IPv4/IPv6 address to use
 
 ```
 $ mbl-cli get <src> <dest> [address]
@@ -73,7 +73,7 @@ $ mbl-cli get <src> <dest> [address]
 
 #### Put
 
-Copy a file to a device, optionally specifying the device address to use
+Copy a file to a device, optionally specifying the device IPv4/IPv6 address to use
 
 ```
 $ mbl-cli put <src> <dest> [address]

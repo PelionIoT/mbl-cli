@@ -29,7 +29,7 @@ export interface RunCommand extends DeviceCommand {
 
 export const builder: RunCommand = {
     address: {
-        description: "address of the device"
+        description: "IP address of the device (IPv4 or IPv6)"
     },
     command: {
         description: "command to run"

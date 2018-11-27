@@ -25,7 +25,7 @@ export const describe = "Get a shell on a device";
 
 export const builder: DeviceCommand = {
     address: {
-        description: "address of the device"
+        description: "IP address of the device (IPv4 or IPv6)"
     }
 };
 

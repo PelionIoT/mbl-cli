@@ -23,7 +23,7 @@ export const describe = "Start the application";
 
 export const builder: DeviceCommand = {
     address: {
-        description: "address of the device"
+        description: "IP address of the device (IPv4 or IPv6)"
     }
 };
 
