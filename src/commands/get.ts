@@ -78,7 +78,7 @@ export function handler(args: CopyCommand) {
         return put(device);
     })
     .then(() => {
-        log("File get succeeded");
+        log("File transfer succeeded");
         process.exit();
     })
     .catch(error => {

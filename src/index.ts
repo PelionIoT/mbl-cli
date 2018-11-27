@@ -26,6 +26,7 @@ notifier({ pkg }).notify();
 
 // tslint:disable-next-line:no-unused-expression
 yargs
+.strict()
 .usage("$0 <command> [arguments]")
 .version().alias("v", "version")
 .help().alias("h", "help")
@@ -34,5 +35,6 @@ yargs
     recurse: true
 })
 .demandCommand(1, "")
+.recommendCommands()
 .epilogue("For more information about Mbed Linux OS, please visit http://mbed.com")
 .argv;
