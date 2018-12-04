@@ -15,10 +15,7 @@
 * limitations under the License.
 */
 
-import { Chooser } from "./utils/chooser";
 import { ConfigStore } from "./utils/configStore";
-import { Discovery } from "./utils/discovery";
-import { log } from "./utils/logger";
 
 export interface Device {
     name: string;
@@ -31,19 +28,16 @@ export interface DeviceConfig {
 }
 
 export class DeviceGetter {
-    private discovery = new Discovery();
-    private chooser = new Chooser(true);
     private store = new ConfigStore<DeviceConfig>();
 
     public getDevice(): Promise<Device> {
-        const config = this.store.load();
-        if (config && config.selectedDevice) return Promise.resolve(config.selectedDevice);
+        return new Promise((resolve, reject) => {
+            const config = this.store.load();
+            if (config && config.selectedDevice) {
+                return resolve(config.selectedDevice);
+            }
 
-        log("Discovering devices...");
-        return this.discovery.discoverAll()
-        .then(devices => {
-            if (devices.length === 0) return null;
-            return this.chooser.choose(devices, device => `${device.name} (${device.address})`, "Select a device:");
+            reject(`No device selected. Please run 'mbl-cli select' first.`);
         });
     }
 }

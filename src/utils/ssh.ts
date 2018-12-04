@@ -18,7 +18,7 @@
 import { EventEmitter } from "events";
 import { existsSync } from "fs";
 import { basename, join, normalize } from "path";
-import { Client } from "ssh2";
+import { Client, SFTPWrapper } from "ssh2";
 
 const DEFAULT_USERNAME = "root";
 
@@ -123,12 +123,6 @@ export class Ssh extends EventEmitter {
             if (!existsSync(source)) return Promise.reject("local file doesn't exist");
         }
 
-        if (!destination) {
-            destination = basename(source);
-        } else if (destination.endsWith("/")) {
-            destination = join(destination, basename(source));
-        }
-
         return this.getSsh()
         .then(ssh => {
             return new Promise<void>((resolve, reject) => {
@@ -136,18 +130,41 @@ export class Ssh extends EventEmitter {
                 ssh.sftp((error, sftp) => {
                     if (error) return reject(error.message);
 
-                    sftp.fastPut(source, destination, {
-                        step: (_totalTransferred, chunk, total) => {
-                            this.emit("progress", {
-                                chunk,
-                                total
-                            });
-                        }
-                    }, err => {
-                        if (err) return reject(err.message);
-                        ssh.end();
+                    this.resolveDestination(sftp, source, destination)
+                    .then(remotePath => {
+                        sftp.fastPut(source, remotePath, {
+                            step: (_totalTransferred, chunk, total) => {
+                                this.emit("progress", {
+                                    chunk,
+                                    total
+                                });
+                            }
+                        }, err => {
+                            if (err) return reject(err.message);
+                            ssh.end();
+                        });
                     });
                 });
+            });
+        });
+    }
+
+    private resolveDestination(sftp: SFTPWrapper, source: string, destination?: string): Promise<string> {
+        return new Promise((resolve, _reject) => {
+
+            if (!destination) {
+                return resolve(basename(source));
+            }
+
+            // Determine whether the destination is a folder
+            sftp.lstat(destination, (err, info) => {
+
+                // An error means the file doesn't exist
+                if (!err && info.isDirectory()) {
+                    destination = join(destination, basename(source));
+                }
+
+                resolve(destination);
             });
         });
     }

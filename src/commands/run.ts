@@ -32,7 +32,7 @@ export const builder: RunCommand = {
         description: "IP address of the device (IPv4 or IPv6)"
     },
     command: {
-        description: "command to run"
+        description: "command to run, enclosing any spaces in quotes e.g. 'ls -la'"
     }
 };
 

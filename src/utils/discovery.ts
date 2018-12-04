@@ -32,7 +32,7 @@ export class Discovery {
     private browser = null;
     private scanning = false;
 
-    constructor(private timeout: number = 60) {
+    constructor(public timeout: number = 60) {
     }
 
     private wait(millis: number = this.timeout * 1000) {

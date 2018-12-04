@@ -29,7 +29,7 @@ export function handler() {
     const chooser = new Chooser();
     const store = new ConfigStore<DeviceConfig>();
 
-    log("Discovering devices...");
+    log(`Discovering devices for ${discovery.timeout} seconds...`);
     discovery.discoverAll()
     .then(devices => {
         if (devices.length === 0) return log("Error: No devices found");
