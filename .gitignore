@@ -7,3 +7,5 @@ lib
 docs
 types
 tpip.csv
+*.egg-info/
+__pycache__

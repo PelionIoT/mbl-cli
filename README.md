@@ -1,29 +1,31 @@
 # Mbed Linux OS CLI
 Command-line interface for developing with Mbed Linux OS
 
-[![Circle CI](https://circleci.com/gh/ARMmbed/mbl-cli.svg?style=shield&circle-token=367893aefffecc72cf7d17201667cd2f75d6d5c7)](https://circleci.com/gh/ARMmbed/mbl-cli/)
 
 The Mbed Linux OS CLI is a toolbox for managing target devices running Mbed Linux OS.
 
+
+## License
+
+Please see the [License][mbl-license] document for more information.
+
+
+## Contributing
+
+Please see the [Contributing][mbl-contributing] document for more information.
+
+
 ## Prerequisites
 
-[Node.js > v8.10.0](https://nodejs.org) and `npm 3`.
+[Python > v3.6](https://python.org) and `pip`. 
 
-These can be installed from the [Node.js website](https://nodejs.org) or from [package managers](https://github.com/nodesource/distributions).
-
-e.g. on Ubuntu:
-
-```bash
-$ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-$ sudo apt-get install -y nodejs
-```
 
 ## Installation
 
-The CLI is distributed using npm. To install the tool globally:
+The CLI is distributed using pypi. To install the tool use `pip`:
 
 ```bash
-$ npm install -g mbl-cli
+$ pip install mbl-cli
 ```
 
 ## Usage
@@ -34,8 +36,15 @@ $ mbl-cli <command> [arguments]
 
 ### Options
 
-- -v, --version - Show version number
 - -h, --help - Show help
+
+### Help
+
+Show help for a specific command
+
+```bash
+$ mbl-cli <command> -h, --help
+```
 
 ### Commands
 
@@ -45,6 +54,14 @@ Discover connected Mbed Linux OS devices and allow the user to select one for fu
 
 ```bash
 $ mbl-cli select
+```
+
+#### Discovery and List
+
+Discover connected Mbed Linux OS devices and show a list of the hostnames.
+
+```bash
+$ mbl-cli list
 ```
 
 #### Shell
@@ -60,7 +77,7 @@ $ mbl-cli shell [address]
 Run a remote command on a device, optionally specifying the device IPv4/IPv6 address to use
 
 ```
-$ mbl-cli run <command> [address]
+$ mbl-cli shell -c <command> [address]
 ```
 
 #### Get
@@ -79,15 +96,6 @@ Copy a file to a device, optionally specifying the device IPv4/IPv6 address to u
 $ mbl-cli put <src> <dest> [address]
 ```
 
-## Implementation Status
 
-- [x] discover and select a device
-- [x] shell onto a device
-- [x] run a remote command on a device
-- [x] copy a file from/to a device
-- [ ] deploy an application image on a device
-- [ ] deploy a firmware component on a device
-- [ ] start an application on a device
-- [ ] stop an application on a device
-- [ ] restart an application on a device
-- [ ] configure the network for a device
+[mbl-license]: LICENSE.md
+[mbl-contributing]: CONTRIBUTING.md
