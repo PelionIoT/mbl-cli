@@ -88,7 +88,7 @@ class WindowsSSHShell(SSHShell):
 
         def write_to_stdout(channel):
             while True:
-                data = channel.recv(1024).decode()               
+                data = channel.recv(1024).decode()
                 if not data:
                     sys.stdout.write(
                         "\r\nShell terminated. Press Enter to quit.\r\n"
@@ -99,8 +99,7 @@ class WindowsSSHShell(SSHShell):
                     sys.stdout.flush()
 
         write_task = threading.Thread(
-            target=write_to_stdout,
-            args=(self.chan,)
+            target=write_to_stdout, args=(self.chan,)
         ).start()
         try:
             while True:
