@@ -14,7 +14,7 @@ pipeline {
         stage("sanity-check") {
             steps {
                 dir("${MBLTOOLSDIR}") {
-                    git url: "git@github.com:armmbed/mbl-tools"
+                    git url: "git@github.com:armmbed/mbl-tools", credentialsId: "fc6db1f7-2a3f-4655-b54a-476bac1194e5"
                 }
 
                 sh "${MBLTOOLSDIR}/ci/sanity-check/run-me.sh --no-tty \
