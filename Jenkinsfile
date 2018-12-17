@@ -25,7 +25,7 @@ pipeline {
             steps{
                 dir("${WORKSPACE}/tests/") {
                     echo "Running tests."
-                    sh "run-tests.sh"
+                    sh "./run-tests.sh"
                 }
             }
         }
