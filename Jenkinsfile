@@ -26,6 +26,7 @@ pipeline {
                 dir("${WORKSPACE}/tests/") {
                     echo "Running tests."
                     sh "./run-tests.sh"
+                    mv "./report" "${WORKSPACE}/report.xml"
                 }
             }
         }
@@ -33,7 +34,7 @@ pipeline {
             when { tag "*" }
             steps {
                 echo "Building wheel."
-                sh "build-wheel.sh"
+                sh "./build-wheel.sh"
             }           
         }
         stage("deploy-to-pypi") {
@@ -47,7 +48,7 @@ pipeline {
 
     post {
         always {
-            junit "${WORKSPACE}/tests/report"
+            junit "report.xml"
             when { tag "*" }
             archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/dist/*whl", fingerprint: true
         }
