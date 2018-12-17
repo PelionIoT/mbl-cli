@@ -26,7 +26,7 @@ pipeline {
                 dir("${WORKSPACE}/tests/") {
                     echo "Running tests."
                     sh "./run-tests.sh"
-                    mv "./report" "${WORKSPACE}/report.xml"
+                    cp "./report" "${WORKSPACE}/report.xml"
                 }
             }
         }
