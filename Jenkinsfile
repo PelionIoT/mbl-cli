@@ -52,7 +52,7 @@ pipeline {
             archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/dist/*whl", fingerprint: true
         }
         failure {
-            mail to: "rob.walton@arm.com", subject: "The Pipeline failed."
+            mail to: "rob.walton@arm.com", subject: "The Pipeline failed.", body: "Build failed."
         }
     }
 }
