@@ -49,7 +49,7 @@ pipeline {
         always {
             junit "${WORKSPACE}/tests/report"
             when { tag "*" }
-            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/dist/*whl", fingerprint: true)
+            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/dist/*whl", fingerprint: true
         }
         failure {
             mail to: rob.walton@arm.com, subject: "The Pipeline failed."
