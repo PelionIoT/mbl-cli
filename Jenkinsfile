@@ -49,7 +49,6 @@ pipeline {
     post {
         always {
             junit "report.xml"
-            when { tag "*" }
             archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/dist/*whl", fingerprint: true
         }
         failure {
