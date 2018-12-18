@@ -33,7 +33,6 @@ def scp_session(func):
             self._client.get_transport(), progress=scp_progress
         ) as scp_client:
             func(self, *args, scp_client=scp_client, **kwargs)
-            scp_client.close()
 
     return wrapper
 
