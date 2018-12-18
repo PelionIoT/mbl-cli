@@ -20,8 +20,12 @@ JSON_FILE_PATH = str(pathlib.Path().home() / ".mbl-dev.json")
 def _read_device_file(path=JSON_FILE_PATH):
     """Read the json file and return some data."""
     fh = file_handler.DeviceInfoFileHandler(path)
-    device_data = fh.read_device_data()
-    return device_data
+    try:
+        device_data = fh.read_device_data()
+    except FileNotFoundError as file_err:
+        raise IOError("Please select a device or provide an ip address.")
+    else:
+        return device_data
 
 
 def _create_device_from_data(data):

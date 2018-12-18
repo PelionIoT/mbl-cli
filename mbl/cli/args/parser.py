@@ -99,6 +99,7 @@ def parse_args(description):
         default=str(),
     )
     shell.add_argument(
+        "-a",
         "--address",
         help="The ipv4 or ipv6 address of"
         " the device you want to communicate with. ",

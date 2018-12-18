@@ -65,7 +65,7 @@ class SSHSession:
         return self
 
     def __exit__(self, *exception_info):
-        """Exit the context, ensuring the ssh session is closed."""
+        """Exit the context, ensuring the ssh client is closed."""
         self._client.close()
         return exception_info
 
