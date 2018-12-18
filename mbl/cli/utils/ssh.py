@@ -9,17 +9,31 @@
 import functools
 import paramiko
 import platform
-
+import scp
 from . import shell
+import sys
 
 
-def sftp_session(func):
-    """Decorator to start an sftp session on the client."""
+def scp_progress(filename, size, sent):
+    """Display the progress of an scp transfer."""
+    if sent:
+        sys.stdout.write(
+            "{} is transferring. Progress: {}\r".format(
+                filename.decode(), int(sent / size * 100)
+            )
+        )
+
+
+def scp_session(func):
+    """Decorator to start an scp session on the client."""
     # wrapper
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
-        with self._client.open_sftp() as sftp:
-            return func(self, *args, sftp, **kwargs)
+        with scp.SCPClient(
+            self._client.get_transport(), progress=scp_progress
+        ) as scp_client:
+            func(self, *args, scp_client=scp_client, **kwargs)
+            scp_client.close()
 
     return wrapper
 
@@ -34,12 +48,12 @@ class SSHClientNoAuth(paramiko.SSHClient):
 
 
 class SSHSession:
-    """Context manager wrapping an SSHClient, handles setup/auth and sftp."""
+    """Context manager wrapping an SSHClient, handles setup/auth and scp."""
 
     def __init__(self, device):
         """:param device DeviceInfo: A device info object."""
         self.device = device
-        self._client = SSHClientNoAuth()
+        self._client = paramiko.SSHClient()
         self._client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def __enter__(self):
@@ -56,15 +70,15 @@ class SSHSession:
         self._client.close()
         return exception_info
 
-    @sftp_session
-    def put(self, local_path, remote_path, sftp=None):
-        """Send data via sftp."""
-        sftp.put(local_path, remote_path)
+    @scp_session
+    def put(self, local_path, remote_path, scp_client=None):
+        """Send data via scp."""
+        scp_client.put(local_path, remote_path=remote_path)
 
-    @sftp_session
-    def get(self, remote_path, local_path, sftp=None):
-        """Get data via sftp."""
-        sftp.get(remote_path, local_path)
+    @scp_session
+    def get(self, remote_path, local_path, scp_client=None):
+        """Get data via scp."""
+        scp_client.get(remote_path, local_path)
 
     def start_shell(self):
         """Start an interactive shell."""
