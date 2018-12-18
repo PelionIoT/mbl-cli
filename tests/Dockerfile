@@ -11,12 +11,10 @@ RUN apt-get update && apt-get install -y \
     python3.7 \
     python3-pip
 
-RUN pip3 install pipenv
-
 ADD . /mbl-cli
 
 WORKDIR /mbl-cli
 
-RUN pipenv install --dev
+RUN pip install -r requirements.txt
 
 CMD ["pipenv", "run", "pytest", "--junit-xml", "report"]

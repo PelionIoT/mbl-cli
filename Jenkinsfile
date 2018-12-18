@@ -1,9 +1,8 @@
+@Library('mbl-jenkins-library@master') _
+ 
+
 pipeline {
     agent any
-
-    environment {
-        MBLTOOLSDIR = "${pwd(tmp:true)}"
-    }
 
     stages {
         stage("checkout") {
@@ -13,12 +12,9 @@ pipeline {
         }
         stage("sanity-check") {
             steps {
-                dir("${MBLTOOLSDIR}") {
-                    git url: "git@github.com:armmbed/mbl-tools", credentialsId: "fc6db1f7-2a3f-4655-b54a-476bac1194e5"
+                sanityCheckPipeline {
+                    credentialsId = "fc6db1f7-2a3f-4655-b54a-476bac1194e5"
                 }
-
-                sh "${MBLTOOLSDIR}/ci/sanity-check/run-me.sh --no-tty \
-                    --workdir ${WORKSPACE}/mbl/cli"
             }
         }
         stage("run-tests") {
