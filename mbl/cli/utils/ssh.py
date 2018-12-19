@@ -7,9 +7,11 @@
 
 
 import functools
+import os
 import paramiko
 import platform
 import scp
+import subprocess
 from . import shell
 import sys
 
@@ -28,11 +30,19 @@ def scp_session(func):
     """Decorator to start an scp session on the client."""
     # wrapper
     @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, local_path, remote_path):
         with scp.SCPClient(
             self._client.get_transport(), progress=scp_progress
         ) as scp_client:
-            func(self, *args, scp_client=scp_client, **kwargs)
+            func(
+                self,
+                local_path=local_path,
+                remote_path=remote_path,
+                scp_client=scp_client,
+            )
+            self._validate_file_transfer(
+                local_path=local_path, remote_path=remote_path
+            )
 
     return wrapper
 
@@ -52,7 +62,7 @@ class SSHSession:
     def __init__(self, device):
         """:param device DeviceInfo: A device info object."""
         self.device = device
-        self._client = SSHClientNoAuth()
+        self._client = paramiko.SSHClient()
         self._client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def __enter__(self):
@@ -67,7 +77,7 @@ class SSHSession:
     def __exit__(self, *exception_info):
         """Exit the context, ensuring the ssh client is closed."""
         self._client.close()
-        return exception_info
+        return False
 
     @scp_session
     def put(self, local_path, remote_path, scp_client=None):
@@ -97,3 +107,24 @@ class SSHSession:
             )
         else:
             return cmd_output
+
+    def _validate_file_transfer(self, local_path, remote_path):
+        local_file_name = os.path.basename(local_path)
+        if local_file_name not in remote_path:
+            remote_path = "{}/{}".format(remote_path, local_file_name)
+        remote_file_size = (
+            self.run_cmd(r"stat -c%s {}".format(remote_path))[1]
+            .read()
+            .decode()
+            .strip("\n")
+        )
+        local_file_size = str(
+            os.stat(local_path).st_size
+        )
+        if local_file_size != remote_file_size:
+            raise IOError(
+                "\nRemote file size: {}\nLocal file size: {}"
+                "\n\nYour file may not have been transferred correctly!".format(
+                    remote_file_size, local_file_size
+                )
+            )
