@@ -1,4 +1,4 @@
-FROM ubuntu:xenial-20170517.1
+FROM ubuntu:bionic-20180724.1
 
 RUN apt-get update && apt-get install locales \
     && dpkg-reconfigure locales \
