@@ -52,7 +52,7 @@ class SSHSession:
     def __init__(self, device):
         """:param device DeviceInfo: A device info object."""
         self.device = device
-        self._client = paramiko.SSHClient()
+        self._client = SSHClientNoAuth()
         self._client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def __enter__(self):
