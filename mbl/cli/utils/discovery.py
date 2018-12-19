@@ -80,7 +80,22 @@ class DeviceGetter:
 
     def discover_all(self, listener):
         """Browse for ssh services on the network."""
-        self.browser = zeroconf.ServiceBrowser(self.zconf, self.ADDR, listener)
+        end_time = time.time() + TIMEOUT
+        while not listener.devices and (time.time() < end_time):
+            time.sleep(SLEEP_TIME)
+            try:
+                raw_output = avahi_browse()
+            except FileNotFoundError:
+                self.browser = zeroconf.ServiceBrowser(
+                    self.zconf, self.ADDR, listener
+                )
+            else:
+                for src_info in parse_avahi_output(raw_output):
+                    listener.add_service(
+                        AvahiZeroconf(**src_info),
+                        "local",
+                        src_info["name"].decode(),
+                    )
 
 
 class ServiceData:
@@ -97,34 +112,33 @@ class ServiceData:
     prop = 9
 
 
-def parse_avahi_output():
-    """Poll avahi, pack output data into a data struct.
+def avahi_browse():
+    """Call avahi-browse."""
+    return subprocess.Popen(
+        [
+            "avahi-browse",
+            "--terminate",
+            "--resolve",
+            "--no-fail",
+            "-p",
+            "_ssh._tcp",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    ).communicate()[0]
+
+
+def parse_avahi_output(raw_output):
+    """Pack avahi output data into a data struct.
 
     Yield the data structs for each service.
     """
     hostname = "name"
     address = "address"
     properties = "properties"
-    raw_output = b""
-    end_time = time.time() + TIMEOUT
     known_device_cache = list()
-
-    while not raw_output and (time.time() < end_time):
-        raw_output = subprocess.Popen(
-            [
-                "avahi-browse",
-                "--terminate",
-                "--resolve",
-                "--no-fail",
-                "-p",
-                "_ssh._tcp",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        ).communicate()[0]
-        time.sleep(SLEEP_TIME)
-
     output = dict()
+
     for txt_line in raw_output.split(b"\n"):
         if txt_line.startswith(b"="):
             tokens = txt_line.split(b";")
@@ -162,18 +176,5 @@ class AvahiZeroconf:
 
 def do_discovery(listener):
     """Browse for mblos devices for up to TIMEOUT seconds."""
-    if platform.system() == "Linux":
-        for src_info in parse_avahi_output():
-            listener.add_service(
-                AvahiZeroconf(**src_info), "local", src_info["name"].decode()
-            )
-    else:
-        with DeviceGetter() as dev_getter:
-            end_time = time.time() + TIMEOUT
-            while not listener.devices and (time.time() < end_time):
-                time.sleep(SLEEP_TIME)
-                dev_getter.discover_all(listener)
-            # one more scan to check for more devices
-            if len(listener.devices) is 1:
-                time.sleep(SLEEP_TIME)
-                dev_getter.discover_all(listener)
+    with DeviceGetter() as dev_getter:
+        dev_getter.discover_all(listener)
