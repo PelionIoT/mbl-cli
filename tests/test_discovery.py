@@ -3,6 +3,9 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+"""Discovery tests."""
+
+
 import socket
 from collections import namedtuple
 from unittest import mock
@@ -14,6 +17,7 @@ from mbl.cli.utils import discovery as d
 
 @pytest.fixture
 def discovery():
+    """Mock the zeroconf module."""
     with mock.patch("mbl.cli.utils.discovery.zeroconf") as zconf:
         device_listener = d.DeviceDiscoveryNotifier()
         yield device_listener, zconf
@@ -21,6 +25,8 @@ def discovery():
 
 
 class TestDeviceDiscovery:
+    """Device discovery tests."""
+
     @pytest.mark.parametrize(
         "properties, address, service_type, name",
         [
@@ -53,6 +59,8 @@ class TestDeviceDiscovery:
     def test_single_valid_device_discovered(
         self, discovery, properties, address, service_type, name
     ):
+        """Test a single device is discovered."""
+        # Define a callback
         def callbk(item):
             assert item.split(":")[0] == name.split("." + service_type)[0]
 
@@ -99,6 +107,7 @@ class TestDeviceDiscovery:
     def test_multiple_valid_devices_discovered(
         self, discovery, properties, address, service_type, name
     ):
+        """Test multiple devices are discovered."""
         data1 = namedtuple("ServiceInfo", "properties address")
         data2 = namedtuple("ServiceInfo", "properties address")
 
@@ -151,6 +160,7 @@ class TestDeviceDiscovery:
     def test_device_discovery_invalid_ips(
         self, discovery, properties, address, service_type, name
     ):
+        """Test devices with invalid ips are ignored and errors are raised."""
         device_listener, zconf = discovery
         data = namedtuple("ServiceInfo", "properties address")
 
@@ -194,6 +204,7 @@ class TestDeviceDiscovery:
     def test_device_discovery_non_mblos_devices(
         self, discovery, properties, address, service_type, name
     ):
+        """Test non mbed linux devices are ignored."""
         device_listener, zconf = discovery
         data = namedtuple("ServiceInfo", "properties address")
 
