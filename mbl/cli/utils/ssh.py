@@ -67,8 +67,12 @@ class SSHSession:
 
     def __enter__(self):
         """Enter the context, connect to the ssh session."""
+        if self.device.hostname:
+            qualified_hostname = f"{self.device.hostname}.local"
+        else:
+            qualified_hostname = self.device.address
         self._client.connect(
-            self.device.address,
+            qualified_hostname,
             username=self.device.username,
             password=self.device.password,
         )
@@ -118,9 +122,7 @@ class SSHSession:
             .decode()
             .strip("\n")
         )
-        local_file_size = str(
-            os.stat(local_path).st_size
-        )
+        local_file_size = str(os.stat(local_path).st_size)
         if local_file_size != remote_file_size:
             raise IOError(
                 "\nRemote file size: {}\nLocal file size: {}"

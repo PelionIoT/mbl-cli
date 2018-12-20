@@ -7,12 +7,12 @@
 
 import pathlib
 import re
+import socket
 import sys
 import threading
 import time
 
 from mbl.cli.utils import device, file_handler, ssh
-
 
 JSON_FILE_PATH = str(pathlib.Path().home() / ".mbl-dev.json")
 
@@ -42,7 +42,12 @@ def create_device(args):
     :param args Namespace: args from the cli parser.
     """
     if args.address:
-        return device.create_device("", args.address)
+        if is_valid_ipv4_address(args.address) or is_valid_ipv6_address(
+            args.address
+        ):
+            return device.create_device("", args.address)
+        else:
+            return device.create_device(args.address, "")
     else:
         return _create_device_from_data(_read_device_file())
 
@@ -53,51 +58,27 @@ def save_device_info(device, path=JSON_FILE_PATH):
     fh.save_device_data(device)
 
 
-def is_ipv6_addr(address):
-    """Match an ipv6 address string."""
-    return False
+def is_valid_ipv4_address(address):
+    """Validate an ipv4 address"""
+    try:
+        socket.inet_pton(socket.AF_INET, address)
+    except AttributeError:
+        try:
+            socket.inet_aton(address)
+        except socket.error:
+            return False
+        return address.count(".") == 3
+    except socket.error:
+        return False
+    else:
+        return True
 
 
-def is_ipv4_addr(address):
-    """Match an ipv4 address string."""
-    ipv4_matcher = r"(\d{1,3}?\.){3}(\d{1,3})"
-    return re.compile(ipv4_matcher).fullmatch(address)
-
-
-class ProgressSpinnerContext:
-    """The graphical majesty of an ascii progress spinner in its own thread."""
-
-    def __init__(self):
-        """Init the spinning joy."""
-        self.spin_stop_event = threading.Event()
-
-    def __enter__(self):
-        """Enter the spinner thread context."""
-        spin_thread = threading.Thread(
-            target=show_progress_spinner, args=(self.spin_stop_event,)
-        )
-        spin_thread.start()
-        return self
-
-    def __exit__(self, *exception_info):
-        """Exit and shut down the spinny thread."""
-        self.spin_stop_event.set()
-        return exception_info
-
-
-def show_progress_spinner(event):
-    """'Draw' a spinning cursor."""
-    for spinner in spinning_cursor():
-        sys.stdout.write(spinner)
-        sys.stdout.flush()
-        time.sleep(0.1)
-        sys.stdout.write("\b")
-        if event.is_set():
-            return
-
-
-def spinning_cursor():
-    """Iterate through the characters required for a spinning cursor effect."""
-    while True:
-        for cursor in "|/-\\":
-            yield cursor
+def is_valid_ipv6_address(address):
+    """Validate an ipv6 address."""
+    try:
+        socket.inet_pton(socket.AF_INET6, address)
+    except socket.error:
+        return False
+    else:
+        return True
