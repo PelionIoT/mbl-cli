@@ -5,7 +5,7 @@
 
 """Setuptools entry point."""
 
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 
 
@@ -22,7 +22,7 @@ setup(
     long_description=read("README.md"),
     author="Arm Ltd.",
     license="BSD-3-Clause",
-    packages=["mbl.cli"],
+    packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
