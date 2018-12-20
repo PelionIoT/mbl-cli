@@ -17,4 +17,4 @@ WORKDIR /mbl-cli
 
 RUN pip install -r requirements.txt
 
-CMD ["pipenv", "run", "pytest", "--junit-xml", "report"]
+CMD ["pytest", "--junit-xml", "report"]

@@ -17,4 +17,4 @@ WORKDIR /mbl-cli
 
 RUN pip install -r requirements.txt
 
-CMD ["pipenv", "run", "python", "setup.py", "bdist_wheel"]
+CMD ["python", "setup.py", "bdist_wheel"]
