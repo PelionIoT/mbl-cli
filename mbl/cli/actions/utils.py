@@ -59,7 +59,7 @@ def save_device_info(device, path=JSON_FILE_PATH):
 
 
 def is_valid_ipv4_address(address):
-    """Validate an ipv4 address"""
+    """Validate an ipv4 address."""
     try:
         socket.inet_pton(socket.AF_INET, address)
     except AttributeError:

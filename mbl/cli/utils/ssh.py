@@ -125,8 +125,8 @@ class SSHSession:
         local_file_size = str(os.stat(local_path).st_size)
         if local_file_size != remote_file_size:
             raise IOError(
-                "\nRemote file size: {}\nLocal file size: {}"
-                "\n\nYour file may not have been transferred correctly!".format(
+                "\nRemote file size: {}\nLocal file size: {}\n"
+                "\nYour file may not have been transferred correctly!".format(
                     remote_file_size, local_file_size
                 )
             )
