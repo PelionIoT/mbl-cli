@@ -51,7 +51,10 @@ class SSHShell:
 
 
 class PosixSSHShell(SSHShell):
-    """Posix SSH Shell variant, using termio for buffering."""
+    """Posix SSH Shell variant.
+
+    For macOS & Linux.
+    """
 
     @termios_tty
     def run(self):
@@ -80,7 +83,7 @@ class PosixSSHShell(SSHShell):
 
 
 class WindowsSSHShell(SSHShell):
-    """Windows terminal IO. As Windows is a special little snowflake."""
+    """Windows terminal IO."""
 
     def run(self):
         """Terminal IO."""
