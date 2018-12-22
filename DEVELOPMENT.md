@@ -6,6 +6,10 @@
 
 It's recommended to use a venv for development.
 
+```bash
+$ python -m venv /path/to/venv
+```
+
 ## Latest Build
 
 Clone the repository
@@ -22,11 +26,15 @@ After cloning the repository install the dev dependencies:
 $ cd /path/to/repo
 $ pip install -r requirements.txt
 ```
-This will install dependencies and install the mbl-cli in 'editable' mode.
+This will install dependencies and install the mbl-cli in 'editable' mode (i.e pip install -e .).
 
 ## Testing
 
 If you installed into a venv, make sure to activate it, this will add mbl-cli to the PATH.
+
+```bash
+$ source /path/to/venv/bin/activate
+```
 
 If you installed mbl-cli to your system python it will already be on PATH.
 
