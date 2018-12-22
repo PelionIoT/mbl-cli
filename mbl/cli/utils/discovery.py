@@ -11,6 +11,7 @@ import subprocess
 import sys
 import time
 from collections import namedtuple
+from enum import Enum
 
 import zeroconf
 
@@ -98,7 +99,7 @@ class DeviceGetter:
                     )
 
 
-class ServiceData:
+class ServiceData(Enum):
     """Enum of service data entries."""
 
     interface = 1
