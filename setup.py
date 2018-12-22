@@ -17,7 +17,7 @@ def read(file_name):
 
 setup(
     name="mbl-cli",
-    version="0.1.1",
+    version="2.0.0",
     description="Mbed Linux OS Command Line Tool",
     long_description=read("README.md"),
     author="Arm Ltd.",
