@@ -17,25 +17,6 @@ from mbl.cli.utils import device, file_handler, ssh
 JSON_FILE_PATH = str(pathlib.Path().home() / ".mbl-dev.json")
 
 
-def _read_device_file(path=JSON_FILE_PATH):
-    """Read the json file and return some data."""
-    fh = file_handler.DeviceInfoFileHandler(path)
-    try:
-        device_data = fh.read_device_data()
-    except FileNotFoundError as file_err:
-        raise IOError("Please select a device or provide an ip address.")
-    else:
-        return device_data
-
-
-def _create_device_from_data(data):
-    """Create a DeviceInfo object using the file data.
-
-    :param data: data as returned from _read_device_file.
-    """
-    return device.create_device(*data.values())
-
-
 def create_device(args):
     """Create a device from either a file or args, depending on args.
 
@@ -82,3 +63,22 @@ def is_valid_ipv6_address(address):
         return False
     else:
         return True
+
+
+def _read_device_file(path=JSON_FILE_PATH):
+    """Read the json file and return some data."""
+    fh = file_handler.DeviceInfoFileHandler(path)
+    try:
+        device_data = fh.read_device_data()
+    except FileNotFoundError as file_err:
+        raise IOError("Please select a device or provide an ip address.")
+    else:
+        return device_data
+
+
+def _create_device_from_data(data):
+    """Create a DeviceInfo object using the file data.
+
+    :param data: data as returned from _read_device_file.
+    """
+    return device.create_device(*data.values())
