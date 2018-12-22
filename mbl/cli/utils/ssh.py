@@ -7,6 +7,7 @@
 
 
 import functools
+import hashlib
 import os
 import paramiko
 import platform
@@ -115,17 +116,17 @@ class SSHSession:
     def _validate_file_transfer(self, local_path, remote_path):
         local_file_name = os.path.basename(local_path)
         if local_file_name not in remote_path:
-            remote_path = "{}/{}".format(remote_path, local_file_name)
+            remote_path = os.path.join(remote_path, local_file_name)
         remote_file_size = (
-            self.run_cmd(r"stat -c%s {}".format(remote_path))[1]
+            self.run_cmd("md5sum {}".format(remote_path))[1]
             .read()
             .decode()
             .strip("\n")
         )
-        local_file_size = str(os.stat(local_path).st_size)
+        local_file_size = hashlib.md5(local_path).hexdigest()
         if local_file_size != remote_file_size:
             raise IOError(
-                "\nRemote file size: {}\nLocal file size: {}\n"
+                "\nRemote file md5sum: {}\nLocal file md5sum: {}\n"
                 "\nYour file may not have been transferred correctly!".format(
                     remote_file_size, local_file_size
                 )
