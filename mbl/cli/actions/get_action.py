@@ -22,4 +22,4 @@ def execute(args):
     with ssh.SSHSession(dev) as ssh_session:
         ssh_session.get(remote_path=args.src_path, local_path=args.dst_path)
 
-    print("\nCompleted without error.")
+    print("\n\nCompleted without error.")
