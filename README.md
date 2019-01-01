@@ -77,7 +77,7 @@ $ mbl-cli [address] shell
 Run a remote command on a device, optionally specifying the device IPv4/IPv6 address to use
 
 ```bash
-$ mbl-cli [address] shell -c <command>
+$ mbl-cli [address] shell <command>
 ```
 
 #### Get
