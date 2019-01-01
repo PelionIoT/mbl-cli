@@ -22,7 +22,7 @@ Please see the [Contributing][mbl-contributing] document for more information.
 
 ## Installation
 
-The CLI is distributed using pypi. To install the tool use `pip`:
+The CLI is distributed using pypi. To install the tool use `pip`
 
 ```bash
 $ pip install mbl-cli
@@ -68,32 +68,32 @@ $ mbl-cli list
 
 Obtain a shell on a device, optionally specifying the device IPv4/IPv6 address to use
 
-```
-$ mbl-cli shell [address]
+```bash
+$ mbl-cli [address] shell 
 ```
 
-#### Run
+#### Run a Single Command
 
 Run a remote command on a device, optionally specifying the device IPv4/IPv6 address to use
 
-```
-$ mbl-cli shell -c <command> [address]
+```bash
+$ mbl-cli [address] shell -c <command>
 ```
 
 #### Get
 
 Copy a file from a device, optionally specifying the device IPv4/IPv6 address to use
 
-```
-$ mbl-cli get <src> <dest> [address]
+```bash
+$ mbl-cli [address] get <src> <dest> 
 ```
 
 #### Put
 
 Copy a file to a device, optionally specifying the device IPv4/IPv6 address to use
 
-```
-$ mbl-cli put <src> <dest> [address]
+```bash
+$ mbl-cli [address] put <src> <dest> 
 ```
 
 
