@@ -22,9 +22,13 @@ from . import shell
 def scp_progress(filename, size, sent):
     """Display the progress of an scp transfer."""
     if sent:
+        try:
+            fname = filename.decode()
+        except AttributeError:
+            fname = filename
         sys.stdout.write(
             "{} is transferring. Progress: {}\r".format(
-                filename.decode(), int(sent / size * 100)
+                fname, int(sent / size * 100)
             )
         )
 
@@ -125,8 +129,12 @@ class SSHSession:
     def _validate_file_transfer(self, local_path, remote_path):
         """Ensure an SCP file transfer succeeded."""
         local_file_name = os.path.basename(local_path)
-        if os.path.basename(remote_path) != local_file_name:
-            remote_path = "/".join((remote_path, local_file_name))
+        remote_file_name = os.path.basename(remote_path)
+        if remote_file_name != local_file_name:
+            if os.path.isfile(local_path):
+                remote_path = "/".join((remote_path, local_file_name))
+            else:
+                local_path = os.path.join(local_path, remote_file_name)
         remote_file_checksum = (
             self.run_cmd("md5sum {}".format(remote_path))[1]
             .read()
