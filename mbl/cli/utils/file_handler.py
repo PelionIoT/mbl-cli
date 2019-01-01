@@ -7,13 +7,33 @@
 
 import json
 import os
+import pathlib
+
+JSON_FILE_PATH = str(pathlib.Path().home() / ".mbl-dev.json")
+
+
+def read_device_file(path=JSON_FILE_PATH):
+    """Read the json file and return some data."""
+    fh = DeviceInfoFileHandler(path)
+    try:
+        device_data = fh.read_device_data()
+    except FileNotFoundError:
+        raise IOError("Please select a device or provide an ip address.")
+    else:
+        return device_data
+
+
+def save_device_info(device, path=JSON_FILE_PATH):
+    """Save device info to a file."""
+    fh = DeviceInfoFileHandler(path)
+    fh.save_device_data(device)
 
 
 class DeviceInfoFileHandler:
     """Serialise/deserialise DeviceInfo objects to/from json."""
 
     HOSTNAME_KEY = "hostname"
-    ADDRESS_KEY = "addr"
+    ADDRESS_KEY = "address"
     JSON_EXT = ".json"
 
     def __init__(self, dfile_path):
