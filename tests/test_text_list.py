@@ -5,30 +5,34 @@
 
 """Text list tests."""
 
-import pytest
-from mbl.cli.utils import print_list
+import re
 import sys
+
+import pytest
+
+from mbl.cli.utils import text_list
 
 
 @pytest.fixture(params=[("blah", "haha", "jajaja"), ()])
-def text_list(request):
+def _text_list(request):
     """Create TextList with all args in params."""
-    yield print_list.TextList(request.param)
+    the_list = text_list.IndexedTextList()
+    for p in request.param:
+        the_list.append(p)
+    yield the_list
 
 
 class TestTextList:
     """TextList tests."""
 
-    def test_item_can_be_added(self, text_list):
+    def test_item_can_be_added(self, _text_list):
         """Check an item is added to the list."""
-        initial_len = len(text_list.data)
-        text_list.add("yep")
-        assert len(text_list.data) > initial_len
+        initial_len = len(_text_list.data)
+        _text_list.append("yep")
+        assert len(_text_list.data) > initial_len
 
-    def test_list_formatted_correctly(self, text_list):
+    def test_list_formatted_correctly(self, _text_list):
         """Check the formatting is correct."""
-        ret = text_list.show()
-        for index, (returned_item, list_data) in enumerate(
-            zip(ret, text_list.data)
-        ):
-            assert returned_item == f"{index+1}: {list_data}"
+        for index, returned_item in enumerate(_text_list):
+            assert f"{index+1}" in returned_item
+            assert re.match(r"[0-9]\: [a-zA-Z]*", returned_item) is not None

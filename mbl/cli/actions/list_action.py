@@ -9,7 +9,7 @@
 import argparse
 import sys
 
-from mbl.cli.utils import discovery, print_list
+from mbl.cli.utils import discovery, text_list
 
 from . import utils
 
@@ -20,15 +20,11 @@ def execute(args):
         "Discovering devices. "
         f"This will take up to {discovery.TIMEOUT} seconds."
     )
-    dev_notifier = discovery.DeviceDiscoveryNotifier()
-    lister = print_list.TextList(list())
-    dev_notifier.add_listener(lister.add)
+    indexed_list = text_list.IndexedTextList()
+    discovery.do_discovery(indexed_list.append)
 
-    discovery.do_discovery(dev_notifier)
-
-    if not lister.data:
+    if not indexed_list:
         raise IOError("No devices found!")
     else:
-        enumerated_things = lister.show()
-        print("\n".join(enumerated_things))
-        return enumerated_things
+        print(indexed_list.to_string())
+        return indexed_list
