@@ -6,7 +6,11 @@
 """Classes and functions related to the device abstraction."""
 
 from collections import namedtuple
-from functools import total_ordering
+
+
+def create_device(hostname, address, username="root", password=""):
+    """Factory function to create a DeviceInfo struct."""
+    return DeviceInfo(hostname, address, username, password)
 
 
 class DeviceInfo(namedtuple("Device", "hostname address username password")):
@@ -36,8 +40,3 @@ class DeviceInfo(namedtuple("Device", "hostname address username password")):
                 "Both objects must be of type "
                 f"{self.__class__} or they can't be compared."
             )
-
-
-def create_device(hostname, address, username="root", password=""):
-    """Factory function to create a DeviceInfo struct."""
-    return DeviceInfo(hostname, address, username, password)
