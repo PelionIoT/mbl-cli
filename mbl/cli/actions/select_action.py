@@ -19,14 +19,10 @@ def execute(args):
     user_input = input("\nSelect a device from the list: \n")
     try:
         user_input = int(user_input)
-        if user_input <= 0:
-            raise IndexError(
-                f"Enter a number between 1 - {len(list_of_devices)}"
-            )
         selected_device = list_of_devices[user_input - 1]
         index, name, addr = selected_device.split(": ")
-    except ValueError:
-        raise ValueError("Enter a valid device index as shown in the list.")
+    except (ValueError, IndexError):
+        raise IndexError("Enter a valid device index as shown in the list.")
     else:
         dev = device.create_device(name, addr)
         file_handler.save_device_info(dev)
