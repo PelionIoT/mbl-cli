@@ -9,12 +9,14 @@
 import functools
 import hashlib
 import os
-import paramiko
 import platform
-import scp
-import subprocess
-from . import shell
+import socket
 import sys
+
+import paramiko
+import scp
+
+from . import shell
 
 
 def scp_progress(filename, size, sent):
@@ -72,11 +74,18 @@ class SSHSession:
             qualified_hostname = f"{self.device.hostname}.local"
         else:
             qualified_hostname = self.device.address
-        self._client.connect(
-            qualified_hostname,
-            username=self.device.username,
-            password=self.device.password,
-        )
+        try:
+            self._client.connect(
+                qualified_hostname,
+                username=self.device.username,
+                password=self.device.password,
+            )
+        except socket.gaierror:
+            self._client.connect(
+                self.device.address,
+                username=self.device.username,
+                password=self.device.password,
+            )
         return self
 
     def __exit__(self, *exception_info):
@@ -104,7 +113,7 @@ class SSHSession:
     def run_cmd(self, cmd):
         """Execute a command."""
         try:
-            cmd_output = self._client.exec_command(cmd)
+            cmd_output = self._client.exec_command(cmd, timeout=30)
         except paramiko.SSHException as ssh_error:
             raise IOError(
                 "The command `{}` failed to execute, "
@@ -114,20 +123,22 @@ class SSHSession:
             return cmd_output
 
     def _validate_file_transfer(self, local_path, remote_path):
+        """Ensure an SCP file transfer succeeded."""
         local_file_name = os.path.basename(local_path)
-        if local_file_name not in remote_path:
-            remote_path = os.path.join(remote_path, local_file_name)
-        remote_file_size = (
+        if os.path.basename(remote_path) != local_file_name:
+            remote_path = "/".join((remote_path, local_file_name))
+        remote_file_checksum = (
             self.run_cmd("md5sum {}".format(remote_path))[1]
             .read()
             .decode()
-            .strip("\n")
+            .split(" ")[0]
         )
-        local_file_size = hashlib.md5(local_path).hexdigest()
-        if local_file_size != remote_file_size:
+        with open(local_path, "rb") as local_file:
+            local_file_checksum = hashlib.md5(local_file.read()).hexdigest()
+        if local_file_checksum != remote_file_checksum:
             raise IOError(
                 "\nRemote file md5sum: {}\nLocal file md5sum: {}\n"
                 "\nYour file may not have been transferred correctly!".format(
-                    remote_file_size, local_file_size
+                    remote_file_checksum, local_file_checksum
                 )
             )
