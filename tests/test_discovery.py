@@ -123,10 +123,7 @@ class TestDeviceDiscovery:
         device_listener.add_service(zconf, service_type, name[1])
 
         assert len(device_listener.devices) == 2
-        assert (
-            device_listener.devices[0].hostname
-            != device_listener.devices[1].hostname
-        )
+        assert device_listener.devices[0] != device_listener.devices[1]
 
     @pytest.mark.parametrize(
         "properties, address, service_type, name",
