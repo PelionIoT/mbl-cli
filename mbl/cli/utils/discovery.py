@@ -5,10 +5,8 @@
 
 """Module handles device discovery."""
 
-import platform
 import socket
 import subprocess
-import sys
 import time
 from collections import namedtuple
 from enum import Enum
@@ -20,6 +18,15 @@ from mbl.cli.utils import device, events
 MBL_ID = b"mblos"
 TIMEOUT = 30
 SLEEP_TIME = 0.5
+
+
+def do_discovery(listener):
+    """Browse for mblos devices for up to TIMEOUT seconds."""
+    discovery_notifier = DeviceDiscoveryNotifier()
+    discovery_notifier.add_listener(listener)
+
+    with DeviceGetter() as dev_getter:
+        dev_getter.discover_all(discovery_notifier)
 
 
 class DeviceDiscoveryNotifier(events.Notifier):
@@ -36,7 +43,6 @@ class DeviceDiscoveryNotifier(events.Notifier):
         Ensure it's an 'mbed linux device', notify listeners if it is.
         """
         info = zeroconf.get_service_info(service_type, name)
-
         try:
             info.properties[MBL_ID]
         except KeyError:
@@ -46,7 +52,6 @@ class DeviceDiscoveryNotifier(events.Notifier):
                 inet_addr = socket.inet_ntoa(info.address)
             except (OSError, TypeError):
                 inet_addr = info.address
-
             new_dev = device.create_device(name, inet_addr)
             if new_dev not in self.devices:
                 self.devices.append(new_dev)
@@ -77,7 +82,7 @@ class DeviceGetter:
     def __exit__(self, *exception_info):
         """Exit the context, close zeroconf."""
         self.zconf.close()
-        return exception_info
+        return False
 
     def discover_all(self, listener):
         """Browse for ssh services on the network."""
@@ -85,18 +90,36 @@ class DeviceGetter:
         while not listener.devices and (time.time() < end_time):
             time.sleep(SLEEP_TIME)
             try:
-                raw_output = avahi_browse()
+                raw_output = _avahi_browse()
             except FileNotFoundError:
                 self.browser = zeroconf.ServiceBrowser(
                     self.zconf, self.ADDR, listener
                 )
             else:
-                for src_info in parse_avahi_output(raw_output):
+                for src_info in _parse_avahi_output(raw_output):
                     listener.add_service(
                         AvahiZeroconf(**src_info),
                         "local",
                         src_info["name"].decode(),
                     )
+
+
+class AvahiZeroconf:
+    """Pack avahi output text into a struct.
+
+    This basically exists to mock out the zeroconf
+    class when using avahi for discovery.
+    """
+
+    ServiceInfo = namedtuple("ServiceInfo", "name properties address")
+
+    def __init__(self, **kwargs):
+        """:param kwargs dict: data to pass into ServiceInfo."""
+        self.service_info = self.ServiceInfo(**kwargs)
+
+    def get_service_info(self, name, addr):
+        """Just return the ServiceInfo struct ignoring args (yikes)."""
+        return self.service_info
 
 
 class ServiceData(Enum):
@@ -113,7 +136,7 @@ class ServiceData(Enum):
     prop = 9
 
 
-def avahi_browse():
+def _avahi_browse():
     """Call avahi-browse."""
     return subprocess.Popen(
         [
@@ -129,7 +152,7 @@ def avahi_browse():
     ).communicate()[0]
 
 
-def parse_avahi_output(raw_output):
+def _parse_avahi_output(raw_output):
     """Pack avahi output data into a data struct.
 
     Yield the data structs for each service.
@@ -155,27 +178,3 @@ def parse_avahi_output(raw_output):
             yield output
             known_device_cache.append(output[hostname])
             output.clear()
-
-
-class AvahiZeroconf:
-    """Pack avahi output text into a struct.
-
-    This basically exists to mock out the zeroconf
-    class when using avahi for discovery.
-    """
-
-    ServiceInfo = namedtuple("ServiceInfo", "name properties address")
-
-    def __init__(self, **kwargs):
-        """:param kwargs dict: data to pass into ServiceInfo."""
-        self.service_info = self.ServiceInfo(**kwargs)
-
-    def get_service_info(self, name, addr):
-        """Just return the ServiceInfo struct ignoring args (yikes)."""
-        return self.service_info
-
-
-def do_discovery(listener):
-    """Browse for mblos devices for up to TIMEOUT seconds."""
-    with DeviceGetter() as dev_getter:
-        dev_getter.discover_all(listener)
