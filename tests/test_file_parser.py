@@ -30,6 +30,13 @@ def mock_open():
         yield open_mock, read_mock
 
 
+@pytest.fixture
+def mock_json(mock_open):
+    json_mock = mock.MagicMock()
+    with mock.patch.object(file_handler, "json", json_mock, create=True):
+        yield json_mock
+
+
 class TestFileHandler:
     """File handler tests."""
 
@@ -43,9 +50,7 @@ class TestFileHandler:
         read_mock.write.assert_called()
         assert open_mock.call_args[0] == (fh.data_file_path, "w+")
 
-    def test_load_device_data(self, fh, mock_open):
+    def test_load_device_data(self, fh, mock_json):
         """Test json.load is called."""
-        json_mock = mock.MagicMock()
-        with mock.patch.object(file_handler, "json", json_mock, create=True):
-            fh.read_device_data()
-            assert json_mock.load.called
+        fh.read_device_data()
+        assert mock_json.load.called
