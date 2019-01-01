@@ -33,6 +33,12 @@ def parse_args(description):
         description=description,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    parser.add_argument(
+        "-a",
+        "--address",
+        help="The ipv4 or ipv6 address of the device"
+        " you want to communicate with. ",
+    )
 
     command_group = parser.add_subparsers(
         description="The commands you can run on the device."
@@ -51,11 +57,6 @@ def parse_args(description):
 
     get = command_group.add_parser("get", help="Get a file from the device.")
     get.add_argument(
-        "--address",
-        help="The ipv4 or ipv6 address of the device"
-        " you want to communicate with. ",
-    )
-    get.add_argument(
         "src_path", help="Path of the file you're getting on the device."
     )
     get.add_argument(
@@ -66,12 +67,6 @@ def parse_args(description):
     get.set_defaults(func=get_action.execute)
 
     put = command_group.add_parser("put", help="Put a file on the device.")
-    put.add_argument(
-        "-a",
-        "--address",
-        help="The ipv4 or ipv6 address"
-        " of the device you want to communicate with. ",
-    )
     put.add_argument(
         "src_path", help="Local path to the file you want to transfer."
     )
@@ -86,23 +81,16 @@ def parse_args(description):
         "shell",
         help="Run a single command or "
         "enable an interactive shell. "
-        "If -c flag, followed by the command, is passed then the "
-        "command will run, "
-        "if no command is passed an interactive shell is started",
+        "If followed by a command, the "
+        "command will run, and the output is printed to stdout. "
+        "If no command is passed an interactive shell is started.",
     )
     shell.add_argument(
-        "-c",
-        "--cmd",
+        "cmd",
+        nargs="?",
         help="Run a command on the device. "
         "If the command contains spaces, "
         "enclose in single quotes. Example: 'ls -la'",
-        default=str(),
-    )
-    shell.add_argument(
-        "-a",
-        "--address",
-        help="The ipv4 or ipv6 address of"
-        " the device you want to communicate with. ",
     )
     shell.set_defaults(func=shell_action.execute)
 
