@@ -49,9 +49,8 @@ Since we installed mbl-cli in editable mode, it will watch for any code changes.
 
 ## Testing
 
-Run the unit tests in a docker container.
+Run the unit tests using pytest
 
 ```bash
-cd mbl-cli/tests
-./run-tests.sh
+pytest -vvv
 ```
