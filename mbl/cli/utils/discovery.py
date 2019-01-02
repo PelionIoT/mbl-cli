@@ -166,14 +166,16 @@ def _parse_avahi_output(raw_output):
     for txt_line in raw_output.split(b"\n"):
         if txt_line.startswith(b"="):
             tokens = txt_line.split(b";")
-            if tokens[ServiceData.name] in known_device_cache:
+            if tokens[ServiceData.name.value] in known_device_cache:
                 continue
-            output[hostname] = tokens[ServiceData.name]
+            output[hostname] = tokens[ServiceData.name.value]
             output[address] = "{}%{}".format(
-                tokens[ServiceData.ip].decode(),
-                tokens[ServiceData.interface].decode(),
+                tokens[ServiceData.ip.value].decode(),
+                tokens[ServiceData.interface.value].decode(),
             )
-            output[properties] = {tokens[ServiceData.prop].strip(b'"'): False}
+            output[properties] = {
+                tokens[ServiceData.prop.value].strip(b'"'): False
+            }
         if len(output) == 3:
             yield output
             known_device_cache.append(output[hostname])
