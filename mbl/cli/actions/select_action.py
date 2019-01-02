@@ -16,9 +16,11 @@ from . import list_action
 def execute(args):
     """Entry point for the select command."""
     list_of_devices = list_action.execute(args)
-    user_input = input("\nSelect a device from the list: \n")
+    user_input = input("\nSelect a device from the list: ")
     try:
         user_input = int(user_input)
+        if user_input <= 0:
+            raise ValueError
         selected_device = list_of_devices[user_input - 1]
         index, name, addr = selected_device.split(": ")
     except (ValueError, IndexError):
