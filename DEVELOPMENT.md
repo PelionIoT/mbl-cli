@@ -1,49 +1,56 @@
 # Mbed Linux OS CLI
 
-[![Circle CI](https://circleci.com/gh/ARMmbed/mbl-cli.svg?style=shield&circle-token=367893aefffecc72cf7d17201667cd2f75d6d5c7)](https://circleci.com/gh/ARMmbed/mbl-cli/)
-
-[![Builds](https://img.shields.io/badge/mbed%20linux%20cli-builds-blue.svg)](http://armmbed.github.io/mbl-cli/builds/)
-
 ## Prerequisites
 
-[Node.js > v8.10.0](https://nodejs.org), which includes `npm v3`.
+[Python > v3.6](https://python.org) and `pip`. 
+
+It's recommended to use a virtual environment for development.
+
+Create a virtual environment using venv
+
+```bash
+$ python -m venv /path/to/venv
+```
+
+Activate the virtual environment you just created
+
+```bash
+$ source /path/to/venv/bin/activate
+```
 
 ## Latest Build
 
-To install the latest development build:
+Clone the repository
 
 ```bash
-$ npm install -g ARMmbed/mbl-cli#build
+$ git clone git@github.com:ARMmbed/mbl-cli.git
 ```
 
 ## Setup
 
-After cloning this repository, install the npm dependencies:
+Install the dev dependencies into your active virtual environment
 
 ```bash
-$ npm install
+$ cd /path/to/repo
+$ pip install -r requirements.txt
 ```
 
-## Building
+This will also install the mbl-cli in 'editable' mode (i.e pip install -e).
 
-Simply use the default ```gulp``` task to build the SDK and docs:
+## Usage
+
+The tool can be invoked when your virtual environment is active
 
 ```bash
-$ npm run gulp
+$ mbl-cli <command>
 ```
 
-## Watching
-
-To continually watch for changes, use the gulp `watch` task:
-
-```bash
-$ npm run gulp watch
-```
+Since we installed mbl-cli in editable mode, it will watch for any code changes.
 
 ## Testing
 
-Link the executable to make it globally available as `mbl-cli` by running:
+Run the unit tests using pytest
 
 ```bash
-$ npm link
+pytest -vvv
 ```
