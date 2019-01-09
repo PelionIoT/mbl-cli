@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# Copyright (c) 2018 Arm Limited and Contributors. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+
+"""Test command handler functions."""
+
 from unittest import mock
 
 import pytest
@@ -113,6 +121,8 @@ class TestSelectCommand:
 
 
 class TestGetCommand:
+    """Test the get command."""
+
     @pytest.fixture(
         params=[
             ("some/path/file.txt", "remote/path/", "mbed-hostname-8989"),
@@ -141,6 +151,8 @@ class TestGetCommand:
 
 
 class TestPutCommand:
+    """Test the put command."""
+
     @pytest.fixture(
         params=[
             ("some/path/file.txt", "remote/path/", "mbed-hostname-8989"),

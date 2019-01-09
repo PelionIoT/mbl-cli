@@ -1,0 +1,14 @@
+/* Copyright (c) 2018 Arm Limited and Contributors. All rights reserved.
+
+   SPDX-License-Identifier: BSD-3-Clause */
+
+@Library('mbl-jenkins-library@d0b5c2eed42821addcacd6aff6a98c083729c7bf') _
+
+mblCliPipeline (
+    credentialsId: "fc6db1f7-2a3f-4655-b54a-476bac1194e5",
+    agent: "builder",
+    daysToKeep: "",
+    numToKeep: "2",
+    cron: "",
+    mblToolsBranch: "rw-iotmbl1333-add-python-deploy-scripts"
+)

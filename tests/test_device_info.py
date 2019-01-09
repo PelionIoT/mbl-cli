@@ -3,6 +3,9 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+"""Test the DeviceInfo data structure."""
+
+
 import pytest
 from mbl.cli.utils import device
 
