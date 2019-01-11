@@ -10,5 +10,5 @@ mblCliPipeline (
     daysToKeep: "",
     numToKeep: "2",
     cron: "",
-    mblToolsBranch: "rw-iotmbl1333-add-python-deploy-scripts"
+    mblToolsBranch: "master"
 )
