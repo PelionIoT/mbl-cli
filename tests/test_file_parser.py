@@ -32,6 +32,7 @@ def mock_open():
 
 @pytest.fixture
 def mock_json(mock_open):
+    """Mock the json library."""
     json_mock = mock.MagicMock()
     with mock.patch.object(file_handler, "json", json_mock, create=True):
         yield json_mock
