@@ -26,5 +26,5 @@ def execute(args):
     if not indexed_list:
         raise IOError("No devices found!")
     else:
-        print(indexed_list.to_string())
+        print(indexed_list)
         return indexed_list

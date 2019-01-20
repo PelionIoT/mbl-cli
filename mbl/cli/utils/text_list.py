@@ -11,10 +11,10 @@ from collections import UserList
 class IndexedTextList(UserList):
     """List of strings. Numbered according to index."""
 
+    def __str__(self):
+        """Return all list items as multi-line string."""
+        return "\n".join(self)
+
     def append(self, item):
         """Append item as a string with numbered index."""
         super().append(f"{len(self)+1}: {item}")
-
-    def to_string(self):
-        """Return all list items as multi-line string."""
-        return "\n".join(self)
