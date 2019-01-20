@@ -15,7 +15,10 @@ from abc import abstractmethod
 
 
 def termios_tty(func):
-    """Decorator to specify a termios tty."""
+    """Create a tty using termios.
+
+    Use as a decorator.
+    """
     # termios/tty imports are only available on mac & Linux
     try:
         import termios
@@ -85,7 +88,7 @@ class PosixSSHShell(SSHShell):
                     pass
             # send stdin to the ssh channel
             if sys.stdin in rlist:
-                # read all waiting bytes
+                # read all waiting bytes from stdin
                 stdin = sys.stdin.read(buffer_size)
                 if not stdin:
                     break

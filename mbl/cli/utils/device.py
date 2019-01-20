@@ -9,7 +9,7 @@ from collections import namedtuple
 
 
 def create_device(hostname, address, username="root", password=""):
-    """Factory function to create a DeviceInfo struct."""
+    """Create and return a DeviceInfo struct."""
     return DeviceInfo(hostname, address, username, password)
 
 

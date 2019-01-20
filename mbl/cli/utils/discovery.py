@@ -38,8 +38,9 @@ class DeviceDiscoveryNotifier(events.Notifier):
     devices = list()
 
     def add_service(self, zeroconf, service_type, name):
-        """Called when a new zeroconf service is discovered.
+        """Add a Mbed Linux Zeroconf service to a list of services.
 
+        Called when a new zeroconf service is discovered.
         Ensure it's an 'mbed linux device', notify listeners if it is.
         """
         info = zeroconf.get_service_info(service_type, name)
