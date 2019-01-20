@@ -19,6 +19,10 @@ def execute(args):
     print(f"Putting {args.src_path} on device: {dev.hostname}\n")
 
     with ssh.SSHSession(dev) as ssh_session:
-        ssh_session.put(local_path=args.src_path, remote_path=args.dst_path)
+        ssh_session.put(
+            local_path=args.src_path,
+            remote_path=args.dst_path,
+            recursive=args.recursive,
+        )
 
     print("\n\nCompleted without error.")

@@ -12,7 +12,7 @@ import os
 import platform
 import socket
 import sys
-
+import io
 import paramiko
 import scp
 
@@ -27,28 +27,34 @@ def scp_progress(filename, size, sent):
         except AttributeError:
             fname = filename
         sys.stdout.write(
-            "{} is transferring. Progress: {}\r".format(
+            "{} is transferring. Progress: {}%\r".format(
                 fname, int(sent / size * 100)
             )
         )
 
 
-def scp_session(func):
-    """Decorator to start an scp session on the client."""
+def scp_session(transfer_func):
+    """Start an scp session on the client.
+
+    Use as a decorator.
+    """
     # wrapper
-    @functools.wraps(func)
-    def wrapper(self, local_path, remote_path):
+    @functools.wraps(transfer_func)
+    def wrapper(self, local_path, remote_path, recursive=False):
         with scp.SCPClient(
             self._client.get_transport(), progress=scp_progress
         ) as scp_client:
-            func(
+            transfer_func(
                 self,
                 local_path=local_path,
                 remote_path=remote_path,
                 scp_client=scp_client,
+                recursive=recursive,
             )
-            self._validate_file_transfer(
-                local_path=local_path, remote_path=remote_path
+            self._validate_scp_transfer(
+                local_path=local_path,
+                remote_path=remote_path,
+                recursive=recursive,
             )
 
     return wrapper
@@ -98,14 +104,16 @@ class SSHSession:
         return False
 
     @scp_session
-    def put(self, local_path, remote_path, scp_client=None):
+    def put(self, local_path, remote_path, recursive, scp_client=None):
         """Send data via scp."""
-        scp_client.put(local_path, remote_path=remote_path)
+        scp_client.put(
+            local_path, remote_path=remote_path, recursive=recursive
+        )
 
     @scp_session
-    def get(self, remote_path, local_path, scp_client=None):
+    def get(self, remote_path, local_path, recursive, scp_client=None):
         """Get data via scp."""
-        scp_client.get(remote_path, local_path)
+        scp_client.get(remote_path, local_path, recursive=recursive)
 
     def start_shell(self):
         """Start an interactive shell."""
@@ -126,27 +134,61 @@ class SSHSession:
         else:
             return cmd_output
 
+    def _validate_scp_transfer(self, local_path, remote_path, recursive=False):
+        """Ensure an SCP transfer succeeded."""
+        if recursive:
+            self._validate_directory_transfer(local_path, remote_path)
+        else:
+            self._validate_file_transfer(local_path, remote_path)
+
     def _validate_file_transfer(self, local_path, remote_path):
-        """Ensure an SCP file transfer succeeded."""
-        local_file_name = os.path.basename(local_path)
-        remote_file_name = os.path.basename(remote_path)
-        if remote_file_name != local_file_name:
-            if os.path.isfile(local_path):
-                remote_path = "/".join((remote_path, local_file_name))
-            else:
-                local_path = os.path.join(local_path, remote_file_name)
-        remote_file_checksum = (
-            self.run_cmd("md5sum {}".format(remote_path))[1]
-            .read()
-            .decode()
-            .split(" ")[0]
-        )
-        with open(local_path, "rb") as local_file:
-            local_file_checksum = hashlib.md5(local_file.read()).hexdigest()
+        local_basename = os.path.basename(local_path)
+        remote_basename = os.path.basename(remote_path)
+        remote_stdout = ""
+        remote_stderr = ""
+        while not remote_stdout:
+            remote_cmd_output = self.run_cmd("md5sum {}".format(remote_path))
+            remote_stdout = remote_cmd_output[1].read().decode()
+            remote_stderr = remote_cmd_output[2].read().decode()
+            if "Is a directory" in remote_stderr:
+                remote_path = os.path.join(remote_path, local_basename)
+                continue
+        remote_file_checksum = remote_stdout.split(" ")[0]
+        local_file_checksum = ""
+        while not local_file_checksum:
+            try:
+                with open(local_path, "rb") as local_file:
+                    local_file_checksum = hashlib.md5(
+                        local_file.read()
+                    ).hexdigest()
+                    break
+            except IsADirectoryError:
+                local_path = os.path.join(local_path, remote_basename)
+                continue
         if local_file_checksum != remote_file_checksum:
-            raise IOError(
+            raise SCPValidationFailed(
                 "\nRemote file md5sum: {}\nLocal file md5sum: {}\n"
                 "\nYour file may not have been transferred correctly!".format(
                     remote_file_checksum, local_file_checksum
                 )
             )
+
+    def _validate_directory_transfer(self, local_path, remote_path):
+        local_basename = os.path.basename(local_path)
+        remote_basename = os.path.basename(remote_path)
+
+        remote_file_checksums = (
+            self.run_cmd(
+                "for fd in `find {} -type f`; do md5sum $fd;".format(
+                    remote_path
+                )
+            )[0]
+            .read()
+            .decode()
+            .split("\n")[0]
+        )
+        print(remote_file_checksums)
+
+
+class SCPValidationFailed(Exception):
+    """SCP transfer md5 validation failed."""
