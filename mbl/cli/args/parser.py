@@ -14,6 +14,7 @@ from mbl.cli.actions import (
     put_action,
     select_action,
     shell_action,
+    which_action,
 )
 
 
@@ -55,6 +56,11 @@ def parse_args(description):
     )
     select.set_defaults(func=select_action.execute)
 
+    which = command_group.add_parser(
+        "which", help="Show the currently selected device."
+    )
+    which.set_defaults(func=which_action.execute)
+
     get = command_group.add_parser("get", help="Get a file from the device.")
     get.add_argument(
         "src_path", help="Path of the file you're getting on the device."
@@ -63,6 +69,12 @@ def parse_args(description):
         "dst_path",
         help="Destination path on the host"
         " where the file will be transferred to.",
+    )
+    get.add_argument(
+        "-r",
+        "--recursive",
+        action="store_true",
+        help="Get the contents of a directory recursively.",
     )
     get.set_defaults(func=get_action.execute)
 
@@ -74,6 +86,12 @@ def parse_args(description):
         "dst_path",
         help="Destination path on the device where the file"
         " will be transferred to.",
+    )
+    put.add_argument(
+        "-r",
+        "--recursive",
+        action="store_true",
+        help="Put the contents of a directory recursively.",
     )
     put.set_defaults(func=put_action.execute)
 
