@@ -14,6 +14,7 @@ import socket
 import sys
 import io
 import paramiko
+import pathlib
 import scp
 
 from . import shell
@@ -177,17 +178,27 @@ class SSHSession:
         local_basename = os.path.basename(local_path)
         remote_basename = os.path.basename(remote_path)
 
-        remote_file_checksums = (
-            self.run_cmd(
-                "for fd in `find {} -type f`; do md5sum $fd;".format(
-                    remote_path
-                )
-            )[0]
-            .read()
-            .decode()
-            .split("\n")[0]
+        remote_file_checksums = self.run_cmd(
+            "for fd in $(find {} -type f | sort -k 2);"
+            " do md5sum $fd; done".format(remote_path)
         )
-        print(remote_file_checksums)
+        remote_stdout = remote_file_checksums[1].read().decode().split("\n")
+        hashes = [f.split(" ")[0] for f in remote_stdout]
+        remote_hashes = "".join(hashes)
+        local_hashes = str()
+        local_subpaths = pathlib.Path(local_path).glob("**/*")
+        for spath in sorted(
+            [path for path in local_subpaths if path.is_file()], reverse=False
+        ):
+            with open(spath, "rb") as file_to_hash:
+                local_hashes += hashlib.md5(file_to_hash.read()).hexdigest()
+        if local_hashes != remote_hashes.strip():
+            raise SCPValidationFailed(
+                "\nRemote files md5sum: {}\nLocal files md5sum: {}\n"
+                "\nYour files may not have been transferred correctly!".format(
+                    remote_hashes, local_hashes
+                )
+            )
 
 
 class SCPValidationFailed(Exception):
