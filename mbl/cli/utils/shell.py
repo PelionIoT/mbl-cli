@@ -13,6 +13,9 @@ import sys
 
 from abc import abstractmethod
 
+# Maximum number of bytes to read from the ssh channel.
+MAX_READ_BYTES = 1024
+
 
 def termios_tty(func):
     """Decorator to specify a termios tty."""
@@ -72,7 +75,7 @@ class PosixSSHShell(SSHShell):
             if self.chan in rlist:
                 try:
                     try:
-                        chan_input = self.chan.recv(1024).decode()
+                        chan_input = self.chan.recv(MAX_READ_BYTES).decode()
                     except UnicodeDecodeError:
                         continue
                     if not chan_input:
@@ -102,7 +105,7 @@ class WindowsSSHShell(SSHShell):
 
         def write_to_stdout(channel):
             while True:
-                data = channel.recv(1024).decode()
+                data = channel.recv(MAX_READ_BYTES).decode()
                 if not data:
                     sys.stdout.write(
                         "\r\nShell terminated. Press Enter to quit.\r\n"
