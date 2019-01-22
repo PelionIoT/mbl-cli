@@ -175,9 +175,6 @@ class SSHSession:
             )
 
     def _validate_directory_transfer(self, local_path, remote_path):
-        local_basename = os.path.basename(local_path)
-        remote_basename = os.path.basename(remote_path)
-
         remote_file_checksums = self.run_cmd(
             "for fd in $(find {} -type f | sort -k 2);"
             " do md5sum $fd; done".format(remote_path)
@@ -188,7 +185,7 @@ class SSHSession:
         local_hashes = str()
         local_subpaths = pathlib.Path(local_path).glob("**/*")
         for spath in sorted(
-            [path for path in local_subpaths if path.is_file()], reverse=False
+            [path for path in local_subpaths if path.is_file()]
         ):
             with open(spath, "rb") as file_to_hash:
                 local_hashes += hashlib.md5(file_to_hash.read()).hexdigest()
