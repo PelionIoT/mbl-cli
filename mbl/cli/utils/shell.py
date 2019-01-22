@@ -8,9 +8,13 @@
 import functools
 import select
 import socket
+import struct
 import sys
 
 from abc import abstractmethod
+
+# Maximum number of bytes to read from the ssh channel.
+MAX_READ_BYTES = 1024
 
 
 def termios_tty(func):
@@ -19,6 +23,7 @@ def termios_tty(func):
     try:
         import termios
         import tty
+        import fcntl
     except ImportError:
         return
 
@@ -29,7 +34,7 @@ def termios_tty(func):
             tty.setraw(sys.stdin.fileno())
             tty.setcbreak(sys.stdin.fileno())
             self.chan.settimeout(0.0)
-            return func(self, *args, **kwargs)
+            func(self, termios, fcntl, **kwargs)
         finally:
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
 
@@ -57,14 +62,22 @@ class PosixSSHShell(SSHShell):
     """
 
     @termios_tty
-    def run(self):
+    def run(self, termios_, fcntl_):
         """Terminal IO."""
         while True:
             rlist, wlist, elist = select.select([self.chan, sys.stdin], [], [])
+            # check how many bytes are waiting to be read
+            buffered_raw = fcntl_.ioctl(
+                rlist[0].fileno(), termios_.FIONREAD, "  "
+            )
+            buffer_size = struct.unpack("h", buffered_raw)[0]
             # read ssh input and write to stdout
             if self.chan in rlist:
                 try:
-                    chan_input = self.chan.recv(1024).decode()
+                    try:
+                        chan_input = self.chan.recv(MAX_READ_BYTES).decode()
+                    except UnicodeDecodeError:
+                        continue
                     if not chan_input:
                         sys.stdout.write("\r\nShell terminated.\r\n")
                         break
@@ -75,7 +88,8 @@ class PosixSSHShell(SSHShell):
                     pass
             # send stdin to the ssh channel
             if sys.stdin in rlist:
-                stdin = sys.stdin.read(1)
+                # read all waiting bytes
+                stdin = sys.stdin.read(buffer_size)
                 if not stdin:
                     break
                 else:
@@ -91,7 +105,7 @@ class WindowsSSHShell(SSHShell):
 
         def write_to_stdout(channel):
             while True:
-                data = channel.recv(1024).decode()
+                data = channel.recv(MAX_READ_BYTES).decode()
                 if not data:
                     sys.stdout.write(
                         "\r\nShell terminated. Press Enter to quit.\r\n"
