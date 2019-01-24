@@ -25,7 +25,7 @@ def discovery():
     """Mock avahi discovery."""
     with mock.patch("mbl.cli.utils.discovery._avahi_browse") as avahi:
         avahi.return_value = (
-            b"=;eth3;inet6;mbed-linux-os-9999;mdns;local;"
+            b"=;eth3;ipv6;mbed-linux-os-9999;mdns;local;"
             b"mbed-linux-os-9999.local;fe80::d079:8191:9140:c56;22;mblos"
         )
         yield avahi
@@ -58,6 +58,7 @@ class Args:
     address = ""
     src_path = ""
     dst_path = ""
+    recursive = False
 
 
 class TestListCommand:
@@ -146,7 +147,9 @@ class TestGetCommand:
         _ssh, _scp = mock_ssh
         get_action.execute(args)
         _ssh.return_value.__enter__.assert_called()
-        _ssh.get.assert_called_once_with(args.src_path, args.dst_path)
+        _ssh.get.assert_called_once_with(
+            args.src_path, args.dst_path, args.recursive
+        )
         _ssh.return_value.__exit__.assert_called()
 
 
@@ -172,5 +175,7 @@ class TestPutCommand:
         _ssh, _scp = mock_ssh
         put_action.execute(args)
         _ssh.return_value.__enter__.assert_called()
-        _ssh.put.assert_called_once_with(args.src_path, args.dst_path)
+        _ssh.put.assert_called_once_with(
+            args.src_path, args.dst_path, args.recursive
+        )
         _ssh.return_value.__exit__.assert_called()

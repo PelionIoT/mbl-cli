@@ -38,8 +38,9 @@ class DeviceDiscoveryNotifier(events.Notifier):
     devices = list()
 
     def add_service(self, zeroconf, service_type, name):
-        """Called when a new zeroconf service is discovered.
+        """Add a Mbed Linux Zeroconf service to a list of services.
 
+        Called when a new zeroconf service is discovered.
         Ensure it's an 'mbed linux device', notify listeners if it is.
         """
         info = zeroconf.get_service_info(service_type, name)
@@ -169,10 +170,13 @@ def _parse_avahi_output(raw_output):
             if tokens[ServiceData.name.value] in known_device_cache:
                 continue
             output[hostname] = tokens[ServiceData.name.value]
-            output[address] = "{}%{}".format(
-                tokens[ServiceData.ip.value].decode(),
-                tokens[ServiceData.interface.value].decode(),
-            )
+            if tokens[ServiceData.family.value].decode().lower() == "ipv6":
+                output[address] = "{}%{}".format(
+                    tokens[ServiceData.ip.value].decode(),
+                    tokens[ServiceData.interface.value].decode(),
+                )
+            else:
+                output[address] = tokens[ServiceData.ip.value].decode()
             output[properties] = {
                 tokens[ServiceData.prop.value].strip(b'"'): False
             }
