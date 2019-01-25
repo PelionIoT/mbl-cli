@@ -17,6 +17,10 @@ from abc import abstractmethod
 MAX_READ_BYTES = 1024
 
 
+class ShellTerminate(Exception):
+    """SSH data transfer has stopped."""
+
+
 def termios_tty(func):
     """Create a tty using termios.
 
@@ -81,14 +85,18 @@ class PosixSSHShell(SSHShell):
                         chan_input = self.chan.recv(MAX_READ_BYTES).decode()
                     except UnicodeDecodeError:
                         continue
-                    if not chan_input:
-                        sys.stdout.write("\r\nShell terminated.\r\n")
-                        break
+                    if "The system is going down for reboot NOW!" in chan_input:
+                        raise ShellTerminate
+                    elif not chan_input:
+                        raise ShellTerminate
                     else:
                         sys.stdout.write(chan_input)
                         sys.stdout.flush()
                 except socket.timeout:
                     pass
+                except ShellTerminate:
+                    sys.stdout.write("\r\nShell terminated.\r\n")
+                    break
             # send stdin to the ssh channel
             if sys.stdin in rlist:
                 # read all waiting bytes from stdin
