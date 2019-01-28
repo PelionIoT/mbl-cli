@@ -125,7 +125,7 @@ The UID/name provided is used by the mbl-cli to reference the appropriate store.
 Store a Pelion Cloud API key in the specified developer storage location.
 
 ```bash
-$ mbl-cli saveapikey <uid> <api-key> [store-location]
+$ mbl-cli save-api-key <uid> <api-key> [store-location]
 ```
 
 #### CreateUpdateCert
@@ -135,7 +135,7 @@ This command will generate an X.509 keypair then create and sign a public key ce
 If no Team Store location exists, then you will be prompted to create one.
 
 ```bash
-$ mbl-cli createupdatecert <uid>
+$ mbl-cli create-update-cert <uid>
 ```
 
 [mbl-license]: LICENSE.md

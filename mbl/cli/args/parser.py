@@ -93,7 +93,7 @@ def parse_args(description):
 
     save_api_key = command_group.add_parser("save-api-key")
     save_api_key.add_argument(
-        "uid", help="UID/name of the Pelion user who owns the key."
+        "uid", help="UID/name of the persistent storage location."
     )
     save_api_key.add_argument(
         "context", choices=["team", "user"], help="The storage context."
