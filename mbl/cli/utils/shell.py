@@ -85,7 +85,10 @@ class PosixSSHShell(SSHShell):
                         chan_input = self.chan.recv(MAX_READ_BYTES).decode()
                     except UnicodeDecodeError:
                         continue
-                    if "The system is going down for reboot NOW!" in chan_input:
+                    if (
+                        "The system is going down for reboot NOW!"
+                        in chan_input
+                    ):
                         raise ShellTerminate
                     elif not chan_input:
                         raise ShellTerminate
