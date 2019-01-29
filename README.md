@@ -98,7 +98,7 @@ $ mbl-cli [address] put <src> <dest>
 
 ### Device Provisioning
 
-MBL-CLI provides support for dynamically injecting mcc credentials in to devices.
+MBL-CLI provides support for dynamically injecting mcc credentials into devices.
 
 Persistent storage for Pelion Cloud Credentials is also provided using the tool.
 
