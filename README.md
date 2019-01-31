@@ -98,25 +98,35 @@ $ mbl-cli [address] put <src> <dest>
 
 ### Device Provisioning
 
-MBL-CLI provides support for dynamically injecting mcc credentials into devices.
+During development, you don't need to go through the full factory process every time you want to test a device or a software version.
 
-Persistent storage for Pelion Cloud Credentials is also provided using the tool.
+Pelion Device Management offers a developer mode to speed up the development process. The mode relies on a developer certificate that you can add to your software binary. The developer certificate allows your test device to connect to your Device Management account.
+
+You can use the same certificate on up to 100 devices. If you need more test devices, you will need to generate a second certificate.
+
+When updating the firmware on a device you must upload a signed [firmware manifest](https://cloud.mbed.com/docs/current/updating-firmware/firmware-manifests.html) to the Pelion cloud. MBL-CLI also provides functionality to create a public/private keypair used to sign the firmware update manifest.
+
+Pelion provide several REST APIs relating to device management. The API keys to authenticate with the Pelion REST APIs are created on the Pelion website. The API keys must be stored locally to be repeatedly accessible. After viewing the API key on initial creation, it is no longer fully visible in the Pelion portal.
+
+MBL-CLI provides support for dynamically injecting Pelion developer certificates into devices.
+
+Persistent storage for Pelion API keys, firmware update authority certificates and developer certificates is also provided using the tool.
 
 #### Persistent Storage
 
 It is possible to save Pelion Cloud Credentials to either a 'Developer Store' or 'Team Store' depending on the given context.
 
-* Developer Store: only accessible by a single user or member of the administrators group. This is where developer API keys are stored.
-* Team Store: accessible by all groups. This is the storage location for the firmware update authority certificate, used to sign firmware update manifests.
+* Developer Store: only accessible by a single user or member of the administrators group. This is where developer API keys are stored. This will usually be a location on your dev machine, used for quick access to Pelion API keys the MBL-CLI will use for further provisoning activities.
+* Team Store: accessible by all groups. This is the storage location for the firmware update authority certificate for a device. This certificate is used to sign firmware update manifests. The Team Store would generally be set to a location accessible by your team (for example a cloud share).
 
 You can optionally specify a location for the Developer Store and/or Team Store. The MBL-CLI will use the following defaults:
-* Default location for the Developer Store is `~/.mbl-cli/dev-store/` (Permissions for this folder are set to drw-------)
-* Default location for shared storage in the Team Store is `~/.mbl-cli/team-store/` (Permissions for this folder are set to drw-rw----)
+* Default location for the Developer Store is `~/.mbl-cli/dev-store/` (Permissions for this folder are set to drwx------)
+* Default location for shared storage in the Team Store is `~/.mbl-cli/team-store/` (Permissions for this folder are set to drwxrw----)
 
 It is possible to have multiple Developer and Team Stores, referenced by UID.
 
 The user must provide a UID/name to associate with the Developer Store or Team Store location on first use.
-The UID/name provided is used by the mbl-cli to reference the appropriate store.
+The UID/name provided is used by the MBL-CLI to reference the appropriate store.
 
 ### Device Provisioning Commands
 

@@ -84,7 +84,7 @@ class StoreFinder:
         self.uid = uid
         self.store_type = store_type
         self.permissions = (
-            0o755 if self.store_type.lower() == "team" else 0o700
+            0o750 if self.store_type.lower() == "team" else 0o700
         )
 
     def get_or_create_location(self):
