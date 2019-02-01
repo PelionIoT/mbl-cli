@@ -41,14 +41,12 @@ def create(uid, store_type, location, **kwargs):
             if location is not None:
                 location = pathlib.Path(location)
             else:
-                raise IOError(
-                    "Unknown store uid and no location given."
-                )
+                raise IOError("Unknown store uid and no location given.")
     if not location.exists():
         location.mkdir(
             parents=True,
             exist_ok=True,
-            mode=0o700 if store_type == "dev" else 0o755
+            mode=0o700 if store_type == "dev" else 0o755,
         )
     params = file_handler.read_config_from_json(
         location.resolve() / "config.json"
@@ -65,12 +63,13 @@ def create(uid, store_type, location, **kwargs):
 
 
 class Store:
-    """This class is an abstraction of a storage location on disk,
-    which holds credential objects for use with
-    device management.
+    """This class is an abstraction of a storage location on disk.
 
-    This object wraps a dictionary,
-    providing an interface to access the objects held in the store.
+    The store holds a config dict which holds metadata
+    about objects in the store.
+
+    This object is a thin wrapper around the config which
+    provides an interface to access the objects held in the store.
     """
 
     def __init__(self, **data):
@@ -104,9 +103,7 @@ class Store:
 
 def _default_store_path(store_type):
     """Path to the default storage location."""
-    sp = pathlib.Path().home() / ".mbl-store/default-{}".format(
-        store_type
-    )
+    sp = pathlib.Path().home() / ".mbl-store/default-{}".format(store_type)
     return sp
 
 
@@ -116,9 +113,7 @@ def _update_store_locations_file(**store_conf):
         config_file_path=STORE_LOCATIONS_FILE_PATH
     )
     if store_conf["uid"] not in known_stores:
-        known_stores.update(
-            {store_conf["uid"]: store_conf["location"]}
-        )
+        known_stores.update({store_conf["uid"]: store_conf["location"]})
         file_handler.write_config_to_json(
             config_file_path=STORE_LOCATIONS_FILE_PATH, **known_stores
         )

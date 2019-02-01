@@ -20,6 +20,5 @@ def execute(args):
     store_handle.add_all_api_keys(args.key)
 
     file_handler.write_config_to_json(
-        config_file_path=store_handle.config_path,
-        **store_handle.config
+        config_file_path=store_handle.config_path, **store_handle.config
     )

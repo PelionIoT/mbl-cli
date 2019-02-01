@@ -48,9 +48,7 @@ def read_config_from_json(config_file_path):
         return dict()
 
 
-def write_config_to_json(
-    config_file_path="", mode="w+", **store_conf_data
-):
+def write_config_to_json(config_file_path="", mode="w+", **store_conf_data):
     """Write a dictionary of config data to a json file.
 
     Check the file exists and create it if not.
