@@ -14,89 +14,99 @@ import pytest
 from mbl.cli.utils import store
 
 
-@pytest.fixture(
-    params=[
-        {"location": "", "store_type": "user", "uid": "default"},
-        {"location": "", "store_type": "team", "uid": "default"},
-        {"location": "user", "store_type": "user", "uid": "rob"},
-        {"location": "team", "store_type": "team", "uid": "dev-team"},
-        {"location": "", "store_type": "user", "uid": "otheruser"},
-        {"location": "", "store_type": "team", "uid": "otherteam"},
-        {"location": "someotherlocation", "store_type": "team", "uid": ""},
-        {"location": "someotherlocation", "store_type": "user", "uid": ""},
-    ]
-)
-def store_data(tmp_path, request):
+VALID_INPUTS = [
+    {"location": "user", "store_type": "user", "uid": "rob"},
+    {"location": "team", "store_type": "team", "uid": "dev-team"},
+]
+
+INVALID_INPUTS = [
+    {"location": "", "store_type": "user", "uid": "rob"},
+    {"location": "", "store_type": "team", "uid": "dev-team"},
+    {"location": "", "store_type": "user", "uid": "otheruser"},
+    {"location": "", "store_type": "team", "uid": "otherteam"},
+    {"location": "someotherlocation", "store_type": "team", "uid": ""},
+    {"location": "someotherlocation", "store_type": "user", "uid": ""},
+]
+
+
+@pytest.fixture(params=VALID_INPUTS)
+def valid_store_data(tmp_path, request):
     """Fixture that yields mock store locations and types."""
     global_store_cache = tmp_path / "mbl-stores.json"
     store_dir = tmp_path / request.param["location"]
-    location_param = request.param["location"]
-    store_config = store_dir / "config.json"
-    store_type = request.param["store_type"]
+    _type = request.param["store_type"]
     uid = request.param["uid"]
-    yield store_dir, store_config, store_type, uid, location_param
+    yield store_dir, _type, uid
+
+
+@pytest.fixture(params=INVALID_INPUTS)
+def invalid_store_data(tmp_path, request):
+    """Fixture that yields mock store locations and types."""
+    global_store_cache = tmp_path / "mbl-stores.json"
+    store_dir = None
+    _type = request.param["store_type"]
+    uid = request.param["uid"]
+    yield store_dir, _type, uid
 
 
 class TestStore:
     """Test the store creation and discovery logic."""
 
-    def test_store_permissions_set_correctly(self, store_data):
+    def test_store_created_correctly_with_valid_inputs(self, valid_store_data):
         """
-        Test Store Permissions are correct.
+        Test a Store is created and permissions are correct.
+
+        Check the permissions for team and user stores
+        are set to the correct values.
+        Also assert that the store location file update function was called.
+        """
+        with mock.patch(
+            "mbl.cli.utils.store._update_store_locations_file"
+        ) as mock_slf:
+            store_dir, store_type, uid = valid_store_data
+            sf = store.create(
+                uid=uid, location=store_dir, store_type=store_type
+            )
+            perms = oct(store_dir.stat().st_mode).replace("0o40", "0o")
+            assert isinstance(sf, store.Store)
+            if store_type == "user":
+                assert perms == oct(0o700)
+            else:
+                assert perms == oct(0o755)
+            assert sf.config_path.exists()
+            mock_slf.assert_called_once_with(
+                uid=uid, location=str(store_dir), store_type=store_type
+            )
+
+    def test_store_create__raises_with_invalid_inputs(
+        self, invalid_store_data
+    ):
+        """
+        Test a Store is created and permissions are correct.
 
         Check the permissions for team and user stores
         are set to the correct values.
         """
-        store_dir, store_config, store_type, uid, location_param = store_data
-        sf = store.StoreFinder(
-            uid=uid, location=store_dir, store_type=store_type
-        )
-        if self._is_compatible_parameter_set(uid, location_param):
-            loc = sf.get_or_create_location()
-            assert oct(loc.stat().st_mode).replace("0o40", "0o") == oct(
-                sf.permissions
-            )
-        else:
-            try:
-                assert sf.get_or_create_location()
-            except (ValueError, IOError):
-                assert True
+        with mock.patch(
+            "mbl.cli.utils.store._update_store_locations_file"
+        ) as mock_slf:
+            store_dir, store_type, uid = invalid_store_data
+            with pytest.raises((ValueError, IOError)):
+                sf = store.create(
+                    uid=uid, location=store_dir, store_type=store_type
+                )
+            mock_slf.assert_not_called()
 
-    def test_store_locations_and_configs_are_found_or_created(
-        self, store_data
-    ):
-        """Test store configs are discovered or created."""
-        store_dir, store_config, store_type, uid, location_param = store_data
-        sf = store.StoreFinder(
-            uid=uid, location=store_dir, store_type=store_type
-        )
-        if self._is_compatible_parameter_set(uid, location_param):
-            assert sf.get_or_create_location().resolve() == store_dir.resolve()
-        else:
-            try:
-                assert sf.get_or_create_location()
-            except (ValueError, IOError):
-                assert True
-
-    def test_global_store_record_is_updated(self, store_data):
-        """Test the global store cache is updated."""
+    def test_global_store_record_is_updated(self, valid_store_data):
+        """Test the file handler write function is called.
+        Ensure called with the correct arguments."""
         with mock.patch("mbl.cli.utils.store.file_handler") as mock_fh:
-            mock_fh.read_known_stores.return_value = dict()
-            store_dir, store_config, store_type, uid, location_param = (
-                store_data
-            )
-            sf = store.StoreFinder(
+            mock_fh.read_config_from_json.return_value = dict()
+            store_dir, store_type, uid = valid_store_data
+            sf = store.create(
                 uid=uid, location=store_dir, store_type=store_type
             )
-            if self._is_compatible_parameter_set(uid, location_param):
-                sf.update_global_store_record(uid=uid, location=location_param)
-                mock_fh.write_store_config.assert_called_once_with(
-                    **{uid: location_param}
-                )
-
-    def _is_compatible_parameter_set(self, uid, location):
-        """Check if we should be raising due to incompatible parameters."""
-        if uid and (not location):
-            return False
-        else:
-            return True
+            mock_fh.write_config_to_json.assert_called_once_with(
+                config_file_path=store.STORE_LOCATIONS_FILE_PATH,
+                **{uid: str(store_dir)}
+            )

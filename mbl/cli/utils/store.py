@@ -42,12 +42,11 @@ def create(uid, store_type, location, **kwargs):
                 location = pathlib.Path(location)
             else:
                 raise IOError("Unknown store uid and no location given.")
-    if not location.exists():
-        location.mkdir(
-            parents=True,
-            exist_ok=True,
-            mode=0o700 if store_type == "dev" else 0o755,
-        )
+    location.mkdir(
+        parents=True,
+        exist_ok=True,
+        mode=0o700 if store_type == "user" else 0o755,
+    )
     params = file_handler.read_config_from_json(
         location.resolve() / "config.json"
     )
