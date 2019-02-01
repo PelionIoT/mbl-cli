@@ -10,7 +10,6 @@ import os
 import pathlib
 
 DEVICE_FILE_PATH = str(pathlib.Path().home() / ".mbl-dev.json")
-STORE_LOCATION_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
 
 
 def read_device_file(path=DEVICE_FILE_PATH):
@@ -30,27 +29,43 @@ def save_device_info(device, path=DEVICE_FILE_PATH):
     fh.to_file(device._asdict())
 
 
-def read_known_stores():
-    """Read the store locations file."""
-    STORE_LOCATION_FILE_PATH.touch(exist_ok=True)
-    fh = JSONParser(STORE_LOCATION_FILE_PATH.resolve())
+def read_config_from_json(config_file_path):
+    """Read json data from a file.
+
+    Check the file exists and create it if not.
+    We want to return an empty dict and not fail if the file contains no data.
+
+    :param config_file_path Path: Path representing the file-to-read.
+    :returns dict: config data (or an empty dict if there was no data).
+    """
+    config_file_path.touch(exist_ok=True)
     try:
-        return fh.from_file()
+        with open(config_file_path, "r") as dfile:
+            return json.load(dfile)
     except json.JSONDecodeError:
+        # The file contains no parsable json.
+        # In this case return an empty dict.
         return dict()
 
 
-def write_store_config(
-    config_file_path=STORE_LOCATION_FILE_PATH, mode="w+", **store_conf_data
+def write_config_to_json(
+    config_file_path="", mode="w+", **store_conf_data
 ):
-    """Write to a store config file."""
+    """Write a dictionary of config data to a json file.
+
+    Check the file exists and create it if not.
+
+    :param config_file_path Path: Path object representing the file-to-write.
+    :param mode str: file mode (must be one of: 'w', 'w+', 'a', 'a+').
+    """
     config_file_path.touch(exist_ok=True)
-    fh = JSONParser(config_file_path.resolve())
-    fh.to_file(store_conf_data, mode=mode)
+    json_fmt_data = json.dumps(store_conf_data)
+    with open(config_file_path, mode) as dfile:
+        dfile.write(json_fmt_data)
 
 
 class JSONParser:
-    """Read and write JSON data to files."""
+    """Read and write JSON data to and from a file."""
 
     JSON_EXT = ".json"
 
