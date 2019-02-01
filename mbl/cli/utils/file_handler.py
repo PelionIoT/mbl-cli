@@ -48,20 +48,20 @@ def read_config_from_json(config_file_path):
         return dict()
 
 
-def write_config_to_json(config_file_path="", mode="w+", **store_conf_data):
+def write_config_to_json(config_file_path, **store_conf_data):
     """Write a dictionary of config data to a json file.
 
     Check the file exists and create it if not.
 
     :param config_file_path Path: Path object representing the file-to-write.
-    :param mode str: file mode (must be one of: 'w', 'w+', 'a', 'a+').
     """
     config_file_path.touch(exist_ok=True)
     json_fmt_data = json.dumps(store_conf_data)
-    with open(config_file_path, mode) as dfile:
+    with open(config_file_path, "w") as dfile:
         dfile.write(json_fmt_data)
 
 
+# This is going to be removed.
 class JSONParser:
     """Read and write JSON data to and from a file."""
 

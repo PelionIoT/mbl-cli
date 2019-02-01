@@ -64,7 +64,7 @@ class TestStore:
             "mbl.cli.utils.store._update_store_locations_file"
         ) as mock_slf:
             store_dir, store_type, uid = valid_store_data
-            sf = store.create(
+            sf = store.Store(
                 uid=uid, location=store_dir, store_type=store_type
             )
             perms = oct(store_dir.stat().st_mode).replace("0o40", "0o")
@@ -91,8 +91,8 @@ class TestStore:
             "mbl.cli.utils.store._update_store_locations_file"
         ) as mock_slf:
             store_dir, store_type, uid = invalid_store_data
-            with pytest.raises((ValueError, IOError)):
-                sf = store.create(
+            with pytest.raises(store.StoreNotFoundError):
+                sf = store.Store(
                     uid=uid, location=store_dir, store_type=store_type
                 )
             mock_slf.assert_not_called()
@@ -103,7 +103,7 @@ class TestStore:
         with mock.patch("mbl.cli.utils.store.file_handler") as mock_fh:
             mock_fh.read_config_from_json.return_value = dict()
             store_dir, store_type, uid = valid_store_data
-            sf = store.create(
+            sf = store.Store(
                 uid=uid, location=store_dir, store_type=store_type
             )
             mock_fh.write_config_to_json.assert_called_once_with(

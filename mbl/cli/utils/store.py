@@ -14,53 +14,6 @@ import pathlib
 STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
 
 
-def create(uid, store_type, location, **kwargs):
-    """Create a Store object and ensure the path exists on the filesystem.
-
-    Check if the Store is already known by looking up its uid
-     in the store locations file. If known get the path from the file.
-
-    If the uid is unknown we're creating a new store. In this case fall
-     back to the given location.
-    Create the location if it doesn't already exist in the filesystem.
-
-    Fill a params dictionary with config data from either
-    a store's actual config file, or the input args if it doesnt exist.
-
-    :param str uid: The unique identifier of the store.
-    :param str location: The path to the store.
-    :param dict kwargs: Any other data to write to persistent storage.
-    :returns Store: A Store object.
-    """
-    if uid.lower() == "default":
-        location = _default_store_path(store_type)
-    else:
-        try:
-            location = _get_store_path_from_uid(uid)
-        except StoreNotFoundError:
-            if location is not None:
-                location = pathlib.Path(location)
-            else:
-                raise IOError("Unknown store uid and no location given.")
-    location.mkdir(
-        parents=True,
-        exist_ok=True,
-        mode=0o700 if store_type == "user" else 0o755,
-    )
-    params = file_handler.read_config_from_json(
-        location.resolve() / "config.json"
-    )
-    if not params:
-        params = dict(
-            uid=uid,
-            location=str(location.resolve()),
-            store_type=store_type,
-            **kwargs
-        )
-    _update_store_locations_file(**params)
-    return Store(**params)
-
-
 class Store:
     """This class is an abstraction of a storage location on disk.
 
@@ -71,12 +24,41 @@ class Store:
     provides an interface to access the objects held in the store.
     """
 
-    def __init__(self, **data):
-        """Initialise a Store object.
+    def __init__(self, uid, store_type, location, **store_data):
+        """Create a Store object and ensure the path exists on the filesystem.
 
-        :params dict data: all objects and metadata in the store.
+        Check if the Store is already known by looking up its uid
+        in the store locations file. If known get the path from the file.
+
+        If the uid is unknown we're creating a new store. In this case fall
+        back to the given location.
+        Create the location if it doesn't already exist in the filesystem.
+
+        Fill a params dictionary with config data from either
+        a store's actual config file, or the input args if it doesnt exist.
+
+        :params str uid: store's uid.
+        :params str store_type: type of store (user or team)
+        :params str location: Path to the store.
+        :params dict store_data: Paths to objects or API keys the store holds.
         """
-        self._config = data
+        if location is not None:
+            path_to_store = _create_new_storage_location(
+                location, mode=0o700 if store_type == "user" else 0o755
+            )
+        else:
+            path_to_store = _get_store_location(uid, store_type)
+        self._config = file_handler.read_config_from_json(
+            path_to_store.resolve() / "config.json"
+        )
+        if not self._config:
+            self._config = dict(
+                uid=uid,
+                location=str(path_to_store.resolve()),
+                store_type=store_type,
+                **store_data
+            )
+        _update_store_locations_file(**self._config)
 
     @property
     def api_keys(self):
@@ -84,20 +66,21 @@ class Store:
         return self._config["api_keys"]
 
     @property
-    def config(self):
-        """Access the config dict directly."""
-        return self._config
-
-    @property
     def config_path(self):
         """Path to the store config file."""
         return pathlib.Path(self._config["location"], "config.json")
 
-    def add_all_api_keys(self, api_keys):
+    def add_api_keys(self, api_keys):
         """Add a list of API keys to the store."""
         for api_key in list(api_keys):
             if api_key not in self.api_keys:
                 self.api_keys.append(api_key)
+
+    def save(self):
+        """Save config data to a file."""
+        file_handler.write_config_to_json(
+            STORE_LOCATIONS_FILE_PATH, **self._config
+        )
 
 
 def _default_store_path(store_type):
@@ -118,11 +101,26 @@ def _update_store_locations_file(**store_conf):
         )
 
 
-def _get_store_path_from_uid(uid):
+def _get_store_location(uid, store_type):
     """Access the known stores and retrieve the storage location."""
     known_stores = file_handler.read_config_from_json(
         config_file_path=STORE_LOCATIONS_FILE_PATH
     )
+    if uid.lower() == "default":
+        path_object = _default_store_path(store_type)
+    else:
+        path_object = _get_store_path_from_uid(uid, known_stores)
+    return path_object
+
+
+def _create_new_storage_location(location, mode):
+    """Create a new storage location."""
+    path_object = pathlib.Path(location)
+    location.mkdir(parents=True, exist_ok=True, mode=mode)
+    return path_object
+
+
+def _get_store_path_from_uid(uid, known_stores):
     try:
         loc = known_stores[uid]
     except KeyError:
