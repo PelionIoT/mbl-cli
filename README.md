@@ -113,9 +113,10 @@ Persistent storage on your developer machine for Pelion API keys, firmware updat
 #### Persistent Storage
 
 It is possible to save Pelion Cloud credentials to either a 'Developer Store' or 'Team Store' depending on the given context.
+These stores are located on your developer machine at a location you specify. It is recommended to set the Team Store location to a shared folder that your team can access.
 
-- Developer Store: only accessible by a single user or member of the administrators group. This is where developer API keys are stored. This will usually be a location on your developer machine, used for quick access to Pelion API keys the MBL-CLI will use for further provisioning activities.
-- Team Store: accessible by all groups. This is the storage location for the firmware update authority certificate for a device. This certificate is used to sign firmware update manifests. The Team Store would generally be set to a location accessible by your team (for example a cloud share).
+- Developer Store: only accessible by a single user or member of the administrators group. This is where developer API keys are stored. This store is used for quick access to Pelion API keys the MBL-CLI will use for further provisioning activities.
+- Team Store: group accessible (provided your team has access to the Team Store folder on your developer machine or cloud share). This is the storage location for the firmware update authority certificate for a device. This certificate is used to sign firmware update manifests. The Team Store would generally be set to a location accessible by your team (for example a cloud share).
 
 You can optionally specify a location for the Developer Store and/or Team Store. The MBL-CLI will use the following defaults:
 
