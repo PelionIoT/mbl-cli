@@ -96,21 +96,24 @@ def parse_args(description):
         "uid", help="UID/name of the persistent storage location."
     )
     save_api_key.add_argument(
-        "context", choices=["team", "user"], help="The storage context."
+        "--new-store",
+        nargs=2,
+        metavar=("PATH", "CONTEXT"),
+        help="""Create a new store. PATH and CONTEXT are required.
+        PATH: file path for the new store.
+        CONTEXT: storage context (must be either 'team' or 'user').""",
     )
     save_api_key.add_argument(
-        "--location",
-        type=str,
-        metavar="PATH",
-        help="A path to the specified store.",
-    )
-    save_api_key.add_argument(
-        "key", nargs="+", help="The API key(s) to store."
+        "keys", nargs="+", help="The API key(s) to store."
     )
     save_api_key.set_defaults(func=save_api_key_action.execute)
 
     args_namespace = parser.parse_args()
 
+    # Extra logic here to check the `save-api-key --new-store` option
+    # was given the correct values.
+    if hasattr(args_namespace, "new_store"):
+        _validate_new_store_arg(args_namespace.new_store)
     # We want to fail gracefully, with a consistent
     # help message, in the no argument case.
     # So here's an obligatory hasattr hack.
@@ -136,3 +139,9 @@ def _load_description_text():
     )
     with open(help_path) as hfile:
         return hfile.read()
+
+
+def _validate_new_store_arg(arg):
+    _, context = arg
+    if context not in ["team", "user"]:
+        raise ValueError("--new-store CONTEXT must be 'team' or 'user'")

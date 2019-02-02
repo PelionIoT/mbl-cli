@@ -6,7 +6,6 @@
 
 """Tests for the Store classes."""
 
-import pathlib
 from unittest import mock
 
 import pytest
@@ -32,7 +31,6 @@ INVALID_INPUTS = [
 @pytest.fixture(params=VALID_INPUTS)
 def valid_store_data(tmp_path, request):
     """Fixture that yields mock store locations and types."""
-    global_store_cache = tmp_path / "mbl-stores.json"
     store_dir = tmp_path / request.param["location"]
     _type = request.param["store_type"]
     uid = request.param["uid"]
@@ -42,7 +40,6 @@ def valid_store_data(tmp_path, request):
 @pytest.fixture(params=INVALID_INPUTS)
 def invalid_store_data(tmp_path, request):
     """Fixture that yields mock store locations and types."""
-    global_store_cache = tmp_path / "mbl-stores.json"
     store_dir = None
     _type = request.param["store_type"]
     uid = request.param["uid"]
@@ -91,10 +88,10 @@ class TestStore:
             "mbl.cli.utils.store._update_store_locations_file"
         ) as mock_slf:
             store_dir, store_type, uid = invalid_store_data
-            with pytest.raises(store.StoreNotFoundError):
-                sf = store.Store(
-                    uid=uid, location=store_dir, store_type=store_type
-                )
+            with pytest.raises(
+                (store.StoreNotFoundError, store.KnownStoreLocationInvalid)
+            ):
+                store.Store(uid=uid, location=store_dir, store_type=store_type)
             mock_slf.assert_not_called()
 
     def test_global_store_record_is_updated(self, valid_store_data):
@@ -103,9 +100,7 @@ class TestStore:
         with mock.patch("mbl.cli.utils.store.file_handler") as mock_fh:
             mock_fh.read_config_from_json.return_value = dict()
             store_dir, store_type, uid = valid_store_data
-            sf = store.Store(
-                uid=uid, location=store_dir, store_type=store_type
-            )
+            store.Store(uid=uid, location=store_dir, store_type=store_type)
             mock_fh.write_config_to_json.assert_called_once_with(
                 config_file_path=store.STORE_LOCATIONS_FILE_PATH,
                 **{uid: str(store_dir)}

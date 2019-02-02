@@ -5,16 +5,15 @@
 
 """Entry point for save-api-key action."""
 
-from mbl.cli.utils import store, file_handler
+from mbl.cli.utils import store
 
 
 def execute(args):
     """Execute the save-api-key action."""
-    store_handle = store.Store(
-        uid=args.uid,
-        location=args.location,
-        store_type=args.context,
-        api_keys=args.key,
-    )
-    store_handle.add_api_keys(args.key)
+    if args.new_store:
+        store_path, context = args.new_store
+        store_handle = store.create(args.uid, context, store_path)
+    else:
+        store_handle = store.get(args.uid)
+    store_handle.api_keys.extend(args.keys)
     store_handle.save()
