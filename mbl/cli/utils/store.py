@@ -4,7 +4,29 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 
-"""Manage persistent storage."""
+"""Manage persistent storage locations.
+
+Instantiate a `Store` using the `get` or `create` functions. 
+These factory functions perform some validation checks on the store metadata
+and file paths before returning a `Store` instance.
+
+The `Store` class wraps a dictionary of metadata and paths to stored objects.
+The dictionary is created from a `config.json` file in an existing storage
+location on disk, or the input arguments if creating a new store.
+
+`Store` provides an interface to access
+objects in storage and save items to the store.
+
+* `get` factory function creates a `Store` from a known UID.
+* `create` factory function creates a `Store`, \
+new store directory and config file paths.
+* `Store` class representing a storage location on disk.
+
+Exceptions:
+* `StoreNotFoundError` store UID is unknown.
+* `KnownStoreLocationInvalid` known store UID has no known path on disk.
+* `StoreConfigError` existing store config.json contains no data.
+"""
 
 
 from . import file_handler
@@ -19,7 +41,7 @@ DEFAULT_TEAM_STORE_NAME = "default-team"
 def create(uid, store_type, location):
     """Create a new store on disk and return a `Store` instance.
 
-    Create the `Store` directory and config file with the correct permissions.
+    Create the store directory and config file with the correct permissions.
 
     Pack the store metadata into a dictionary and wrap it in a `Store` object.
 
@@ -28,7 +50,7 @@ def create(uid, store_type, location):
     :params str store_type: type of store (user or team).
     :returns `Store`: A `Store` object.
     """
-    mode = 0o700 if store_type == "user" else 0o755
+    mode = 0o700 if store_type == "user" else 0o750
     path_to_store = pathlib.Path(location)
     config_file_path = path_to_store / "config.json"
     try:
@@ -44,10 +66,10 @@ def create(uid, store_type, location):
 
 
 def get(uid):
-    """Get existing store metadata from a known store, return a `Store`.
+    """Get existing store metadata from a known config file, return a `Store`.
 
-    Find the known store based on its UID.
-    Read store metadata from the store config file and wrap it in a `Store`.
+    Find the known config file based on the store UID.
+    Read store metadata from the config file and wrap it in a `Store` object.
 
     :params str uid: store's UID.
     :returns `Store`: A `Store` object.
@@ -59,30 +81,38 @@ def get(uid):
     metadata = file_handler.read_config_from_json(
         path_to_store / "config.json"
     )
+    if not metadata:
+        raise StoreConfigError(
+            "The config file at {} contains no data. "
+            "Your store is corrupt, please delete and recreate.".format(
+                    path_to_store
+                )
+            )
     return Store(metadata)
 
 
 class StoreNotFoundError(Exception):
-    """The specified store location does not exist."""
+    """The specified store does not exist."""
 
 
 class KnownStoreLocationInvalid(Exception):
     """A store UID is associated with a path that does not exist."""
 
 
+class StoreConfigError(Exception):
+    """Store config file exists but contains no data."""
+
+
 class Store:
     """This class is an abstraction of a storage location on disk.
 
     The store holds a `_config` dict. `_config` holds metadata
-    about objects in the store.
+    about the store itself, and information on objects within the store.
 
-    This object is a thin wrapper around `_config` and
-    provides an interface to access the objects held in `_config`.
+    This object provides an interface to access the store config file data.
 
-    NOTE: You usually won't instantiate this object directly, instead use the
-    `get` or `create` functions which validate/create the paths on disk
-    and prepare the metadata before returning a `Store` instance wrapping
-    the data.
+    NOTE: You usually won't instantiate this object directly. Instead use the
+    `get` or `create` module level convenience functions.
     """
 
     def __init__(self, metadata):
