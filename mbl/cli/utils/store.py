@@ -6,31 +6,36 @@
 
 """Manage persistent storage locations used with device provisioning.
 
-A "persistent storage location" consists of a directory on disk where objects
-are stored as files.
-This directory contains a file named `config.json` which contains
-some metadata about the store and any stored items (including paths to any
-files in the persistent storage location).
+A "persistent storage location" consists of a directory on disk containing
+a file named `config.json`. The persistent storage location is used to hold
+credentials and certificates which are used to provision devices for use with
+Pelion Device Management.
+The `config.json` file holds information about the stored items and other
+metadata (including paths to any objects in the persistent storage location
+stored as files).
 MBL-CLI also creates a file named `.mbl-stores.json`.
-`.mbl-stores.json` is referred to as STORE_LOCATIONS_FILE.
+`.mbl-stores.json` is referred to as the STORE_LOCATIONS_FILE.
 This is where known storage UIDs and locations are saved as key/value pairs.
 
-The `Store` class contained in this module is basically a thin wrapper
-for the dict passed to its `__init__` method as the `metadata` parameter.
-`metadata` is built from data in a store's `config.json` file by either the
-`get` or `create` functions (which must be used to create a `Store` instance.
-This is explained further below).
-`Store` provides an interface to access objects in a persistent storage
-location and save new items to the store.
+The `Store` class contained in this module provides the public interface to
+access objects in a persistent storage location and save new items to the
+store.
 
-To instantiate a `Store` use the `get` or `create` functions.
+The `Store` class is basically a thin wrapper
+around the dict passed to its `__init__` method as the `metadata` parameter.
+
+The `metadata` dict is built from data in a persistent storage location's
+`config.json` file, by either the `get` or `create` functions, which must
+be used to build a `Store` instance.
+
+To instantiate a `Store` use the `get` or `create` functions. Both of
+these functions return a `Store`.
 `get` will retrieve the `config.json` data from a known persistent storage
-location.
+location, then perform some sanity checks on the data.
 A `Store` object wrapping this data is then instantiated and returned.
 `create` will create a new persistent storage location on disk
-before instantiating a `Store` object and returning it.
-The `get` and `create` functions also perform some validation checks
-on the store metadata and file paths.
+before building a `metadata` dict from the input arguments.
+The `metadata` dict is passed to the `Store` object then `Store` is returned.
 
 * `get` factory function gets a path to a persistent storage location from
  a known UID and builds a `Store` instance from the config.json.
@@ -152,7 +157,7 @@ class Store:
 class StoreLocationsRecord:
     """Class represents the Store Locations Record.
 
-    This class provides an interface to stream data to/from the
+    This class provides an interface to update and read the
     STORE_LOCATIONS_FILE.
 
     The store uids and locations in the STORE_LOCATIONS_FILE are held as JSON
@@ -221,10 +226,9 @@ class StoreConfigError(Exception):
 def _get_or_create_default_store(uid):
     """Get the default store path, creating it if it doesn't exist.
 
-    This 'create' aspect of this covers the case when a user is saving to the
-    default store for the first time.
     We expect the default storage location and config.json to be automatically
-    created in this scenario.
+    created in the scenario where a user is saving to the
+    default store for the first time.
 
     :param str: UID for this default store (team & user have independent UIDs)
     :return Path: path to the default store.
