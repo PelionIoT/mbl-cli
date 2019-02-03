@@ -108,28 +108,20 @@ class TestStore:
         are set to the correct values.
         Also assert that the store location file update function was called.
         """
-        with mock.patch(
-            "mbl.cli.utils.store._update_store_locations_file"
-        ) as mock_slf:
-            with mock.patch("mbl.cli.utils.store.file_handler") as mock_fh:
-                store_dir, store_type, uid = valid_store_data
-                store_dir.mkdir(exist_ok=True)
-                mock_fh.read_config_from_json.return_value = {
-                    uid: str(store_dir.resolve())
-                }
+        with mock.patch("mbl.cli.utils.store.file_handler") as mock_fh:
+            store_dir, _, uid = valid_store_data
+            store_dir.mkdir(exist_ok=True)
+            conf = store_dir / "config.json"
+            conf.touch(exist_ok=True)
+            mock_fh.read_config_from_json.return_value = {
+                uid: str(store_dir.resolve()),
+                "location": str(store_dir.resolve()),
+            }
 
-                sf = store.get(uid=uid)
+            sf = store.get(uid=uid)
 
-                perms = oct(store_dir.stat().st_mode).replace("0o40", "0o")
-                assert isinstance(sf, store.Store)
-                if store_type == "user":
-                    assert perms == oct(0o700)
-                else:
-                    assert perms == oct(0o755)
-                assert sf.config_path.exists()
-                mock_slf.assert_called_once_with(
-                    uid=uid, location=str(store_dir), store_type=store_type
-                )
+            assert isinstance(sf, store.Store)
+            assert sf.config_path.exists()
 
     def test_store_create_raises_with_invalid_inputs(self, invalid_store_data):
         """
