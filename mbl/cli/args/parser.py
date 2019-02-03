@@ -142,6 +142,7 @@ def _load_description_text():
 
 
 def _validate_new_store_arg(arg):
-    _, context = arg
-    if context not in ["team", "user"]:
-        raise ValueError("--new-store CONTEXT must be 'team' or 'user'")
+    if arg is not None:
+        _, context = arg
+        if context not in ["team", "user"]:
+            raise ValueError("--new-store CONTEXT must be 'team' or 'user'")
