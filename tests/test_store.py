@@ -13,21 +13,6 @@ import pathlib
 from mbl.cli.utils import store
 
 
-VALID_INPUTS = [
-    {"location": "user", "store_type": "user", "uid": "rob"},
-    {"location": "team", "store_type": "team", "uid": "dev-team"},
-]
-
-INVALID_INPUTS = [
-    {"location": "", "store_type": "user", "uid": "rob"},
-    {"location": "", "store_type": "team", "uid": "dev-team"},
-    {"location": "", "store_type": "user", "uid": "otheruser"},
-    {"location": "", "store_type": "team", "uid": "otherteam"},
-    {"location": "someotherlocation", "store_type": "team", "uid": ""},
-    {"location": "someotherlocation", "store_type": "user", "uid": ""},
-]
-
-
 @pytest.fixture(
     params=[
         {"location": "user", "store_type": "user", "uid": "rob"},
@@ -81,7 +66,7 @@ class TestStore:
         Also assert that the store location file update function was called.
         """
         with mock.patch(
-            "mbl.cli.utils.store._update_store_locations_file"
+            "mbl.cli.utils.store.StoreLocationsRecord"
         ) as mock_slf:
             store_dir, store_type, uid = valid_store_data
             sf = store.create(
@@ -94,8 +79,8 @@ class TestStore:
             else:
                 assert perms == oct(0o750)
             assert sf.config_path.exists()
-            mock_slf.assert_called_once_with(
-                uid=uid, location=str(store_dir), store_type=store_type
+            mock_slf.update.assert_called_once_with(
+                uid=uid, location=str(store_dir)
             )
 
     def test_known_store_retrieved_correctly_with_valid_inputs(
@@ -131,7 +116,7 @@ class TestStore:
         are set to the correct values.
         """
         with mock.patch(
-            "mbl.cli.utils.store._update_store_locations_file"
+            "mbl.cli.utils.store.StoreLocationsRecord"
         ) as mock_slf:
             store_dir, store_type, uid = invalid_store_data
 
@@ -140,7 +125,7 @@ class TestStore:
                     uid=uid, location=store_dir, store_type=store_type
                 )
 
-            mock_slf.assert_not_called()
+            mock_slf.update.assert_not_called()
 
     @pytest.mark.parametrize(
         "known_store_loc",
@@ -158,23 +143,18 @@ class TestStore:
         Check the permissions for team and user stores
         are set to the correct values.
         """
-        with mock.patch(
-            "mbl.cli.utils.store._update_store_locations_file"
-        ) as mock_slf:
-            with mock.patch("mbl.cli.utils.store.file_handler") as mock_fh:
-                mock_fh.read_config_from_json.return_value = known_store_loc
-                _, _, uid = invalid_store_data
+        with mock.patch("mbl.cli.utils.store.file_handler") as mock_fh:
+            mock_fh.read_config_from_json.return_value = known_store_loc
+            _, _, uid = invalid_store_data
 
-                with pytest.raises(
-                    (
-                        store.StoreNotFoundError,
-                        store.KnownStoreLocationInvalid,
-                        store.StoreConfigError,
-                    )
-                ):
-                    store.get(uid=uid)
-
-                mock_slf.assert_not_called()
+            with pytest.raises(
+                (
+                    store.StoreNotFoundError,
+                    store.KnownStoreLocationInvalid,
+                    store.StoreConfigError,
+                )
+            ):
+                store.get(uid=uid)
 
     def test_global_store_record_is_updated(self, valid_store_data):
         """Test the file handler write function is called.

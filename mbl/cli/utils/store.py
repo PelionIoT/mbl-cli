@@ -160,7 +160,7 @@ class StoreLocationsRecord:
     """
 
     def __init__(self):
-        """Initialise `UserDict.data` with data from STORE_LOCATIONS_FILE."""
+        """Initialise `_data` dict with data from STORE_LOCATIONS_FILE."""
         self._data = file_handler.read_config_from_json(
             config_file_path=STORE_LOCATIONS_FILE_PATH
         )
@@ -181,7 +181,7 @@ class StoreLocationsRecord:
             )
 
     def get(self, uid):
-        """Get a known store's UID from the record.
+        """Look up a store by UID and return the location.
 
         Verify the storage location is valid & exists on disk.
         :returns Path: file path to the storage location.
