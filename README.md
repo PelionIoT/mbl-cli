@@ -115,32 +115,35 @@ Persistent storage on your developer machine for Pelion API keys, firmware updat
 It is possible to save Pelion Cloud credentials to either a 'Developer Store' or 'Team Store' depending on the given context.
 These stores are located on your developer machine at a location you specify. It is recommended to set the Team Store location to a shared folder that your team can access.
 
-- Developer Store: only accessible by a single user or member of the administrators group. This is where developer API keys are stored. This store is used for quick access to Pelion API keys the MBL-CLI will use for further provisioning activities.
+- Developer Store: only accessible by a single user. This is where developer API keys are stored. This store is used for quick access to Pelion API keys the MBL-CLI will use for further provisioning activities.
 - Team Store: group accessible (provided your team has access to the Team Store folder on your developer machine or cloud share). This is the storage location for the firmware update authority certificate for a device. This certificate is used to sign firmware update manifests. The Team Store would generally be set to a location accessible by your team (for example a cloud share).
 
-You can optionally specify a location for the Developer Store and/or Team Store. The MBL-CLI will use the following defaults:
+You can optionally specify to create a new Developer Store or Team Store. The MBL-CLI will use the following defaults:
 
-- Default location for the Developer Store is `~/.mbl-cli/dev-store/` (Permissions for this folder are set to drwx------)
-- Default location for shared storage in the Team Store is `~/.mbl-cli/team-store/` (Permissions for this folder are set to drwxrw----)
+- Default location for the Developer Store is `~/.mbl-cli/default-user/` (Permissions for this folder are set to drwx------)
+- Default location for shared storage in the Team Store is `~/.mbl-cli/default-team/` (Permissions for this folder are set to drwxrw----)
 
-It is possible to have multiple Developer and Team Stores, referenced by UID.
-
-The user must provide a UID/name to associate with the Developer Store or Team Store location on first use.
-The UID/name provided is used by the MBL-CLI to reference the appropriate store.
+The user must provide a UID to associate with the Developer Store or Team Store location.
+The UID provided is given by the user on subsequent uses of the tool to access a store.
 
 ### Device Provisioning Commands
 
 #### SaveApikey
 
 Store a Pelion Cloud API key in the specified developer storage location.
+Optionally specify `--new-store` when saving to a new storage location.
+If `--new-store` is passed, it must be given a `PATH` and a `CONTEXT`:
+
+- `PATH` path to the new store location
+- `CONTEXT` team or user store.
 
 ```bash
-mbl-cli save-api-key <uid> <api-key> [store-location]
+mbl-cli save-api-key <uid> <api-key> [new-store] [PATH CONTEXT]
 ```
 
 #### CreateUpdateCert
 
-This command will generate an X.509 keypair then create and sign a public key certificate used to sign update manifests. [More information here](https://cloud.mbed.com/docs/v1.3/updating-firmware/update-auth-cert.html). The public key certificate is saved in the Team Store.
+This command will generate an X.509 keypair then create and sign a public key certificate used to sign update manifests. [More information here](https://cloud.mbed.com/docs/current/updating-firmware/update-auth-cert.html). The public key certificate is saved in the Team Store.
 
 If no Team Store location exists, then you will be prompted to create one.
 

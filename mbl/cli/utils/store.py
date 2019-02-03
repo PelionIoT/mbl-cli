@@ -6,7 +6,7 @@
 
 """Manage persistent storage locations.
 
-Instantiate a `Store` using the `get` or `create` functions. 
+Instantiate a `Store` using the `get` or `create` functions.
 These factory functions perform some validation checks on the store metadata
 and file paths before returning a `Store` instance.
 
@@ -18,7 +18,7 @@ location on disk, or the input arguments if creating a new store.
 objects in storage and save items to the store.
 
 * `get` factory function creates a `Store` from a known UID.
-* `create` factory function creates a `Store`, \
+* `create` factory function creates a `Store`,
 new store directory and config file paths.
 * `Store` class representing a storage location on disk.
 
@@ -85,9 +85,9 @@ def get(uid):
         raise StoreConfigError(
             "The config file at {} contains no data. "
             "Your store is corrupt, please delete and recreate.".format(
-                    path_to_store
-                )
+                path_to_store
             )
+        )
     return Store(metadata)
 
 
