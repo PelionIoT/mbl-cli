@@ -79,8 +79,8 @@ class TestStore:
             else:
                 assert perms == oct(0o750)
             assert sf.config_path.exists()
-            mock_slf.update.assert_called_once_with(
-                uid=uid, location=str(store_dir)
+            mock_slf.return_value.update.assert_called_once_with(
+                uid, str(store_dir)
             )
 
     def test_known_store_retrieved_correctly_with_valid_inputs(
