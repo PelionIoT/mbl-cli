@@ -35,7 +35,7 @@ location, then perform some sanity checks on the data.
 A `Store` object wrapping this data is then instantiated and returned.
 `create` will create a new persistent storage location on disk
 before building a `metadata` dict from the input arguments.
-The `metadata` dict is passed to the `Store` object then `Store` is returned.
+The `metadata` dict is passed to a `Store` instance, then `Store` is returned.
 
 * `get` factory function gets a path to a persistent storage location from
  a known UID and builds a `Store` instance from the config.json.
@@ -51,8 +51,9 @@ Exceptions:
 * `StoreConfigError` existing store config.json contains no data.
 """
 
+import os
 import pathlib
-
+import platform
 from . import file_handler
 
 STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
@@ -68,6 +69,8 @@ def create(uid, store_type, location):
     Update the StoreLocationsRecord with the new store's uid & location.
     Pack the store metadata into a dictionary and wrap it in a `Store` object.
 
+    If a team store is being created, also set the store's user and group.
+    
     :params str uid: store's UID.
     :params str location: path to the store.
     :params str store_type: type of store (user or team).
@@ -79,6 +82,11 @@ def create(uid, store_type, location):
     try:
         path_to_store.mkdir(parents=True, mode=mode)
         config_file_path.touch(mode=mode)
+        if store_type == "team":
+            if not platform.system() == "Windows":
+                # Set the unix user:group for this team store.
+                user, group = _get_user_group_from_user_prompt()
+                _set_store_user_group(path_to_store, user, group)
     except FileExistsError:
         raise IOError("The given path already exists.")
     metadata = dict(
@@ -160,8 +168,8 @@ class StoreLocationsRecord:
     This class provides an interface to update and read the
     STORE_LOCATIONS_FILE.
 
-    The store uids and locations in the STORE_LOCATIONS_FILE are held as JSON
-     key-value pairs which map directly to this object's internal dictionary.
+    The store UIDs and locations in the STORE_LOCATIONS_FILE are held as JSON
+    key-value pairs which map directly to this object's internal dictionary.
     """
 
     def __init__(self):
@@ -173,7 +181,7 @@ class StoreLocationsRecord:
     def update(self, uid, location):
         """Write a new store UID and storage location to the record.
 
-        Prevent setting a known UIDs location.
+        Prevent setting a known UID's location.
         """
         if uid not in self._data:
             self._data[uid] = location
@@ -227,8 +235,8 @@ def _get_or_create_default_store(uid):
     """Get the default store path, creating it if it doesn't exist.
 
     We expect the default storage location and config.json to be automatically
-    created in the scenario where a user is saving to the
-    default store for the first time.
+    created in the scenario where a user is saving to the default store for
+    the first time.
 
     :param str: UID for this default store (team & user have independent UIDs)
     :return Path: path to the default store.
@@ -245,3 +253,27 @@ def _get_or_create_default_store(uid):
             )
         )
     return default_sp
+
+
+def _get_user_group_from_user_prompt():
+    usr_grp_input = input(
+        "Enter the user:group that is allowed to access this store."
+        "Ensure input is entered in the form <username>:<groupname> "
+        "separated by a colon.:\n"
+    )
+    return usr_grp_input.split(":")
+
+
+def _set_store_user_group(path, user, group):
+    """Set the user:group on unix systems.
+
+    Lazily import the pwd module as this isn't available on Windows.
+
+    :params Path path: path to the store.
+    :params str user: Name of the user who owns the store.
+    :params str group: Name of the group that has access to the store.
+    """
+    import pwd
+    uid = pwd.getpwname(user).pw_uid
+    gid = pwd.getpwname(group).pw_gid
+    os.chown(str(path.resolve()), uid, gid)
