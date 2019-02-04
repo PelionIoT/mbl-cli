@@ -70,7 +70,7 @@ def create(uid, store_type, location):
     Pack the store metadata into a dictionary and wrap it in a `Store` object.
 
     If a team store is being created, also set the store's user and group.
-    
+
     :params str uid: store's UID.
     :params str location: path to the store.
     :params str store_type: type of store (user or team).
@@ -274,6 +274,7 @@ def _set_store_user_group(path, user, group):
     :params str group: Name of the group that has access to the store.
     """
     import pwd
+
     uid = pwd.getpwname(user).pw_uid
     gid = pwd.getpwname(group).pw_gid
     os.chown(str(path.resolve()), uid, gid)
