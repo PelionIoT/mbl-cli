@@ -138,7 +138,7 @@ If `--new-store` is passed, it must be given a `PATH` and a `CONTEXT`:
 - `CONTEXT` team or user store.
 
 ```bash
-mbl-cli save-api-key <uid> <api-key> [new-store] [PATH CONTEXT]
+mbl-cli save-api-key <uid> <api-key> [--new-store PATH CONTEXT]
 ```
 
 #### CreateUpdateCert
