@@ -68,20 +68,28 @@ class TestStore:
         with mock.patch(
             "mbl.cli.utils.store.StoreLocationsRecord"
         ) as mock_slf:
-            store_dir, store_type, uid = valid_store_data
-            sf = store.create(
-                uid=uid, location=store_dir, store_type=store_type
-            )
-            perms = oct(store_dir.stat().st_mode).replace("0o40", "0o")
-            assert isinstance(sf, store.Store)
-            if store_type == "user":
-                assert perms == oct(0o700)
-            else:
-                assert perms == oct(0o750)
-            assert sf.config_path.exists()
-            mock_slf.return_value.update.assert_called_once_with(
-                uid, str(store_dir)
-            )
+            with mock.patch(
+                "mbl.cli.utils.store._get_user_group_from_user_prompt"
+            ) as mup:
+                with mock.patch(
+                    "mbl.cli.utils.store._set_store_user_group"
+                ) as ssug:
+                    mup.return_value = ("testuser", "testgroup")
+
+                    store_dir, store_type, uid = valid_store_data
+                    sf = store.create(
+                        uid=uid, location=store_dir, store_type=store_type
+                    )
+                    perms = oct(store_dir.stat().st_mode).replace("0o40", "0o")
+                    assert isinstance(sf, store.Store)
+                    if store_type == "user":
+                        assert perms == oct(0o700)
+                    else:
+                        assert perms == oct(0o750)
+                    assert sf.config_path.exists()
+                    mock_slf.return_value.update.assert_called_once_with(
+                        uid, str(store_dir)
+                    )
 
     def test_known_store_retrieved_correctly_with_valid_inputs(
         self, valid_store_data
@@ -118,14 +126,23 @@ class TestStore:
         with mock.patch(
             "mbl.cli.utils.store.StoreLocationsRecord"
         ) as mock_slf:
-            store_dir, store_type, uid = invalid_store_data
+            with mock.patch(
+                "mbl.cli.utils.store._get_user_group_from_user_prompt"
+            ) as mup:
+                with mock.patch(
+                    "mbl.cli.utils.store._set_store_user_group"
+                ) as ssug:
+                    mup.return_value = ("testuser", "testgroup")
+                    store_dir, store_type, uid = invalid_store_data
 
-            with pytest.raises(IOError, match="The given path already exists"):
-                store.create(
-                    uid=uid, location=store_dir, store_type=store_type
-                )
+                    with pytest.raises(
+                        IOError, match="The given path already exists"
+                    ):
+                        store.create(
+                            uid=uid, location=store_dir, store_type=store_type
+                        )
 
-            mock_slf.update.assert_not_called()
+                    mock_slf.update.assert_not_called()
 
     @pytest.mark.parametrize(
         "known_store_loc",
@@ -160,12 +177,21 @@ class TestStore:
         """Test the file handler write function is called.
         Ensure called with the correct arguments."""
         with mock.patch("mbl.cli.utils.store.file_handler") as mock_fh:
-            mock_fh.read_config_from_json.return_value = dict()
-            store_dir, store_type, uid = valid_store_data
+            with mock.patch(
+                "mbl.cli.utils.store._get_user_group_from_user_prompt"
+            ) as mup:
+                with mock.patch(
+                    "mbl.cli.utils.store._set_store_user_group"
+                ) as ssug:
+                    mock_fh.read_config_from_json.return_value = dict()
+                    store_dir, store_type, uid = valid_store_data
+                    mup.return_value = ("testuser", "testgroup")
 
-            store.create(uid=uid, location=store_dir, store_type=store_type)
+                    store.create(
+                        uid=uid, location=store_dir, store_type=store_type
+                    )
 
-            mock_fh.write_config_to_json.assert_called_once_with(
-                config_file_path=store.STORE_LOCATIONS_FILE_PATH,
-                **{uid: str(store_dir)}
-            )
+                    mock_fh.write_config_to_json.assert_called_once_with(
+                        config_file_path=store.STORE_LOCATIONS_FILE_PATH,
+                        **{uid: str(store_dir)}
+                    )
