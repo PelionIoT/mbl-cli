@@ -54,11 +54,12 @@ Exceptions:
 import os
 import pathlib
 import platform
+import shutil
+
 from . import file_handler
 
 STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
-DEFAULT_USER_STORE_NAME = "default-user"
-DEFAULT_TEAM_STORE_NAME = "default-team"
+DEFAULT_STORE_UIDS = {"user": "default-user", "team": "default-team"}
 
 
 def create(uid, store_type, location):
@@ -89,6 +90,11 @@ def create(uid, store_type, location):
                 _set_store_user_group(path_to_store, user, group)
     except FileExistsError:
         raise IOError("The given path already exists.")
+    except OSError:
+        # Something disastrous occurred.
+        # Delete the directory and config file.
+        shutil.rmtree(path_to_store)
+        raise IOError("File operation failed. Removed store and config file.")
     metadata = dict(
         uid=uid, location=str(path_to_store.resolve()), store_type=store_type
     )
@@ -107,14 +113,17 @@ def get(uid):
     :params str uid: store's UID.
     :returns `Store`: A `Store` object.
     """
-    if uid.lower() in [DEFAULT_USER_STORE_NAME, DEFAULT_TEAM_STORE_NAME]:
-        # Implicitly create the default store if it doesn't exist.
-        # The user has elected to `get` the default `Store`,
-        # and expects the directory and config to be automatically created.
-        path_to_store = _get_or_create_default_store(uid)
-    else:
+    if not uid.lower() in DEFAULT_STORE_UIDS.values():
         # Query the known stores record.
         path_to_store = StoreLocationsRecord().get(uid)
+    else:
+        for duid, stype in DEFAULT_STORE_UIDS.items():
+            if uid.lower() == duid:
+                # Implicitly create the default store if it doesn't exist.
+                # The user has elected to `get` the default `Store`,
+                # and expects the directory and config to be automatically
+                # created.
+                path_to_store = _get_or_create_default_store(stype)
     metadata = file_handler.read_config_from_json(
         path_to_store / "config.json"
     )
@@ -231,7 +240,7 @@ class StoreConfigError(Exception):
     """Store config file exists but contains no data."""
 
 
-def _get_or_create_default_store(uid):
+def _get_or_create_default_store(store_type):
     """Get the default store path, creating it if it doesn't exist.
 
     We expect the default storage location and config.json to be automatically
@@ -241,15 +250,16 @@ def _get_or_create_default_store(uid):
     :param str: UID for this default store (team & user have independent UIDs)
     :return Path: path to the default store.
     """
+    uid = DEFAULT_STORE_UIDS[store_type]
     default_sp = pathlib.Path().home() / ".mbl-store/{}".format(uid)
     if not default_sp.exists():
-        # default store type is in the UID
-        stype = uid.split("-")[1].strip()
         default_sp.mkdir()
         file_handler.write_config_to_json(
             config_file_path=default_sp / "config.json",
             **dict(
-                uid=uid, location=str(default_sp.resolve()), store_type=stype
+                uid=uid,
+                location=str(default_sp.resolve()),
+                store_type=store_type,
             )
         )
     return default_sp
