@@ -130,15 +130,22 @@ The UID provided is given by the user on subsequent uses of the tool to access a
 
 #### SaveApikey
 
-Store a Pelion Cloud API key in the specified developer storage location.
+Store one or more Pelion Cloud API keys in the specified storage location.
+Multiple API keys can be given as and they'll be added to the store.
 Optionally specify `--new-store` when saving to a new storage location.
-If `--new-store` is passed, it must be given a `PATH` and a `CONTEXT`:
+If `--new-store` is passed, it must be given a set of `INFO` arguments.
+The arguments always required by `INFO` are `PATH` and a `CONTEXT`:
+If `CONTEXT` is `team` then `USER` and `GROUP` must also be given.
+
+The `INFO` arguments must be given in the following order.
 
 - `PATH` path to the new store location
 - `CONTEXT` team or user store.
+- `USER` set the store's user (required if `CONTEXT` is `team`)
+- `GROUP` set the store's group (required if `CONTEXT` is `team`)
 
 ```bash
-mbl-cli save-api-key <uid> <api-key> [--new-store PATH CONTEXT]
+mbl-cli save-api-key <uid> <api-key...> [--new-store PATH CONTEXT [USER GROUP]]
 ```
 
 #### CreateUpdateCert
