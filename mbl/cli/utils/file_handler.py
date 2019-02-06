@@ -8,6 +8,7 @@
 import json
 import os
 import pathlib
+import shutil
 
 DEVICE_FILE_PATH = str(pathlib.Path().home() / ".mbl-dev.json")
 
@@ -52,13 +53,24 @@ def write_config_to_json(config_file_path, **store_conf_data):
     """Write a dictionary of config data to a json file.
 
     Check the file exists and create it if not.
+    Use copy-modify-move when writing to avoid corrupting the config_file.
 
     :param config_file_path Path: Path object representing the file-to-write.
     """
     config_file_path.touch(exist_ok=True)
-    json_fmt_data = json.dumps(store_conf_data)
-    with open(config_file_path, "w") as dfile:
-        dfile.write(json_fmt_data)
+    # copy the config file to a tmp file
+    tmp_file_path = pathlib.Path(config_file_path.parent, "tmp")
+    tmp_file_path.mkdir(exist_ok=True)
+    try:
+        dst_path = shutil.copy(str(config_file_path), str(tmp_file_path))
+        # write the data to the tmp file
+        json_fmt_data = json.dumps(store_conf_data)
+        with open(dst_path, "w") as dfile:
+            dfile.write(json_fmt_data)
+        # move the tmp file over the original file
+        shutil.move(dst_path, str(config_file_path))
+    finally:
+        shutil.rmtree(tmp_file_path)
 
 
 # This is going to be removed.
