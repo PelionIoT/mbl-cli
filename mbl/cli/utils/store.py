@@ -49,6 +49,8 @@ Exceptions:
 * `StoreNotFoundError` store UID is unknown.
 * `KnownStoreLocationInvalid` known store UID has no known path on disk.
 * `StoreConfigError` existing store config.json contains no data.
+* `GroupNameNotFoundError` group doesn't exist.
+* `UserNotInGroupError` specified user not in the specified group.
 """
 
 import os
@@ -62,7 +64,7 @@ STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
 DEFAULT_STORE_UIDS = {"user": "default-user", "team": "default-team"}
 
 
-def create(uid, store_type, location):
+def create(uid, store_type, location, user=None, group=None):
     """Create a new store on disk and return a `Store` instance.
 
     Create the store directory and config file with the correct permissions.
@@ -81,20 +83,25 @@ def create(uid, store_type, location):
     path_to_store = pathlib.Path(location)
     config_file_path = path_to_store / "config.json"
     try:
-        path_to_store.mkdir(parents=True, mode=mode)
+        path_to_store.mkdir(parents=True, mode=mode, exist_ok=True)
         config_file_path.touch(mode=mode)
         if store_type == "team":
             if not platform.system() == "Windows":
                 # Set the unix user:group for this team store.
-                user, group = _get_user_group_from_user_prompt()
                 _set_store_user_group(path_to_store, user, group)
     except FileExistsError:
         raise IOError("The given path already exists.")
-    except OSError:
+    except (OSError, GroupNameNotFoundError, UserNotInGroupError) as err:
         # Something disastrous occurred.
-        # Delete the directory and config file.
-        shutil.rmtree(path_to_store)
-        raise IOError("File operation failed. Removed store and config file.")
+        # Delete the config file but leave the directory to prevent the user
+        # inadvertently deleting an 'important' directory.
+        os.remove(str(config_file_path))
+        raise IOError(
+            "File operation failed because: {}\n"
+            "Removed store config file at path {}.".format(
+                err, config_file_path
+            )
+        )
     metadata = dict(
         uid=uid, location=str(path_to_store.resolve()), store_type=store_type
     )
@@ -240,6 +247,14 @@ class StoreConfigError(Exception):
     """Store config file exists but contains no data."""
 
 
+class GroupNameNotFoundError(Exception):
+    """Group name was not found in the database."""
+
+
+class UserNotInGroupError(Exception):
+    """Specified user is not in the specified group."""
+
+
 def _get_or_create_default_store(store_type):
     """Get the default store path, creating it if it doesn't exist.
 
@@ -251,9 +266,10 @@ def _get_or_create_default_store(store_type):
     :return Path: path to the default store.
     """
     uid = DEFAULT_STORE_UIDS[store_type]
+    mode = 0o700 if store_type == "user" else 0o750
     default_sp = pathlib.Path().home() / ".mbl-store/{}".format(uid)
     if not default_sp.exists():
-        default_sp.mkdir()
+        default_sp.mkdir(mode=mode)
         file_handler.write_config_to_json(
             config_file_path=default_sp / "config.json",
             **dict(
@@ -265,26 +281,29 @@ def _get_or_create_default_store(store_type):
     return default_sp
 
 
-def _get_user_group_from_user_prompt():
-    usr_grp_input = input(
-        "Enter the user:group that is allowed to access this store."
-        "Ensure input is entered in the form <username>:<groupname> "
-        "separated by a colon.:\n"
-    )
-    return usr_grp_input.split(":")
-
-
 def _set_store_user_group(path, user, group):
-    """Set the user:group on unix systems.
+    """Set the :group on unix systems, leaving the user unchanged.
 
+    It is the caller's responsibility to ensure the group exists
+    and the correct users are added to it.
     Lazily import the pwd module as this isn't available on Windows.
 
     :params Path path: path to the store.
     :params str user: Name of the user who owns the store.
     :params str group: Name of the group that has access to the store.
     """
-    import pwd
+    import grp
 
-    uid = pwd.getpwname(user).pw_uid
-    gid = pwd.getpwname(group).pw_gid
-    os.chown(str(path.resolve()), uid, gid)
+    try:
+        group_info = grp.getgrnam(group)
+        usr_idx = group_info.gr_mem.index(user)
+    except ValueError:
+        raise GroupNameNotFoundError(
+            "The group name was not found in the database."
+        )
+    except KeyError:
+        raise UserNotInGroupError("The given user is not in the given group.")
+    else:
+        os.chown(
+            str(path.resolve()), group_info.gr_mem[usr_idx], group_info.gr_gid
+        )

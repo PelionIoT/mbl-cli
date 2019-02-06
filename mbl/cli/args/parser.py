@@ -97,11 +97,16 @@ def parse_args(description):
     )
     save_api_key.add_argument(
         "--new-store",
-        nargs=2,
-        metavar=("PATH", "CONTEXT"),
-        help="""Create a new store. PATH and CONTEXT are required.
-        PATH: file path for the new store.
-        CONTEXT: storage context (must be either 'team' or 'user').""",
+        nargs="*",
+        metavar="INFO",
+        help="""Create a new store. 
+        INFO is a variable length argument with the following inputs.
+        The inputs must be given in the following order!\n
+        PATH: file path for the new store.\n
+        CONTEXT: storage context (must be either 'team' or 'user').\n
+        USER: User who owns this store. (ONLY required when CONTEXT is `team`)\n
+        GROUP: store's group. (ONLY required when CONTEXT is `team`)\n
+        """,
     )
     save_api_key.add_argument(
         "keys", nargs="+", help="The API key(s) to store."
@@ -143,6 +148,11 @@ def _load_description_text():
 
 def _validate_new_store_arg(arg):
     if arg is not None:
-        _, context = arg
+        path, context, *other = tuple(arg)
         if context not in ["team", "user"]:
             raise ValueError("--new-store CONTEXT must be 'team' or 'user'")
+        if context == "team":
+            if len(other) is not 2:
+                raise ValueError(
+                    "USER and GROUP must be given if CONTEXT is 'team'"
+                )
