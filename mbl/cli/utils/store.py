@@ -298,11 +298,11 @@ def _set_store_user_group(path, user, group):
         group_info = grp.getgrnam(group)
         usr_idx = group_info.gr_mem.index(user)
     except ValueError:
+        raise UserNotInGroupError("The given user is not in the given group.")
+    except KeyError:
         raise GroupNameNotFoundError(
             "The group name was not found in the database."
         )
-    except KeyError:
-        raise UserNotInGroupError("The given user is not in the given group.")
     else:
         os.chown(
             str(path.resolve()), group_info.gr_mem[usr_idx], group_info.gr_gid
