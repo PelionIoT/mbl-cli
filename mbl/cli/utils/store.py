@@ -83,7 +83,7 @@ def create(uid, store_type, location, user=None, group=None):
     path_to_store = pathlib.Path(location)
     config_file_path = path_to_store / "config.json"
     try:
-        path_to_store.mkdir(parents=True, mode=mode, exist_ok=True)
+        path_to_store.mkdir(parents=True, mode=mode)
         config_file_path.touch(mode=mode)
         if store_type == "team":
             if not platform.system() == "Windows":
@@ -95,7 +95,8 @@ def create(uid, store_type, location, user=None, group=None):
         # Something disastrous occurred.
         # Delete the config file but leave the directory to prevent the user
         # inadvertently deleting an 'important' directory.
-        os.remove(str(config_file_path))
+        if config_file_path.exists():
+            os.remove(str(config_file_path))
         raise IOError(
             "File operation failed because: {}\n"
             "Removed store config file at path {}.".format(
