@@ -125,7 +125,7 @@ def get(uid):
         # Query the known stores record.
         path_to_store = StoreLocationsRecord().get(uid)
     else:
-        for duid, stype in DEFAULT_STORE_UIDS.items():
+        for stype, duid in DEFAULT_STORE_UIDS.items():
             if uid.lower() == duid:
                 # Implicitly create the default store if it doesn't exist.
                 # The user has elected to `get` the default `Store`,
@@ -270,7 +270,7 @@ def _get_or_create_default_store(store_type):
     mode = 0o700 if store_type == "user" else 0o750
     default_sp = pathlib.Path().home() / ".mbl-store/{}".format(uid)
     if not default_sp.exists():
-        default_sp.mkdir(mode=mode)
+        default_sp.mkdir(mode=mode, parents=True)
         file_handler.write_config_to_json(
             config_file_path=default_sp / "config.json",
             **dict(
