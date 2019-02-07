@@ -16,7 +16,7 @@ from mbl.cli.utils import device, file_handler
 @pytest.fixture
 def fh():
     """Instance of DeviceFileHandler."""
-    yield file_handler.DeviceInfoFileHandler("test.json")
+    yield file_handler.JSONParser("test.json")
 
 
 @pytest.fixture
@@ -47,11 +47,11 @@ class TestFileHandler:
         dev = device.DeviceInfo(
             "mbed-linux-nbakjal", "169.254.0.8", "root", ""
         )
-        fh.save_device_data(dev)
+        fh.to_file(dev._asdict())
         read_mock.write.assert_called()
         assert open_mock.call_args[0] == (fh.data_file_path, "w+")
 
     def test_load_device_data(self, fh, mock_json):
         """Test json.load is called."""
-        fh.read_device_data()
+        fh.from_file()
         assert mock_json.load.called
