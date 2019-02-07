@@ -9,6 +9,7 @@ import json
 import os
 import pathlib
 import shutil
+import tempfile
 
 DEVICE_FILE_PATH = str(pathlib.Path().home() / ".mbl-dev.json")
 
@@ -59,10 +60,10 @@ def write_config_to_json(config_file_path, **store_conf_data):
     """
     config_file_path.touch(exist_ok=True)
     # copy the config file to a tmp file
-    tmp_file_path = pathlib.Path(config_file_path.parent, "tmp")
-    tmp_file_path.mkdir(exist_ok=True)
+    tmp_dir = tempfile.mkdtemp(dir=str(config_file_path.parent))
     try:
-        dst_path = shutil.copy(str(config_file_path), str(tmp_file_path))
+        # copy2 will attempt to preserve all metadata
+        dst_path = shutil.copy2(str(config_file_path), tmp_dir)
         # write the data to the tmp file
         json_fmt_data = json.dumps(store_conf_data)
         with open(dst_path, "w") as dfile:
@@ -70,7 +71,7 @@ def write_config_to_json(config_file_path, **store_conf_data):
         # move the tmp file over the original file
         shutil.move(dst_path, str(config_file_path))
     finally:
-        shutil.rmtree(tmp_file_path)
+        shutil.rmtree(tmp_dir)
 
 
 # This is going to be removed.
