@@ -150,12 +150,11 @@ mbl-cli save-api-key <uid> <api-key...> [--new-store PATH CONTEXT [USER GROUP]]
 
 #### CreateUpdateCert
 
-This command will generate an X.509 keypair then create and sign a public key certificate used to sign update manifests. [More information here](https://cloud.mbed.com/docs/current/updating-firmware/update-auth-cert.html). The public key certificate is saved in the Team Store.
+This command will generate an X.509 keypair then create and sign a public key certificate used to sign update manifests. [More information here](https://cloud.mbed.com/docs/current/updating-firmware/update-auth-cert.html). The `--new-store` optional arguments are as described for the previous command.
 
-If no Team Store location exists, then you will be prompted to create one.
 
 ```bash
-mbl-cli create-update-cert <uid>
+mbl-cli create-update-cert <uid> [--new-store PATH CONTEXT [USER GROUP]]
 ```
 
 [mbl-license]: LICENSE.md
