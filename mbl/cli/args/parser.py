@@ -99,13 +99,13 @@ def parse_args(description):
         "--new-store",
         nargs="*",
         metavar="INFO",
-        help="""Create a new store. 
+        help="""Create a new store.
         INFO is a variable length argument with the following inputs.
-        The inputs must be given in the following order!\n
-        PATH: file path for the new store.\n
-        CONTEXT: storage context (must be either 'team' or 'user').\n
-        USER: User who owns this store. (ONLY required when CONTEXT is `team`)\n
-        GROUP: store's group. (ONLY required when CONTEXT is `team`)\n
+        The inputs must be given in the following order!
+        PATH: file path for the new store.
+        CONTEXT: storage context (must be either 'team' or 'user').
+        USER: User who owns this store. (ONLY required when CONTEXT is `team`)
+        GROUP: store's group. (ONLY required when CONTEXT is `team`)
         """,
     )
     save_api_key.add_argument(
