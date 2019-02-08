@@ -25,7 +25,7 @@ class DeviceInfo(namedtuple("Device", "hostname address username password")):
         else:
             raise TypeError(
                 "Both objects must be of type"
-                f" {self.__class__} or they can't be compared."
+                " {} or they can't be compared.".format(self.__class__)
             )
 
     def __ne__(self, other):
@@ -38,5 +38,5 @@ class DeviceInfo(namedtuple("Device", "hostname address username password")):
         else:
             raise TypeError(
                 "Both objects must be of type "
-                f"{self.__class__} or they can't be compared."
+                "{} or they can't be compared.".format(self.__class__)
             )
