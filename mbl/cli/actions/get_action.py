@@ -17,7 +17,7 @@ from . import utils
 def execute(args):
     """Entry point for the get cli command."""
     dev = utils.create_device(args)
-    print(f"Getting {args.src_path} from device: {dev.hostname}\n")
+    print("Getting {} from device: {}\n".format(args.src_path, dev.hostname))
 
     with ssh.SSHSession(dev) as ssh_session:
         ssh_session.get(

@@ -16,7 +16,7 @@ from . import utils
 def execute(args):
     """Entry point for the put action."""
     dev = utils.create_device(args)
-    print(f"Putting {args.src_path} on device: {dev.hostname}\n")
+    print("Putting {} on device: {}\n".format(args.src_path, dev.hostname))
 
     with ssh.SSHSession(dev) as ssh_session:
         ssh_session.put(

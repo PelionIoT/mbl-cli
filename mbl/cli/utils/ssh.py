@@ -82,7 +82,7 @@ class SSHSession:
     def __enter__(self):
         """Enter the context, connect to the ssh session."""
         if self.device.hostname:
-            qualified_hostname = f"{self.device.hostname}.local"
+            qualified_hostname = "{}.local".format(self.device.hostname)
         else:
             qualified_hostname = self.device.address
         try:

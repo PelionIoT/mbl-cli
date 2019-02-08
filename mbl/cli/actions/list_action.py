@@ -18,7 +18,7 @@ def execute(args):
     """Entry point for the list action."""
     print(
         "Discovering devices. "
-        f"This will take up to {discovery.TIMEOUT} seconds."
+        "This will take up to {} seconds.".format(discovery.TIMEOUT)
     )
     indexed_list = text_list.IndexedTextList()
     discovery.do_discovery(indexed_list.append)

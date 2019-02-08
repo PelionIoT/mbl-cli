@@ -56,8 +56,8 @@ class DeviceDiscoveryNotifier(events.Notifier):
             new_dev = device.create_device(name, inet_addr)
             if new_dev not in self.devices:
                 self.devices.append(new_dev)
-                name = name.split(f".{service_type}")
-                self.notify(f"{name[0]}: {new_dev.address}")
+                name = name.split(".{}".format(service_type))
+                self.notify("{}: {}".format(name[0], new_dev.address))
 
     def remove_service(self, zeroconf, type, name):
         """Remove services from the list.
