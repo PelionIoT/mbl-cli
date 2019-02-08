@@ -1,0 +1,14 @@
+discover and select a device to work with
+  list                List Mbed Linux OS devices on the network.
+  select              Select an Mbed Linux OS device to interact with.
+  which               Show the currently selected device.
+
+transfer files to/from your device
+  get                 Get a file from a device.
+  put                 Put a file on a device.
+
+interact directly with your device's shell
+  shell               Obtain an interactive shell, or run a single command, on a device.
+
+provision devices for cloud-based device management
+  save-api-key        Save a Pelion Cloud developer API key to persistent storage.
