@@ -6,7 +6,6 @@
 """Setuptools entry point."""
 
 from setuptools import setup, find_packages
-import os
 
 
 def read(file_name):
@@ -27,10 +26,16 @@ setup(
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Build Tools",
+        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-    install_requires=["paramiko>=2.4.2", "scp>=0.13.0", "zeroconf>=0.21.3"],
+    install_requires=[
+        "paramiko>=2.4.2",
+        "scp>=0.13.0",
+        "zeroconf>=0.21.3",
+        "mbed-cloud-sdk>=2.0.4"
+        ],
     zip_safe=False,
     entry_points={"console_scripts": ["mbl-cli = mbl.cli.mbl_cli:_main"]},
 )
