@@ -53,13 +53,14 @@ class Store:
     This object provides an interface to access the store config file data.
     """
 
-    def __init__(self, path_to_store):
-        """Create a `Store` object.
+    def __init__(self, store_type):
+        """Build a store object from a path based on the store_type.
 
         The path_to_store on disk must exist before instantiating this class.
 
-        :params Path path_to_store: Path to the Store's location on disk.
+        :params str store_type: The type of store to build (team or user).
         """
+        path_to_store = _get_or_create_store(store_type)
         self._config = file_handler.read_config_from_json(
             path_to_store / "config.json"
         )
@@ -68,15 +69,6 @@ class Store:
                 location=str(path_to_store),
             )
 
-    @classmethod
-    def from_type(cls, store_type):
-        """Build a store object from a path based on the store_type.
-
-        :params str store_type: The type of store to build (team or user).
-        """
-        path_to_store = _get_or_create_store(store_type)
-        return cls(path_to_store)
-
     @property
     def api_keys(self):
         """Dict of all API keys held in the store.
@@ -84,6 +76,14 @@ class Store:
         :returns dict: API keys in the form `{name: key, ...}`
         """
         return self._config.setdefault("api_keys", dict())
+
+    @property
+    def dev_certs(self):
+        """Dict of all developer certificates held in the store.
+
+        :returns dict: developer certs keys in the form `{name: cert, ...}`
+        """
+        return self._config.setdefault("dev_certs", dict())
 
     @property
     def config_path(self):
