@@ -1,15 +1,11 @@
 from mbed_cloud import CertificatesAPI
-from mbl.cli.utils import store
 
 
-def create_developer_cert(name):
-    store_handle = store.get("default-user")
-    conf = {"api_key": store_handle.api_keys["dev"]}
-    cert_api = CertificatesAPI(conf)
-    cert_data = {
-        "name": name
-    }
+def create_developer_cert(api_key, name):
+    cert_api = CertificatesAPI(
+        dict(api_key=api_key)
+    )
     certificate = cert_api.add_developer_certificate(
-            **cert_data
+           name=name
         )
-    print(certificate)
+    return certificate.header_file
