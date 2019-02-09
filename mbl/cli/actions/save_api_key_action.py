@@ -10,6 +10,6 @@ from mbl.cli.utils.store import Store
 
 def execute(args):
     """Execute the save-api-key action."""
-    store_handle = Store.from_type("user")
+    store_handle = Store("user")
     store_handle.add_api_key(args.key)
     store_handle.save()
