@@ -12,3 +12,4 @@ interact directly with your device's shell
 
 provision devices for cloud-based device management
   save-api-key        Save a Pelion Cloud developer API key to persistent storage.
+  provision-pelion    Obtains a developer credentials certificate and injects it into the selected device.

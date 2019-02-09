@@ -16,6 +16,7 @@ from mbl.cli.actions import (
     select_action,
     shell_action,
     which_action,
+    provision_action,
     save_api_key_action,
 )
 
@@ -92,36 +93,19 @@ def parse_args(description):
     shell.set_defaults(func=shell_action.execute)
 
     save_api_key = command_group.add_parser("save-api-key")
+
     save_api_key.add_argument(
-        "uid", help="UID/name of the persistent storage location."
-    )
-    save_api_key.add_argument(
-        "--new-store",
-        nargs="*",
-        metavar="INFO",
-        help="""Create a new store.
-        INFO is a variable length argument with the following inputs.
-        The inputs must be given in the following order!
-        PATH: file path for the new store.
-        CONTEXT: storage context (must be either 'team' or 'user').
-        USER: User who owns this store. (ONLY required when CONTEXT is `team`)
-        GROUP: store's group. (ONLY required when CONTEXT is `team`)
-        """,
-    )
-    save_api_key.add_argument(
-        "keys", nargs="+", help="The API key(s) to store."
+        "key", help="The API key to store."
     )
     save_api_key.set_defaults(func=save_api_key_action.execute)
 
+    provision = command_group.add_parser("provision-pelion")
+    provision.set_defaults(func=provision_action.execute)
+
     args_namespace = parser.parse_args()
 
-    # Extra logic here to check the `save-api-key --new-store` option
-    # was given the correct values.
-    if hasattr(args_namespace, "new_store"):
-        _validate_new_store_arg(args_namespace.new_store)
     # We want to fail gracefully, with a consistent
     # help message, in the no argument case.
-    # So here's an obligatory hasattr hack.
     if not hasattr(args_namespace, "func"):
         parser.error("No arguments given!")
     else:
@@ -144,15 +128,3 @@ def _load_description_text():
     )
     with open(help_path) as hfile:
         return hfile.read()
-
-
-def _validate_new_store_arg(arg):
-    if arg is not None:
-        path, context, *other = tuple(arg)
-        if context not in ["team", "user"]:
-            raise ValueError("--new-store CONTEXT must be 'team' or 'user'")
-        if context == "team":
-            if len(other) is not 2:
-                raise ValueError(
-                    "USER and GROUP must be given if CONTEXT is 'team'"
-                )
