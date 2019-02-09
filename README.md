@@ -208,7 +208,7 @@ mbl-cli save-api-key <api-key>
 Run the provisioning command.
 
 ```bash
-mbl-cli provision-pelion --create-cert <api-key-name>
+mbl-cli provision-pelion --create-cert <api-key-name> <cert-name>
 ```
 
 This command will create your developer certificate and provision your selected device. The API key is required to access the Pelion Service API to create the certificate. `<api-key-name>` is the api key name you set in the Pelion portal when you created the key. After obtaining the certificate, MBL-CLI will inject it into your selected device's secure storage. The certificate is also saved in the Team Store for use with other devices.
