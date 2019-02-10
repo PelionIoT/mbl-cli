@@ -9,3 +9,24 @@ def create_developer_cert(api_key, name):
            name=name
         )
     return certificate.header_file
+
+
+def parse_cert_header(cert_header):
+    cert_header = cert_header.strip()
+    _, body = cert_header.split("#include <inttypes.h>")
+    cpp_statements = body.split(";")
+    out_map = dict()
+    for statement in cpp_statements:
+        statement = statement.replace("\n", "")
+        if statement.startswith("#"):
+            continue
+        var_name, val = statement.split(" = ")
+        # sanitise the string tokens
+        var_pp_name = var_name[var_name.find("MBED_CLOUD_DEV_"):].replace(
+                    r"[]", ""
+                )
+        val_pp = val.replace(r" '", "")
+        val_pp = val_pp.replace(r'"', "")
+        val_pp = val_pp.strip(r"{} ")
+        out_map[var_pp_name] = val_pp
+    return out_map
