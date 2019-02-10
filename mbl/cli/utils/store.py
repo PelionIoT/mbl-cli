@@ -33,8 +33,6 @@ Exceptions:
 
 import pathlib
 
-from mbed_cloud import AccountManagementAPI
-
 from . import file_handler
 
 STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
