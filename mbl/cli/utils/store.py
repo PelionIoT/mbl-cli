@@ -61,7 +61,7 @@ class Store:
         :params str store_type: The type of store to build (team or user).
         """
         path_to_store = _get_or_create_store(store_type)
-        self._config = file_handler.read_config_from_json(
+        self._config = file_handler.from_json(
             path_to_store / "config.json"
         )
         if not self._config:
@@ -78,10 +78,10 @@ class Store:
         return self._config.setdefault("api_keys", dict())
 
     @property
-    def dev_certs(self):
-        """Dict of all developer certificates held in the store.
+    def dev_cert_data_files(self):
+        """List of all developer certificate binary files in the store.
 
-        :returns dict: developer certs keys in the form `{name: cert, ...}`
+        :returns dict: developer cert file paths in the form `{name: [bin_path_1, bin_path_2 ...]}`
         """
         return self._config.setdefault("dev_certs", dict())
 
@@ -92,23 +92,30 @@ class Store:
 
     def save(self):
         """Save config data to a file."""
-        file_handler.write_config_to_json(self.config_path, **self._config)
+        file_handler.to_json(self.config_path, **self._config)
 
-    def add_api_key(self, api_key):
+    def add_api_key(self, name, api_key):
         """Add an API key to the store.
-
-        Query the Pelion API to validate the API key and retrieve its name.
 
         :param api_key str: The api key to add to the store.
         """
-        api = AccountManagementAPI({"api_key": api_key})
-        for known_api_key in api.list_api_keys():
-            # The last 32 characters of the API key are 'secret'
-            # and aren't included in the key returned by the api.
-            if known_api_key.key == api_key[:-32]:
-                self.api_keys[known_api_key.name] = api_key.strip()
-                return
-        raise ValueError("API key not recognised by Pelion.")
+        self.api_keys[name] = api_key.strip()
+
+    def add_developer_credentials(self, name, credentials):
+        """Add a dev credentials object to the store as a set of binary files.
+
+        :param str name: name of the dev certificate.
+        :param dict credentials: credentials object.
+        """
+        p_list = []
+        for item in credentials:
+            c_path = pathlib.Path(
+                self._config["location"], "{}.bin".format(item)
+            )
+            file_handler.to_binary_file(c_path, credentials[item])
+            p_list.append(str(c_path))
+        self.dev_cert_data_files[name] = p_list
+        self.save()
 
 
 class StoreLocationsRecord:
@@ -123,11 +130,11 @@ class StoreLocationsRecord:
 
     def __init__(self):
         """Initialise `_data` dict with data from STORE_LOCATIONS_FILE."""
-        conf = file_handler.read_config_from_json(
+        conf = file_handler.from_json(
             config_file_path=STORE_LOCATIONS_FILE_PATH
         )
         if not conf:
-            file_handler.write_config_to_json(
+            file_handler.to_json(
                 config_file_path=STORE_LOCATIONS_FILE_PATH,
                 **DEFAULT_STORE_RECORD
             )
@@ -139,7 +146,7 @@ class StoreLocationsRecord:
         Prevent setting a known UID's location.
         """
         self._data[store_type] = location
-        file_handler.write_config_to_json(
+        file_handler.to_json(
             config_file_path=STORE_LOCATIONS_FILE_PATH, **self._data
         )
 
