@@ -23,10 +23,8 @@ def parse_cert_header(cert_header):
         var_name, val = statement.split(" = ")
         # sanitise the string tokens
         var_pp_name = var_name[var_name.find("MBED_CLOUD_DEV_"):].replace(
-                    r"[]", ""
-                )
-        val_pp = val.replace(r" '", "")
-        val_pp = val_pp.replace(r'"', "")
-        val_pp = val_pp.strip(r"{} ")
+                r"[]", ""
+            )
+        val_pp = val.replace(r" '", "").replace(r'"', "").strip(r"{} ")
         out_map[var_pp_name] = val_pp
     return out_map
