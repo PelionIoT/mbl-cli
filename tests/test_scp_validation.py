@@ -91,7 +91,9 @@ class TestSCPFileTransferValidation:
         hsh_lib.md5().hexdigest.return_value = "HASH"
         session = ssh.SSHSession(Device())
         try:
-            session._validate_file_transfer(str(file_paths[0]), str(file_paths[1]))
+            session._validate_file_transfer(
+                str(file_paths[0]), str(file_paths[1])
+            )
         except ssh.SCPValidationFailed as io_error:
             pytest.fail("Raised SCPValidationFailed {}".format(io_error))
 
@@ -103,4 +105,6 @@ class TestSCPFileTransferValidation:
         hsh_lib.md5().hexdigest.return_value = "HASHY"
         session = ssh.SSHSession(Device())
         with pytest.raises(ssh.SCPValidationFailed):
-            session._validate_file_transfer(str(file_paths[0]), str(file_paths[1]))
+            session._validate_file_transfer(
+                str(file_paths[0]), str(file_paths[1])
+            )
