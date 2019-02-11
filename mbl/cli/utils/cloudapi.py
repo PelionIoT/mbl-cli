@@ -36,7 +36,7 @@ class DevCredentialsAPI:
 
     @property
     def existing_cert_names(self):
-        """List all existing certificate names known to Pelion."""
+        """List all existing certificate names known to the Pelion account."""
         return [
             self._cert_api.get_certificate(c["id"]).name
             for c in self._cert_api.list_certificates()
@@ -52,10 +52,14 @@ class DevCredentialsAPI:
         for c in self._cert_api.list_certificates():
             this_cert = self._cert_api.get_certificate(c["id"])
             if this_cert.name == name:
-                return self._parse_cert_header(this_cert.header_file)
+                return _parse_cert_header(
+                    this_cert.header_file,
+                    "#include <inttypes.h>",
+                    "MBED_CLOUD_DEV_"
+                )
         raise ValueError(
             "The developer certificate does not exist."
-            "Available certificates are: {}".format(
+            "Available certificates: \n{}".format(
                 "\n".join(self.existing_cert_names)
             )
         )
@@ -86,11 +90,11 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
     Store the data as key/value pairs (variable name/value) in a
     dictionary.
 
-    match_str_pre is used to split the preprocessor directives from the
+    match_str_pre is used to split the include statements from the
     header body. It should be the last preprocessor statement at the top
     of the header.
     match_str_var is used to match the variable names (all variables in
-    these certs have a consistent naming scheme, match_str_var is passed 
+    these certs have a consistent naming scheme, match_str_var is passed
     directly to str.find. This is not a RE!)
 
     :param str cert_header: The certificate header to parse.
@@ -100,7 +104,7 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
     :return dict: credentials object
     """
     cert_header = cert_header.strip()
-    _, body = cert_header.rsplit(match_str_pre)
+    _, body = cert_header.split("*/")
     cpp_statements = body.split(";")
     out_map = dict()
     for statement in cpp_statements:
@@ -108,12 +112,11 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
         # skip preprocessor directives
         if statement.startswith("#"):
             continue
-            print(statement)
         var_name, val = statement.split(" = ")
         # sanitise the string tokens
         var_pp_name = var_name[var_name.find(match_str_var) :].replace(
             r"[]", ""
         )
-        val_pp = val.replace(r" '", "").replace(r'"', "").strip(r"{} ")
+        val_pp = val.replace(r" '", "").replace(r'"', "").replace(",", "\n").strip(r"{} ")
         out_map[var_pp_name] = val_pp
     return out_map

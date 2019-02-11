@@ -107,11 +107,8 @@ def parse_args(description):
     provision.add_argument(
         "-c",
         "--create-dev-cert",
-        metavar="<key-name>",
-        help="Create a new developer certificate and inject it into the"
-        " selected device. "
-        "<key-name>: the name of the API key saved using save-api-key. "
-        "Used to access the Pelion API to create the cert.",
+        action="store_true",
+        help="Create a new developer certificate."
     )
     provision.set_defaults(func=provision_action.execute)
 

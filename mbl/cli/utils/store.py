@@ -35,7 +35,6 @@ import pathlib
 
 from . import file_handler
 
-STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
 DEFAULT_STORE_RECORD = {
     "user": str(pathlib.Path().home() / pathlib.Path(".mbl-store", "user")),
     "team": str(pathlib.Path().home() / pathlib.Path(".mbl-store", "team")),
@@ -72,7 +71,7 @@ class Store:
         return self._config.setdefault("api_keys", dict())
 
     @property
-    def dev_cert_data_files(self):
+    def certificate_paths(self):
         """List of all developer certificate binary files in the store.
 
         :returns dict: developer cert file paths in the form `{name: [bin_path_1, bin_path_2 ...]}`
@@ -95,20 +94,20 @@ class Store:
         """
         self.api_keys[name] = api_key.strip()
 
-    def add_developer_credentials(self, name, credentials):
-        """Add a dev credentials object to the store as a set of binary files.
+    def add_certificate(self, name, certificate):
+        """Add a certificate object to the store as a set of binary files.
 
         :param str name: name of the dev certificate.
         :param dict credentials: credentials object.
         """
         p_list = []
-        for item in credentials:
+        for item in certificate:
             c_path = pathlib.Path(
                 self._config["location"], "{}.bin".format(item)
             )
-            file_handler.to_binary_file(c_path, credentials[item])
+            file_handler.to_binary_file(c_path, certificate[item])
             p_list.append(str(c_path))
-        self.dev_cert_data_files[name] = p_list
+        self.certificate_paths[name] = p_list
         self.save()
 
 
@@ -118,21 +117,24 @@ class StoreLocationsRecord:
     This class provides an interface to update and read the
     STORE_LOCATIONS_FILE.
 
-    The store UIDs and locations in the STORE_LOCATIONS_FILE are held as JSON
+    The store types and locations in the STORE_LOCATIONS_FILE are held as JSON
     key-value pairs which map directly to this object's internal dictionary.
     """
+    STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
 
     def __init__(self):
         """Initialise `_data` dict with data from STORE_LOCATIONS_FILE."""
-        conf = file_handler.from_json(
-            config_file_path=STORE_LOCATIONS_FILE_PATH
+        self._data = file_handler.from_json(
+            config_file_path=self.STORE_LOCATIONS_FILE_PATH
         )
-        if not conf:
+        if not self._data:
+            # STORE_LOCATIONS_FILE was empty.
+            # write DEFAULT_STORE_RECORD to it.
             file_handler.to_json(
-                config_file_path=STORE_LOCATIONS_FILE_PATH,
+                config_file_path=self.STORE_LOCATIONS_FILE_PATH,
                 **DEFAULT_STORE_RECORD
             )
-        self._data = conf if conf else DEFAULT_STORE_RECORD
+            self._data = DEFAULT_STORE_RECORD
 
     def update(self, store_type, location):
         """Write a new store UID and storage location to the record.
@@ -141,13 +143,15 @@ class StoreLocationsRecord:
         """
         self._data[store_type] = location
         file_handler.to_json(
-            config_file_path=STORE_LOCATIONS_FILE_PATH, **self._data
+            config_file_path=self.STORE_LOCATIONS_FILE_PATH, **self._data
         )
 
     def get(self, store_type):
-        """Look up a store by UID and return the location.
+        """Look up a store by store_type and return the location.
 
         Verify the storage location is valid & exists on disk.
+
+        :param str store_type:
         :returns Path: file path to the storage location.
         """
         try:
@@ -174,8 +178,7 @@ def _get_or_create_store(store_type):
 
     :param str store_type: type of store to get/create.
     """
-    known_stores = StoreLocationsRecord()
-    store_path = known_stores.get(store_type)
+    store_path = StoreLocationsRecord().get(store_type)
     mode = 0o700 if store_type == "user" else 0o750
     store_path.mkdir(mode=mode, parents=True, exist_ok=True)
     return store_path
