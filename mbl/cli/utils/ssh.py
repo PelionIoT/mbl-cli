@@ -185,7 +185,7 @@ class SSHSession:
         local_hashes = str()
         local_subpaths = pathlib.Path(local_path).glob("**/*")
         for spath in sorted(
-            [path for path in local_subpaths if path.is_file()]
+            [str(path) for path in local_subpaths if path.is_file()]
         ):
             with open(spath, "rb") as file_to_hash:
                 local_hashes += hashlib.md5(file_to_hash.read()).hexdigest()
