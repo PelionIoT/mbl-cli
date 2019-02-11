@@ -94,23 +94,24 @@ def parse_args(description):
 
     save_api_key = command_group.add_parser("save-api-key")
 
-    save_api_key.add_argument(
-        "key", help="The API key to store."
-    )
+    save_api_key.add_argument("key", help="The API key to store.")
     save_api_key.set_defaults(func=save_api_key_action.execute)
 
     provision = command_group.add_parser("provision-pelion")
     provision.add_argument(
-        "cert_name", help="Name of the certificate to fetch/create."
+        "dev_cert_name", help="Name of the certificate to fetch/create."
+    )
+    provision.add_argument(
+        "update_cert_path", help="Path to update_default_resources.c."
     )
     provision.add_argument(
         "-c",
-        "--create-cert",
+        "--create-dev-cert",
         metavar="<key-name>",
         help="Create a new developer certificate and inject it into the"
         " selected device. "
         "<key-name>: the name of the API key saved using save-api-key. "
-        "Used to access the Pelion API to create the cert."
+        "Used to access the Pelion API to create the cert.",
     )
     provision.set_defaults(func=provision_action.execute)
 

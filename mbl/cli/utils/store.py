@@ -38,7 +38,7 @@ from . import file_handler
 STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
 DEFAULT_STORE_RECORD = {
     "user": str(pathlib.Path().home() / pathlib.Path(".mbl-store", "user")),
-    "team":  str(pathlib.Path().home() / pathlib.Path(".mbl-store", "team"))
+    "team": str(pathlib.Path().home() / pathlib.Path(".mbl-store", "team")),
 }
 
 
@@ -59,17 +59,13 @@ class Store:
         :params str store_type: The type of store to build (team or user).
         """
         path_to_store = _get_or_create_store(store_type)
-        self._config = file_handler.from_json(
-            path_to_store / "config.json"
-        )
+        self._config = file_handler.from_json(path_to_store / "config.json")
         if not self._config:
-            self._config = dict(
-                location=str(path_to_store),
-            )
+            self._config = dict(location=str(path_to_store))
 
     @property
     def api_keys(self):
-        """Dict of all API keys held in the store.
+        """Return the API keys held in the store.
 
         :returns dict: API keys in the form `{name: key, ...}`
         """

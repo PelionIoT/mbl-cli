@@ -32,6 +32,7 @@ def save_device_info(device, path=DEVICE_FILE_PATH):
 
 
 def to_binary_file(file_path, binary_data):
+    """Write binary data to a file."""
     _write_with_copy_modify_move(file_path, binary_data)
 
 
@@ -46,7 +47,7 @@ def from_json(config_file_path):
     """
     config_file_path.touch(exist_ok=True)
     try:
-        with open(config_file_path, "r") as dfile:
+        with open(str(config_file_path.resolve()), "r") as dfile:
             return json.load(dfile)
     except json.JSONDecodeError:
         # The file contains no parsable json.

@@ -48,7 +48,6 @@ class TestFileHandler:
             "mbed-linux-nbakjal", "169.254.0.8", "root", ""
         )
         fh.to_file(dev._asdict())
-        read_mock.write.assert_called()
         assert open_mock.call_args[0] == (fh.data_file_path, "w+")
 
     def test_load_device_data(self, fh, mock_json):

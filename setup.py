@@ -34,8 +34,9 @@ setup(
         "paramiko>=2.4.2",
         "scp>=0.13.0",
         "zeroconf>=0.21.3",
-        "mbed-cloud-sdk>=2.0.4"
-        ],
+        "mbed-cloud-sdk>=2.0.4",
+        "cryptography==2.4.2",
+    ],
     zip_safe=False,
     entry_points={"console_scripts": ["mbl-cli = mbl.cli.mbl_cli:_main"]},
 )
