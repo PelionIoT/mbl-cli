@@ -133,7 +133,7 @@ class ArgumentParserWithDefaultHelp(argparse.ArgumentParser):
 
     def error(self, message):
         """Error handler."""
-        sys.stderr.write(f"error: {message}\n")
+        sys.stderr.write("error: {}\n".format(message))
         self.print_help()
         raise SystemExit(2)
 
