@@ -146,11 +146,11 @@ class TestGetCommand:
         """Test the get command is executed without error."""
         _ssh, _scp = mock_ssh
         get_action.execute(args)
-        _ssh.return_value.__enter__.assert_called()
+        assert _ssh.return_value.__enter__.called
         _ssh.get.assert_called_once_with(
             args.src_path, args.dst_path, args.recursive
         )
-        _ssh.return_value.__exit__.assert_called()
+        assert _ssh.return_value.__exit__.called
 
 
 class TestPutCommand:
@@ -174,8 +174,8 @@ class TestPutCommand:
         """Test the put command is executed without error."""
         _ssh, _scp = mock_ssh
         put_action.execute(args)
-        _ssh.return_value.__enter__.assert_called()
+        assert _ssh.return_value.__enter__.called
         _ssh.put.assert_called_once_with(
             args.src_path, args.dst_path, args.recursive
         )
-        _ssh.return_value.__exit__.assert_called()
+        assert _ssh.return_value.__exit__.called

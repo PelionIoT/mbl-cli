@@ -32,7 +32,7 @@ def file_paths(tmp_path, request):
         else:
             local_.touch(exist_ok=True)
             try:
-                shutil.copy(local_, mock_remote)
+                shutil.copy(str(local_), str(mock_remote))
             except shutil.SameFileError:
                 pass
         if ".txt" not in request.param[1]:
@@ -40,7 +40,7 @@ def file_paths(tmp_path, request):
         else:
             mock_remote.touch(exist_ok=True)
             try:
-                shutil.copy(mock_remote, local_)
+                shutil.copy(str(mock_remote), str(local_))
             except shutil.SameFileError:
                 pass
     except FileExistsError:
@@ -91,7 +91,7 @@ class TestSCPFileTransferValidation:
         hsh_lib.md5().hexdigest.return_value = "HASH"
         session = ssh.SSHSession(Device())
         try:
-            session._validate_file_transfer(file_paths[0], file_paths[1])
+            session._validate_file_transfer(str(file_paths[0]), str(file_paths[1]))
         except ssh.SCPValidationFailed as io_error:
             pytest.fail("Raised SCPValidationFailed {}".format(io_error))
 
@@ -103,4 +103,4 @@ class TestSCPFileTransferValidation:
         hsh_lib.md5().hexdigest.return_value = "HASHY"
         session = ssh.SSHSession(Device())
         with pytest.raises(ssh.SCPValidationFailed):
-            session._validate_file_transfer(file_paths[0], file_paths[1])
+            session._validate_file_transfer(str(file_paths[0]), str(file_paths[1]))
