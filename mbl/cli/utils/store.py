@@ -80,7 +80,7 @@ def create(uid, store_type, location, user=None, group=None):
     :returns `Store`: A `Store` object.
     """
     mode = 0o700 if store_type == "user" else 0o750
-    path_to_store = pathlib.Path(location)
+    path_to_store = pathlib.Path(str(location))
     config_file_path = path_to_store / "config.json"
     try:
         path_to_store.mkdir(parents=True, mode=mode)

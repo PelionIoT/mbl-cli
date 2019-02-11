@@ -30,7 +30,12 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-    install_requires=["paramiko>=2.4.2", "scp>=0.13.0", "zeroconf>=0.21.3"],
+    install_requires=[
+        "paramiko>=2.4.2",
+        "scp>=0.13.0",
+        "zeroconf>=0.21.3",
+        "cryptography==2.4.2",
+    ],
     zip_safe=False,
     entry_points={"console_scripts": ["mbl-cli = mbl.cli.mbl_cli:_main"]},
 )

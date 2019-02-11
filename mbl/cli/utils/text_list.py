@@ -17,4 +17,4 @@ class IndexedTextList(UserList):
 
     def append(self, item):
         """Append item as a string with numbered index."""
-        super().append(f"{len(self)+1}: {item}")
+        super().append("{}: {}".format(len(self) + 1, item))

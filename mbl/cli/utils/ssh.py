@@ -82,7 +82,7 @@ class SSHSession:
     def __enter__(self):
         """Enter the context, connect to the ssh session."""
         if self.device.hostname:
-            qualified_hostname = f"{self.device.hostname}.local"
+            qualified_hostname = "{}.local".format(self.device.hostname)
         else:
             qualified_hostname = self.device.address
         try:
@@ -185,7 +185,7 @@ class SSHSession:
         local_hashes = str()
         local_subpaths = pathlib.Path(local_path).glob("**/*")
         for spath in sorted(
-            [path for path in local_subpaths if path.is_file()]
+            [str(path) for path in local_subpaths if path.is_file()]
         ):
             with open(spath, "rb") as file_to_hash:
                 local_hashes += hashlib.md5(file_to_hash.read()).hexdigest()
