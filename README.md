@@ -15,7 +15,7 @@ Please see the [Contributing][mbl-contributing] document for more information.
 
 ## Prerequisites
 
-[Python > v3.6](https://python.org) and `pip`. 
+[Python > v3.5](https://python.org) and `pip`. 
 
 
 ## Installation
