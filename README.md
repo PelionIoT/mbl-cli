@@ -140,9 +140,9 @@ You can use the same certificate on up to 100 devices. You can generate another 
 Previously the developer certificate had to be added to your Mbed Linux OS build configuration.
 Now you can provision your devices dynamically at runtime using the MBL-CLI.
 
-When updating the firmware on a device you must upload a signed [firmware manifest](https://cloud.mbed.com/docs/current/updating-firmware/firmware-manifests.html) to the Pelion cloud.
+To update the firmware on a device you must upload a signed [firmware manifest](https://cloud.mbed.com/docs/current/updating-firmware/firmware-manifests.html) to the Pelion cloud.
 
-An update authority certificate is used to sign the firmware update manifest. The manifest is then uploaded to Pelion Device Management and can be used to initiate a firmware update campaign. MBL-CLI provides a command to create the update authority certificate. [More information on the update authority certificate](https://cloud.mbed.com/docs/current/updating-firmware/update-auth-cert.html).
+An update authority certificate is used to sign the firmware update manifest. The manifest is then uploaded to Pelion Device Management and can be used to initiate a firmware update campaign. MBL-CLI will accept an update certificate created with the `manifest-tool` and use this to provision your device. MBL-CLI also provides a command to create an update authority certificate. [More information on the update authority certificate](https://cloud.mbed.com/docs/current/updating-firmware/update-auth-cert.html).
 
 Pelion provides several REST APIs relating to device management. The API keys used to authenticate with the Pelion APIs are created in the Pelion Device Management portal. MBL-CLI requires use of an API key to perform provisioning activities.
 
@@ -157,7 +157,7 @@ These stores are located on your developer machine at locations you can optional
 - User Store: This is where per user Pelion API keys are stored.
 - Team Store: This is where developer certificates and firmware update authority certificates for your devices are stored.
 
-The Team Store should be set to a location accessible by your team (for example a cloud share). This location is intended to be group accessible.
+The Team Store should be set to a location accessible by your team (for example a cloud share). This location is intended to be accessible by all members of your team.
 
 To specify a storage location you must provide a config file `~/.mbl-stores.json` with the following contents:
 
@@ -184,6 +184,8 @@ The developer provisioning workflow consists of the following steps:
 
 To inject a developer certificate into your device using MBL-CLI, follow the steps below.
 
+NOTE: This tutorial assumes you have already created a `update_default_resources.c` file using the `manifest-tool` as described [here](https://os.mbed.com/docs/mbed-linux-os/v0.5/getting-started/preparing-device-management-sources.html#creating-an-update-resources-file).
+
 Connect your Mbed Linux device to your development PC. Run the `select` command.
 The select command will return a list of discovered devices, you can select your device by its list index.
 
@@ -197,9 +199,9 @@ $ 1
 
 ```
 
-Obtain an API key from the Pelion Device Management website. When you create the API key on the website, you will be asked to give it a name. Copy the API key to your clipboard when prompted on the website.
+Obtain an API key from the Pelion Device Management website. When you create the API key on the website, you will be asked to give it a name. MBL-CLI will verify the given API key is correct, by matching it to the name created in the Pelion Device Management portal. You can refer to your API key by name when executing other commands that require use of the Pelion APIs if you wish. However, MBL-CLI will automatically choose the first API key in the User Store when it requires authentication with the Pelion APIs. Copy the API key to your clipboard when prompted on the website.
 
-Store your API key using the following command (replacing `<api-key>` with the real API key in your clipboard). This saves your API key, with the name you assigned to it in the Pelion portal, in the User Store.
+Store your API key using the following command (replacing `<api-key>` with the real API key in your clipboard). This command validates the key exists in the Pelion Cloud, fetches the name you assigned to it in the Pelion portal and saves the information in the User Store.
 
 ```bash
 mbl-cli save-api-key <api-key>
@@ -208,7 +210,7 @@ mbl-cli save-api-key <api-key>
 Run the provisioning command.
 
 ```bash
-mbl-cli provision-pelion --create-cert <api-key-name> <cert-name>
+mbl-cli provision-pelion --create-cert <api-key-name> <cert-name> <update-cert-path>
 ```
 
 This command will create your developer certificate and provision your selected device. The API key is required to access the Pelion Service API to create the certificate. `<api-key-name>` is the api key name you set in the Pelion portal when you created the key. After obtaining the certificate, MBL-CLI will inject it into your selected device's secure storage. The certificate is also saved in the Team Store for use with other devices.
