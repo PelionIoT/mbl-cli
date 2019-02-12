@@ -98,7 +98,7 @@ mbl-cli [address] put <src> <dest>
 
 Store a Pelion Service API key.
 
-API keys are saved in the User Store. MBL-CLI will also query the Pelion Service API the name given to the key when it was created. The name is stored alongside the key. The name is used to reference the key in other commands.
+API keys are saved in the User Store. MBL-CLI will also query the Pelion Service API the name given to the key when it was created. The name is stored alongside the key.
 
 ```bash
 mbl-cli save-api-key <api-key>
@@ -110,13 +110,13 @@ Create a developer certificate and inject it into the target device.
 
 This command will instruct MBL-CLI to perform the following actions.
 
-- Obtain or create a developer certificate.
-- Inject the certificate into the selected device's secure storage.
+- Obtain or create a developer certificate and update certificate.
+- Inject the certificates into the selected device's secure storage.
 
- MBL-CLI will search the Team Store for a device certificate if the `--create-cert` option is omitted. If `--create-cert` is given, MBL-CLI will create a new certificate using the Pelion Service API, provision the device, and store the certificate in your Team Store for later use.
+ MBL-CLI will search the Team Store for a device certificate if the `--create-dev-cert` option is omitted. If `--create-dev-cert` is given, MBL-CLI will create a new certificate using the Pelion Service API, provision the device, and store the certificate in your Team Store for later use.
 
 ```bash
-mbl-cli provision-pelion [--create-cert <api-key-name>]
+mbl-cli provision-pelion <dev-cert-name> <update-default-resources-path> [--create-dev-cert]
 ```
 
 #### CreateUpdateCert
@@ -157,7 +157,7 @@ These stores are located on your developer machine at locations you can optional
 - User Store: This is where per user Pelion API keys are stored.
 - Team Store: This is where developer certificates and firmware update authority certificates for your devices are stored.
 
-The Team Store should be set to a location accessible by your team (for example a cloud share). This location is intended to be accessible by all members of your team.
+The Team Store can be set to a location accessible by your team (for example a cloud share). If your team then specify this location for their Tema Store config (see below) they can use the CLI tool to access the device certificates to provision other devices.
 
 To specify a storage location you must provide a config file `~/.mbl-stores.json` with the following contents:
 
@@ -199,9 +199,11 @@ $ 1
 
 ```
 
-Obtain an API key from the Pelion Device Management website. When you create the API key on the website, you will be asked to give it a name. MBL-CLI will verify the given API key is correct, by matching it to the name created in the Pelion Device Management portal. You can refer to your API key by name when executing other commands that require use of the Pelion APIs if you wish. However, MBL-CLI will automatically choose the first API key in the User Store when it requires authentication with the Pelion APIs. Copy the API key to your clipboard when prompted on the website.
+Obtain an API key from the Pelion Device Management website. Copy the API key to your clipboard when prompted on the website.
 
-Store your API key using the following command (replacing `<api-key>` with the real API key in your clipboard). This command validates the key exists in the Pelion Cloud, fetches the name you assigned to it in the Pelion portal and saves the information in the User Store.
+Store your API key using the following command (replacing `<api-key>` with the real API key in your clipboard). This command validates the key exists in the Pelion Cloud. It then saves the key in the User Store.
+
+MBL-CLI will automatically choose the first API key it finds in the User Store when it requires authentication with the Pelion APIs.
 
 ```bash
 mbl-cli save-api-key <api-key>
@@ -210,10 +212,10 @@ mbl-cli save-api-key <api-key>
 Run the provisioning command.
 
 ```bash
-mbl-cli provision-pelion --create-cert <api-key-name> <cert-name> <update-cert-path>
+mbl-cli provision-pelion  <cert-name> <update-cert-path> --create-dev-cert
 ```
 
-This command will create your developer certificate and provision your selected device. The API key is required to access the Pelion Service API to create the certificate. `<api-key-name>` is the api key name you set in the Pelion portal when you created the key. After obtaining the certificate, MBL-CLI will inject it into your selected device's secure storage. The certificate is also saved in the Team Store for use with other devices.
+This command will provision your selected device with the developer and update certificates. You must pass in a name for your developer certificate and the path to the `update_default_resources.c` file created using the manifest-tool. Because we passed in `--create-dev-cert` MBL-CLI will create a new developer certificate with the given name, then save it in the Team Store for use with other devices. If we had omitted this option, MBL-CLI would search the Team Store for a dev certificate with the given name. After obtaining the certificates, MBL-CLI will inject it into your selected device's secure storage.
 
 [mbl-license]: LICENSE.md
 [mbl-contributing]: CONTRIBUTING.md
