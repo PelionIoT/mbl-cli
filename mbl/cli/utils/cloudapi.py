@@ -104,7 +104,8 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
     :return dict: credentials object
     """
     cert_header = cert_header.strip()
-    _, body = cert_header.split("*/")
+    _, body = cert_header.split(match_str_pre)
+    print(_, body)
     cpp_statements = body.split(";")
     out_map = dict()
     for statement in cpp_statements:
