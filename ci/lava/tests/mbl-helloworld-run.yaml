@@ -9,9 +9,8 @@ metadata:
 
 run:
     steps:
-        - apt-get install --yes python3-pip
-        - pip3 install --upgrade pip
-        - pip install -r requirements.txt
+        - apt-get install --yes python3-cffi libssl-dev libffi-dev python3-dev
+        - pip3 install 
         - mbl-cli select
         - mbl-cli put /home/ubuntu/user-sample-app-package_1.0_armv7vet2hf-neon.ipk /home/app
 
