@@ -4,11 +4,11 @@
 
 @Library('mbl-jenkins-library@master') _
 
-mblCliPipeline (
-    credentialsId: "fc6db1f7-2a3f-4655-b54a-476bac1194e5",
-    agent: "builder",
-    daysToKeep: "",
-    numToKeep: "2",
-    cron: "",
-    mblToolsBranch: "master"
-)
+mblCliPipeline {
+    credentialsId = "fc6db1f7-2a3f-4655-b54a-476bac1194e5"
+    agent = "builder"
+    daysToKeep = ""
+    numToKeep = "2"
+    cron = ""
+    mblToolsBranch = "master"
+}
