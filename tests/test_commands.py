@@ -10,14 +10,8 @@ from unittest import mock
 
 import pytest
 
-from mbl.cli.actions import (
-    get_action,
-    list_action,
-    put_action,
-    select_action,
-    shell_action,
-)
-from mbl.cli.utils import device, ssh
+from mbl.cli.actions import get_action, list_action, put_action, select_action
+from mbl.cli.utils import device
 
 
 @pytest.fixture
@@ -126,11 +120,11 @@ class TestGetCommand:
 
     @pytest.fixture(
         params=[
-            ("some/path/file.txt", "remote/path/", "mbed-hostname-8989"),
+            ("some/path/file.txt", "remote/path/", "168.254.56.92"),
             (
                 "some/path/file.txt",
                 "remote/path/file.txt",
-                "mbed-hostname-8989",
+                "fe80::6593:97d5:5bb6:d182%26",
             ),
         ]
     )
@@ -158,8 +152,12 @@ class TestPutCommand:
 
     @pytest.fixture(
         params=[
-            ("some/path/file.txt", "remote/path/", "mbed-hostname-8989"),
-            ("some/path/", "remote/path/file.txt", "mbed-hostname-8989"),
+            ("some/path/file.txt", "remote/path/", "168.254.56.92"),
+            (
+                "some/path/",
+                "remote/path/file.txt",
+                "fe80::6593:97d5:5bb6:d182%26",
+            ),
         ]
     )
     def args(self, request):
