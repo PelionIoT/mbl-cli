@@ -37,6 +37,7 @@ setup(
         "zeroconf>=0.21.3",
         "cryptography==2.4.2",
     ],
+    include_package_data=True,
     zip_safe=False,
     entry_points={"console_scripts": ["mbl-cli = mbl.cli.mbl_cli:_main"]},
 )
