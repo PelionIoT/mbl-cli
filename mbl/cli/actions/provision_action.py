@@ -35,7 +35,7 @@ def _get_api_key():
     try:
         return list(store_handle.api_keys.values())[0]
     except IndexError:
-        raise RuntimeError("You have not added and API key to the store.")
+        raise RuntimeError("You have not added an API key to the store.")
 
 
 def _get_certificate_paths(cert_name):
