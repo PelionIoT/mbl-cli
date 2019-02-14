@@ -20,7 +20,7 @@ def create_device(args):
         ):
             data = {"hostname": "", "address": args.address}
         else:
-            data = {"hostname": args.address, "address": ""}
+            raise ValueError("Invalid address given.")
     else:
         data = file_handler.read_device_file()
     return device.create_device(**data)
@@ -44,6 +44,7 @@ def is_valid_ipv4_address(address):
 
 def is_valid_ipv6_address(address):
     """Validate an ipv6 address."""
+    address, *_ = address.split("%")
     try:
         socket.inet_pton(socket.AF_INET6, address)
     except socket.error:
