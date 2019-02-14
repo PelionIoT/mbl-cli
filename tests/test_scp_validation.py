@@ -28,17 +28,17 @@ def file_paths(tmp_path, request):
     mock_remote = tmp_path / request.param[1]
     try:
         if ".txt" not in request.param[0]:
-            local_.mkdir(exist_ok=True)
+            local_.mkdir(mode=777, exist_ok=True)
         else:
-            local_.touch(exist_ok=True)
+            local_.touch(mode=777, exist_ok=True)
             try:
                 shutil.copy(str(local_), str(mock_remote))
             except shutil.SameFileError:
                 pass
         if ".txt" not in request.param[1]:
-            mock_remote.mkdir(exist_ok=True)
+            mock_remote.mkdir(mode=777, exist_ok=True)
         else:
-            mock_remote.touch(exist_ok=True)
+            mock_remote.touch(mode=777, exist_ok=True)
             try:
                 shutil.copy(str(mock_remote), str(local_))
             except shutil.SameFileError:

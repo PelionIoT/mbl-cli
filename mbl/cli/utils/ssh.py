@@ -81,22 +81,11 @@ class SSHSession:
 
     def __enter__(self):
         """Enter the context, connect to the ssh session."""
-        if self.device.hostname:
-            qualified_hostname = "{}.local".format(self.device.hostname)
-        else:
-            qualified_hostname = self.device.address
-        try:
-            self._client.connect(
-                qualified_hostname,
-                username=self.device.username,
-                password=self.device.password,
-            )
-        except socket.gaierror:
-            self._client.connect(
-                self.device.address,
-                username=self.device.username,
-                password=self.device.password,
-            )
+        self._client.connect(
+            self.device.address,
+            username=self.device.username,
+            password=self.device.password,
+        )
         return self
 
     def __exit__(self, *exception_info):
@@ -163,7 +152,7 @@ class SSHSession:
                         local_file.read()
                     ).hexdigest()
                     break
-            except IsADirectoryError:
+            except (IsADirectoryError, PermissionError):
                 local_path = os.path.join(local_path, remote_basename)
                 continue
         if local_file_checksum != remote_file_checksum:

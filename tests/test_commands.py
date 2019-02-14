@@ -17,7 +17,7 @@ from mbl.cli.actions import (
     select_action,
     shell_action,
 )
-from mbl.cli.utils import device, ssh
+from mbl.cli.utils import device
 
 
 @pytest.fixture
@@ -59,6 +59,7 @@ class Args:
     src_path = ""
     dst_path = ""
     recursive = False
+    cmd = ""
 
 
 class TestListCommand:
@@ -126,11 +127,11 @@ class TestGetCommand:
 
     @pytest.fixture(
         params=[
-            ("some/path/file.txt", "remote/path/", "mbed-hostname-8989"),
+            ("some/path/file.txt", "remote/path/", "168.254.56.92"),
             (
                 "some/path/file.txt",
                 "remote/path/file.txt",
-                "mbed-hostname-8989",
+                "fe80::6593:97d5:5bb6:d182%26",
             ),
         ]
     )
@@ -158,8 +159,12 @@ class TestPutCommand:
 
     @pytest.fixture(
         params=[
-            ("some/path/file.txt", "remote/path/", "mbed-hostname-8989"),
-            ("some/path/", "remote/path/file.txt", "mbed-hostname-8989"),
+            ("some/path/file.txt", "remote/path/", "168.254.56.92"),
+            (
+                "some/path/",
+                "remote/path/file.txt",
+                "fe80::6593:97d5:5bb6:d182%26",
+            ),
         ]
     )
     def args(self, request):
@@ -179,3 +184,25 @@ class TestPutCommand:
             args.src_path, args.dst_path, args.recursive
         )
         assert _ssh.return_value.__exit__.called
+
+
+class TestShellCommand:
+    """Test shell command."""
+
+    @pytest.fixture(params=["168.254.56.92", "fe80::6593:97d5:5bb6:d182%26"])
+    def args(self, request):
+        """Parametrized args fixture."""
+        _args = Args()
+        _args.address = request.param
+        yield _args
+
+    def test_ssh_client_is_called_correctly(self, args):
+        with mock.patch(
+            "mbl.cli.utils.ssh.SSHClientNoAuth", autospec=True
+        ) as client:
+            with mock.patch("mbl.cli.utils.ssh.shell") as shell:
+                shell_action.execute(args)
+                client().connect.assert_called_once_with(
+                    args.address, username="root", password=""
+                )
+                client().start_shell.assert_called_once()
