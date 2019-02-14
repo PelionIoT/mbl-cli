@@ -108,7 +108,7 @@ def parse_args(description):
         "-c",
         "--create-dev-cert",
         action="store_true",
-        help="Create a new developer certificate."
+        help="Create a new developer certificate.",
     )
     provision.set_defaults(func=provision_action.execute)
 

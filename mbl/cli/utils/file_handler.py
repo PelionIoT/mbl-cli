@@ -31,7 +31,7 @@ def save_device_info(device, path=DEVICE_FILE_PATH):
     fh.to_file(device._asdict())
 
 
-def to_binary_file(file_path, binary_data):
+def to_text_file(file_path, binary_data):
     """Write binary data to a file."""
     _write_with_copy_modify_move(file_path, binary_data)
 

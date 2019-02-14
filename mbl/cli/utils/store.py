@@ -76,7 +76,7 @@ class Store:
 
         :returns dict: developer cert file paths in the form `{name: [bin_path_1, bin_path_2 ...]}`
         """
-        return self._config.setdefault("dev_certs", dict())
+        return self._config["dev_certs"]
 
     @property
     def config_path(self):
@@ -102,10 +102,10 @@ class Store:
         """
         p_list = []
         for item in certificate:
-            c_path = pathlib.Path(
-                self._config["location"], "{}.bin".format(item)
-            )
-            file_handler.to_binary_file(c_path, certificate[item])
+            c_path = pathlib.Path(self._config["location"], name)
+            c_path.mkdir(exist_ok=True, parents=True)
+            c_path = c_path / "{}.bin".format(item)
+            file_handler.to_text_file(c_path, certificate[item])
             p_list.append(str(c_path))
         self.certificate_paths[name] = p_list
         self.save()
@@ -120,6 +120,7 @@ class StoreLocationsRecord:
     The store types and locations in the STORE_LOCATIONS_FILE are held as JSON
     key-value pairs which map directly to this object's internal dictionary.
     """
+
     STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
 
     def __init__(self):

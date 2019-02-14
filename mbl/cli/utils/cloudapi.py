@@ -55,7 +55,7 @@ class DevCredentialsAPI:
                 return _parse_cert_header(
                     this_cert.header_file,
                     "#include <inttypes.h>",
-                    "MBED_CLOUD_DEV_"
+                    "MBED_CLOUD_DEV_",
                 )
         raise ValueError(
             "The developer certificate does not exist."
@@ -105,7 +105,6 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
     """
     cert_header = cert_header.strip()
     _, body = cert_header.split(match_str_pre)
-    print(_, body)
     cpp_statements = body.split(";")
     out_map = dict()
     for statement in cpp_statements:
@@ -118,6 +117,11 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
         var_pp_name = var_name[var_name.find(match_str_var) :].replace(
             r"[]", ""
         )
-        val_pp = val.replace(r" '", "").replace(r'"', "").replace(",", "\n").strip(r"{} ")
+        val_pp = (
+            val.replace(r" '", "")
+            .replace(r'"', "")
+            .replace(",", "\n")
+            .strip(r"{} ")
+        )
         out_map[var_pp_name] = val_pp
     return out_map
