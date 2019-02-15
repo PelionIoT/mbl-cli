@@ -5,8 +5,24 @@
 
 """Action handler helper functions/classes."""
 
+import functools
 import socket
-from mbl.cli.utils import device, file_handler
+
+from mbl.cli.utils import device, file_handler, ssh
+
+
+# decorator
+def ssh_session(func):
+    """SSH session decorator."""
+    # wrapper
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        with ssh.SSHSession(
+            device.create_device(**file_handler.read_device_file())
+        ) as session:
+            func(*args, **kwargs, ssh=session)
+
+    return wrapper
 
 
 def create_device(args):

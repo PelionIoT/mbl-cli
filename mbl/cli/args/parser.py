@@ -16,7 +16,9 @@ from mbl.cli.actions import (
     select_action,
     shell_action,
     which_action,
+    provision_action,
     save_api_key_action,
+    pelion_status_action,
 )
 
 
@@ -32,7 +34,9 @@ def parse_args(description):
         help="The ipv4/6 address or hostname of the device"
         " you want to communicate with. ",
     )
-
+    parser.add_argument(
+        "-v", "--verbose", help="Enable verbose logging.", action="store_true"
+    )
     command_group = parser.add_subparsers(
         title="mbl-cli supports the following commands",
         description=_load_description_text(),
@@ -96,12 +100,42 @@ def parse_args(description):
     save_api_key.add_argument("key", help="The API key to store.")
     save_api_key.set_defaults(func=save_api_key_action.execute)
 
+    provision = command_group.add_parser("provision-pelion")
+    provision.add_argument(
+        "dev_cert_name",
+        help="Name of the developer certificate to fetch (or create and store "
+        "if -c is also given). "
+        "Certificates can only be fetched if they've already been added "
+        "to the Team Store.",
+    )
+    provision.add_argument(
+        "update_cert_name",
+        help="Name of the update certificate to fetch (or parse from an "
+        "`update_default_resources.c` file and store if -p is given). "
+        "Certificates can only be fetched if they've already been added "
+        "to the Team Store.",
+    )
+    provision.add_argument(
+        "-p",
+        "--parse-update-cert",
+        help="Parse an existing update certificate and save it in the"
+        " Team Store.",
+        metavar="CERT_PATH",
+        dest="update_cert_path",
+    )
+    provision.add_argument(
+        "-c",
+        "--create-dev-cert",
+        action="store_true",
+        help="Create a new developer certificate.",
+    )
+    provision.set_defaults(func=provision_action.execute)
+
+    query_pelion = command_group.add_parser("get-pelion-status")
+    query_pelion.set_defaults(func=pelion_status_action.execute)
+
     args_namespace = parser.parse_args()
 
-    # Extra logic here to check the `save-api-key --new-store` option
-    # was given the correct values.
-    if hasattr(args_namespace, "new_store"):
-        _validate_new_store_arg(args_namespace.new_store)
     # We want to fail gracefully, with a consistent
     # help message, in the no argument case.
     # So here's an obligatory hasattr hack.
@@ -127,15 +161,3 @@ def _load_description_text():
     )
     with open(help_path) as hfile:
         return hfile.read()
-
-
-def _validate_new_store_arg(arg):
-    if arg is not None:
-        path, context, *other = tuple(arg)
-        if context not in ["team", "user"]:
-            raise ValueError("--new-store CONTEXT must be 'team' or 'user'")
-        if context == "team":
-            if len(other) is not 2:
-                raise ValueError(
-                    "USER and GROUP must be given if CONTEXT is 'team'"
-                )

@@ -31,9 +31,14 @@ def save_device_info(device, path=DEVICE_FILE_PATH):
     fh.to_file(device._asdict())
 
 
-def to_text_file(file_path, binary_data):
-    """Write binary data to a file."""
-    _write_with_copy_modify_move(file_path, binary_data)
+def to_text_file(file_path, data):
+    """Write data to a text file."""
+    _write_with_copy_modify_move(file_path, data)
+
+
+def to_binary_file(file_path, data):
+    """Write data to a binary file."""
+    _write_with_copy_modify_move(file_path, data, mode="wb")
 
 
 def from_json(config_file_path):
@@ -64,13 +69,15 @@ def to_json(config_file_path, **store_conf_data):
     _write_with_copy_modify_move(config_file_path, json_fmt_data)
 
 
-def _write_with_copy_modify_move(file_path, data):
+def _write_with_copy_modify_move(file_path, data, mode="w"):
     """Write data to a file safely.
 
     Check the file exists and create it if not.
     Use copy-modify-move when writing to avoid corrupting the config_file.
 
     :param file_path Path: Path object representing the file-to-write.
+    :param data: The data to write to the file.
+    :param mode str: file mode. "w" and "wb" are the only sensible values.
     """
     file_path.touch(exist_ok=True)
     # copy the config file to a tmp file
@@ -79,7 +86,7 @@ def _write_with_copy_modify_move(file_path, data):
         # copy2 will attempt to preserve all metadata
         dst_path = shutil.copy2(str(file_path), tmp_dir)
         # write the data to the tmp file
-        with open(dst_path, "w") as dfile:
+        with open(dst_path, mode) as dfile:
             dfile.write(data)
         # move the tmp file over the original file
         shutil.move(dst_path, str(file_path))

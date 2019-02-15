@@ -6,6 +6,7 @@
 """Wrappers for the mbed-cloud-sdk."""
 
 from mbed_cloud import CertificatesAPI, AccountManagementAPI
+import array
 
 
 def find_api_key_name(api_key):
@@ -89,11 +90,13 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
     Store the data as key/value pairs (variable name/value) in a
     dictionary.
 
-    match_str_pre is used to split the include statements from the
+    `match_str_pre` is used to split the include statements from the
     header body. It should be the last preprocessor statement at the top
-    of the header.
-    match_str_var is used to match the variable names (all variables in
-    these certs have a consistent naming scheme, match_str_var is passed
+    of the header. (`match_str_pre` is passed directly to str.find. This is
+    not a RE!)
+
+    `match_str_var` is used to match the variable names (all variables in
+    these certs have a consistent naming scheme, `match_str_var` is passed
     directly to str.find. This is not a RE!)
 
     :param str cert_header: The certificate header to parse.
@@ -108,19 +111,30 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
     out_map = dict()
     for statement in cpp_statements:
         statement = statement.replace("\n", "")
-        # skip preprocessor directives
-        if statement.startswith("#"):
+        # skip statements that aren't var assignments
+        if "=" not in statement:
             continue
         var_name, val = statement.split(" = ")
+        # ignore sizeof variables
+        if "sizeof(" in val:
+            continue
         # sanitise the string tokens
-        var_pp_name = var_name[var_name.find(match_str_var) :].replace(
-            r"[]", ""
+        var_pp_name = (
+            var_name[var_name.find(match_str_var) :].replace(r"[]", "").strip()
         )
         val_pp = (
             val.replace(r" '", "")
             .replace(r'"', "")
-            .replace(",", "\n")
-            .strip(r"{} ")
+            .replace(" ", "")
+            .strip(r"{} \r")
         )
-        out_map[var_pp_name] = val_pp
+        values = val_pp.split(",")
+        if len(values) > 1:
+            # is an array of hexadecimal values
+            fmt_arr = [int(av, 16) for av in values]
+            out_val = array.array("B", fmt_arr).tobytes()
+        else:
+            # is a single string or int/uint value
+            out_val = values[0].encode()
+        out_map[var_pp_name] = out_val
     return out_map
