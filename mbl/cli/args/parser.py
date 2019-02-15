@@ -92,25 +92,8 @@ def parse_args(description):
     shell.set_defaults(func=shell_action.execute)
 
     save_api_key = command_group.add_parser("save-api-key")
-    save_api_key.add_argument(
-        "uid", help="UID/name of the persistent storage location."
-    )
-    save_api_key.add_argument(
-        "--new-store",
-        nargs="*",
-        metavar="INFO",
-        help="""Create a new store.
-        INFO is a variable length argument with the following inputs.
-        The inputs must be given in the following order!
-        PATH: file path for the new store.
-        CONTEXT: storage context (must be either 'team' or 'user').
-        USER: User who owns this store. (ONLY required when CONTEXT is `team`)
-        GROUP: store's group. (ONLY required when CONTEXT is `team`)
-        """,
-    )
-    save_api_key.add_argument(
-        "keys", nargs="+", help="The API key(s) to store."
-    )
+
+    save_api_key.add_argument("key", help="The API key to store.")
     save_api_key.set_defaults(func=save_api_key_action.execute)
 
     args_namespace = parser.parse_args()

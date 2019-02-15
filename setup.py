@@ -35,6 +35,7 @@ setup(
         "paramiko>=2.4.2",
         "scp>=0.13.0",
         "zeroconf>=0.21.3",
+        "mbed-cloud-sdk>=2.0.4",
         "cryptography==2.4.2",
     ],
     include_package_data=True,
