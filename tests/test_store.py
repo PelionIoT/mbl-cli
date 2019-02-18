@@ -21,10 +21,9 @@ class TestStore:
         with mock.patch("mbl.cli.utils.store.file_handler") as mock_fh:
             mock_fh.from_json.return_value = dict()
             store.Store(store_type=store_type)
+            expected_p = store.StoreLocationsRecord.STORE_LOCATIONS_FILE_PATH
             mock_fh.to_json.assert_called_once_with(
-                config_file_path=store.StoreLocationsRecord
-                                      .STORE_LOCATIONS_FILE_PATH,
-                **store.DEFAULT_STORE_RECORD
+                config_file_path=expected_p, **store.DEFAULT_STORE_RECORD
             )
 
     @pytest.mark.parametrize("store_type", ["blah", "b;aha;;a;"])
