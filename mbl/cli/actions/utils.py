@@ -44,7 +44,9 @@ def is_valid_ipv4_address(address):
 
 def is_valid_ipv6_address(address):
     """Validate an ipv6 address."""
-    address, iface = address.split("%")
+
+    address, *_ = address.split("%")
+
     try:
         socket.inet_pton(socket.AF_INET6, address)
     except socket.error:

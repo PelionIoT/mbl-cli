@@ -15,8 +15,11 @@ Please see the [Contributing][mbl-contributing] document for more information.
 
 ## Prerequisites
 
-[Python > v3.6](https://python.org) and `pip`. 
+[Python > v3.5](https://python.org) and `pip`. 
 
+Linux users require a few other dependencies. Install them using apt-get (this example is for Ubuntu 16.04):
+
+`apt-get install --yes python3-cffi libssl-dev libffi-dev python3-dev`
 
 ## Installation
 

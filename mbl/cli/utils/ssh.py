@@ -152,7 +152,7 @@ class SSHSession:
                         local_file.read()
                     ).hexdigest()
                     break
-            except IsADirectoryError:
+            except (IsADirectoryError, PermissionError):
                 local_path = os.path.join(local_path, remote_basename)
                 continue
         if local_file_checksum != remote_file_checksum:
