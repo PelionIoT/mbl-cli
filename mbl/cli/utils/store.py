@@ -78,7 +78,8 @@ class Store:
     def certificate_paths(self):
         """List of all developer certificate binary files in the store.
 
-        :returns dict: developer cert file paths in the form `{name: [bin_path_1, bin_path_2 ...]}`
+        :returns dict: developer cert file paths in the form 
+        `{name: [bin_path_1, bin_path_2 ...]}`
         """
         return self._config["dev_certs"]
 
