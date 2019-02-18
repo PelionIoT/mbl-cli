@@ -205,4 +205,4 @@ class TestShellCommand:
                 client().connect.assert_called_once_with(
                     args.address, username="root", password=""
                 )
-                client().start_shell.assert_called_once()
+                assert client().invoke_shell.called
