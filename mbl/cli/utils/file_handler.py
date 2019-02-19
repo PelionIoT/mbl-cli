@@ -31,8 +31,13 @@ def save_device_info(device, path=DEVICE_FILE_PATH):
     fh.to_file(device._asdict())
 
 
-def read_config_from_json(config_file_path):
-    """Read json data from a file.
+def to_text_file(file_path, binary_data):
+    """Write binary data to a file."""
+    _write_with_copy_modify_move(file_path, binary_data)
+
+
+def from_json(config_file_path):
+    """Read data from a json file.
 
     Check the file exists and create it if not.
     We want to return an empty dict and not fail if the file contains no data.
@@ -42,7 +47,7 @@ def read_config_from_json(config_file_path):
     """
     config_file_path.touch(exist_ok=True)
     try:
-        with open(config_file_path, "r") as dfile:
+        with open(str(config_file_path.resolve()), "r") as dfile:
             return json.load(dfile)
     except json.JSONDecodeError:
         # The file contains no parsable json.
@@ -50,26 +55,34 @@ def read_config_from_json(config_file_path):
         return dict()
 
 
-def write_config_to_json(config_file_path, **store_conf_data):
+def to_json(config_file_path, **store_conf_data):
     """Write a dictionary of config data to a json file.
+
+    :param config_file_path Path: Path object representing the file-to-write.
+    """
+    json_fmt_data = json.dumps(store_conf_data)
+    _write_with_copy_modify_move(config_file_path, json_fmt_data)
+
+
+def _write_with_copy_modify_move(file_path, data):
+    """Write data to a file safely.
 
     Check the file exists and create it if not.
     Use copy-modify-move when writing to avoid corrupting the config_file.
 
-    :param config_file_path Path: Path object representing the file-to-write.
+    :param file_path Path: Path object representing the file-to-write.
     """
-    config_file_path.touch(exist_ok=True)
+    file_path.touch(exist_ok=True)
     # copy the config file to a tmp file
-    tmp_dir = tempfile.mkdtemp(dir=str(config_file_path.parent))
+    tmp_dir = tempfile.mkdtemp(dir=str(file_path.parent))
     try:
         # copy2 will attempt to preserve all metadata
-        dst_path = shutil.copy2(str(config_file_path), tmp_dir)
+        dst_path = shutil.copy2(str(file_path), tmp_dir)
         # write the data to the tmp file
-        json_fmt_data = json.dumps(store_conf_data)
         with open(dst_path, "w") as dfile:
-            dfile.write(json_fmt_data)
+            dfile.write(data)
         # move the tmp file over the original file
-        shutil.move(dst_path, str(config_file_path))
+        shutil.move(dst_path, str(file_path))
     finally:
         shutil.rmtree(tmp_dir)
 

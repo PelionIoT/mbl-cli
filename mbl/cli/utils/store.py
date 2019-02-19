@@ -13,136 +13,32 @@ Pelion Device Management.
 The `config.json` file holds information about the stored items and other
 metadata (including paths to any objects in the persistent storage location
 stored as files).
-MBL-CLI also creates a file named `.mbl-stores.json`.
+MBL-CLI also creates/accepts a file named `.mbl-stores.json`.
 `.mbl-stores.json` is referred to as the STORE_LOCATIONS_FILE.
-This is where known storage UIDs and locations are saved as key/value pairs.
+This is where known storage types and locations are saved as key/value pairs.
 
 The `Store` class contained in this module provides the public interface to
 access objects in a persistent storage location and save new items to the
 store.
+The `Store` class is basically a thin wrapper around a dict built from the
+store's config.json.
 
-The `Store` class is basically a thin wrapper
-around the dict passed to its `__init__` method as the `metadata` parameter.
-
-The `metadata` dict is built from data in a persistent storage location's
-`config.json` file, by either the `get` or `create` functions, which must
-be used to build a `Store` instance.
-
-To instantiate a `Store` use the `get` or `create` functions. Both of
-these functions return a `Store`.
-`get` will retrieve the `config.json` data from a known persistent storage
-location, then perform some sanity checks on the data.
-A `Store` object wrapping this data is then instantiated and returned.
-`create` will create a new persistent storage location on disk
-before building a `metadata` dict from the input arguments.
-The `metadata` dict is passed to a `Store` instance, then `Store` is returned.
-
-* `get` factory function gets a path to a persistent storage location from
- a known UID and builds a `Store` instance from the config.json.
-* `create` factory function creates a new persistent storage location and
-builds a `Store` instance from the function's input parameters.
 * `Store` class representing a storage location on disk.
 * `StoreLocationsRecord` class is an interface for STORE_LOCATIONS_FILE i/o.
 
 Exceptions:
 ----
-* `StoreNotFoundError` store UID is unknown.
-* `KnownStoreLocationInvalid` known store UID has no known path on disk.
-* `StoreConfigError` existing store config.json contains no data.
-* `GroupNameNotFoundError` group doesn't exist.
-* `UserNotInGroupError` specified user not in the specified group.
+* `StoreNoteFoundError` Specified store location does not exist.
 """
 
-import os
 import pathlib
-import platform
-import shutil
 
 from . import file_handler
 
-STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
-DEFAULT_STORE_UIDS = {"user": "default-user", "team": "default-team"}
-
-
-def create(uid, store_type, location, user=None, group=None):
-    """Create a new store on disk and return a `Store` instance.
-
-    Create the store directory and config file with the correct permissions.
-
-    Update the StoreLocationsRecord with the new store's uid & location.
-    Pack the store metadata into a dictionary and wrap it in a `Store` object.
-
-    If a team store is being created, also set the store's user and group.
-
-    :params str uid: store's UID.
-    :params str location: path to the store.
-    :params str store_type: type of store (user or team).
-    :returns `Store`: A `Store` object.
-    """
-    mode = 0o700 if store_type == "user" else 0o750
-    path_to_store = pathlib.Path(str(location))
-    config_file_path = path_to_store / "config.json"
-    try:
-        path_to_store.mkdir(parents=True, mode=mode)
-        config_file_path.touch(mode=mode)
-        if store_type == "team":
-            if not platform.system() == "Windows":
-                # Set the unix user:group for this team store.
-                _set_store_user_group(path_to_store, user, group)
-    except FileExistsError:
-        raise IOError("The given path already exists.")
-    except (OSError, GroupNameNotFoundError, UserNotInGroupError) as err:
-        # Something disastrous occurred.
-        # Delete the config file but leave the directory to prevent the user
-        # inadvertently deleting an 'important' directory.
-        if config_file_path.exists():
-            os.remove(str(config_file_path))
-        raise IOError(
-            "File operation failed because: {}\n"
-            "Removed store config file at path {}.".format(
-                err, config_file_path
-            )
-        )
-    metadata = dict(
-        uid=uid, location=str(path_to_store.resolve()), store_type=store_type
-    )
-    # Add the new store uid and location to the record.
-    StoreLocationsRecord().update(uid, metadata["location"])
-    return Store(metadata)
-
-
-def get(uid):
-    """Build a `Store` from an existing store config file on disk.
-
-    Find the known store config file based on the store's UID in the
-    `StoreLocationsRecord`.
-    Read store metadata from the config file and wrap it in a `Store` object.
-
-    :params str uid: store's UID.
-    :returns `Store`: A `Store` object.
-    """
-    if not uid.lower() in DEFAULT_STORE_UIDS.values():
-        # Query the known stores record.
-        path_to_store = StoreLocationsRecord().get(uid)
-    else:
-        for stype, duid in DEFAULT_STORE_UIDS.items():
-            if uid.lower() == duid:
-                # Implicitly create the default store if it doesn't exist.
-                # The user has elected to `get` the default `Store`,
-                # and expects the directory and config to be automatically
-                # created.
-                path_to_store = _get_or_create_default_store(stype)
-    metadata = file_handler.read_config_from_json(
-        path_to_store / "config.json"
-    )
-    if not metadata:
-        raise StoreConfigError(
-            "The config file at {} contains no data. "
-            "Your store is corrupt, please delete and recreate.".format(
-                path_to_store
-            )
-        )
-    return Store(metadata)
+DEFAULT_STORE_RECORD = {
+    "user": str(pathlib.Path().home() / pathlib.Path(".mbl-store", "user")),
+    "team": str(pathlib.Path().home() / pathlib.Path(".mbl-store", "team")),
+}
 
 
 class Store:
@@ -152,22 +48,40 @@ class Store:
     about the store itself, and information on objects within the store.
 
     This object provides an interface to access the store config file data.
-
-    NOTE: You usually won't instantiate this object directly. Instead use the
-    `get` or `create` factory functions.
     """
 
-    def __init__(self, metadata):
-        """Create a `Store` object.
+    def __init__(self, store_type):
+        """Build a store object from a path based on the store_type.
 
-        :params dict metadata: Store metadata from the store config file.
+        The path_to_store on disk must exist before instantiating this class.
+
+        :params str store_type: The type of store to build (team or user).
         """
-        self._config = metadata
+        path_to_store = _get_or_create_store(store_type)
+        self._config = file_handler.from_json(path_to_store / "config.json")
+        if not self._config:
+            self._config = dict(location=str(path_to_store))
 
     @property
-    def api_keys(self):
-        """List of API keys held in the store."""
-        return self._config.setdefault("api_keys", list())
+    def api_key(self):
+        """Return the API key held in the store.
+
+        :returns str: API key
+        """
+        return self._config["api_keys"]
+
+    @api_key.setter
+    def api_key(self, key):
+        self._config["api_keys"] = key.strip()
+
+    @property
+    def certificate_paths(self):
+        """List of all developer certificate binary files in the store.
+
+        :returns dict: developer cert file paths in the form
+        `{name: [bin_path_1, bin_path_2 ...]}`
+        """
+        return self._config["dev_certs"]
 
     @property
     def config_path(self):
@@ -176,7 +90,23 @@ class Store:
 
     def save(self):
         """Save config data to a file."""
-        file_handler.write_config_to_json(self.config_path, **self._config)
+        file_handler.to_json(self.config_path, **self._config)
+
+    def add_certificate(self, name, certificate):
+        """Add a certificate object to the store as a set of binary files.
+
+        :param str name: name of the dev certificate.
+        :param dict credentials: credentials object.
+        """
+        p_list = []
+        for item in certificate:
+            c_path = pathlib.Path(self._config["location"], name)
+            c_path.mkdir(exist_ok=True, parents=True)
+            c_path = c_path / "{}.bin".format(item)
+            file_handler.to_text_file(c_path, certificate[item])
+            p_list.append(str(c_path))
+        self.certificate_paths[name] = p_list
+        self.save()
 
 
 class StoreLocationsRecord:
@@ -185,53 +115,49 @@ class StoreLocationsRecord:
     This class provides an interface to update and read the
     STORE_LOCATIONS_FILE.
 
-    The store UIDs and locations in the STORE_LOCATIONS_FILE are held as JSON
+    The store types and locations in the STORE_LOCATIONS_FILE are held as JSON
     key-value pairs which map directly to this object's internal dictionary.
     """
 
+    STORE_LOCATIONS_FILE_PATH = pathlib.Path().home() / ".mbl-stores.json"
+
     def __init__(self):
         """Initialise `_data` dict with data from STORE_LOCATIONS_FILE."""
-        self._data = file_handler.read_config_from_json(
-            config_file_path=STORE_LOCATIONS_FILE_PATH
+        self._data = file_handler.from_json(
+            config_file_path=self.STORE_LOCATIONS_FILE_PATH
         )
+        if not self._data:
+            # STORE_LOCATIONS_FILE was empty.
+            # write DEFAULT_STORE_RECORD to it.
+            file_handler.to_json(
+                config_file_path=self.STORE_LOCATIONS_FILE_PATH,
+                **DEFAULT_STORE_RECORD
+            )
+            self._data = DEFAULT_STORE_RECORD
 
-    def update(self, uid, location):
+    def update(self, store_type, location):
         """Write a new store UID and storage location to the record.
 
         Prevent setting a known UID's location.
         """
-        if uid not in self._data:
-            self._data[uid] = location
-            file_handler.write_config_to_json(
-                config_file_path=STORE_LOCATIONS_FILE_PATH, **self._data
-            )
-        else:
-            raise KeyError(
-                "Trying to add a store UID that already exists in the record."
-            )
+        self._data[store_type] = location
+        file_handler.to_json(
+            config_file_path=self.STORE_LOCATIONS_FILE_PATH, **self._data
+        )
 
-    def get(self, uid):
-        """Look up a store by UID and return the location.
+    def get(self, store_type):
+        """Look up a store by store_type and return the location.
 
         Verify the storage location is valid & exists on disk.
+
+        :param str store_type:
         :returns Path: file path to the storage location.
         """
         try:
-            loc = pathlib.Path(self._data.get(uid, None))
+            loc = pathlib.Path(self._data.get(store_type, None))
         except TypeError:
             raise StoreNotFoundError(
-                "UID not recognised. You must create a store."
-            )
-        if not loc.exists():
-            # We've found a 'known store' that doesn't actually exist on disk.
-            # Delete from the store locations record and raise an exception.
-            del self._data[uid]
-            file_handler.write_config_to_json(
-                config_file_path=STORE_LOCATIONS_FILE_PATH, **self._data
-            )
-            raise KnownStoreLocationInvalid(
-                "A 'known store' location does not exist on disk."
-                " You must recreate the store."
+                "Store Type not recognised. Only User and Team supported."
             )
         return loc
 
@@ -240,71 +166,18 @@ class StoreNotFoundError(Exception):
     """The specified store does not exist."""
 
 
-class KnownStoreLocationInvalid(Exception):
-    """A store UID is associated with a path that does not exist."""
+def _get_or_create_store(store_type):
+    """Get the store path from the StoreLocationsRecord.
 
+    Create the path if it doesn't exist.
 
-class StoreConfigError(Exception):
-    """Store config file exists but contains no data."""
-
-
-class GroupNameNotFoundError(Exception):
-    """Group name was not found in the database."""
-
-
-class UserNotInGroupError(Exception):
-    """Specified user is not in the specified group."""
-
-
-def _get_or_create_default_store(store_type):
-    """Get the default store path, creating it if it doesn't exist.
-
-    We expect the default storage location and config.json to be automatically
-    created in the scenario where a user is saving to the default store for
+    We expect the storage location and config.json to be automatically
+    created in the scenario where a user is saving to the store for
     the first time.
 
-    :param str: UID for this default store (team & user have independent UIDs)
-    :return Path: path to the default store.
+    :param str store_type: type of store to get/create.
     """
-    uid = DEFAULT_STORE_UIDS[store_type]
+    store_path = StoreLocationsRecord().get(store_type)
     mode = 0o700 if store_type == "user" else 0o750
-    default_sp = pathlib.Path().home() / ".mbl-store/{}".format(uid)
-    if not default_sp.exists():
-        default_sp.mkdir(mode=mode, parents=True)
-        file_handler.write_config_to_json(
-            config_file_path=default_sp / "config.json",
-            **dict(
-                uid=uid,
-                location=str(default_sp.resolve()),
-                store_type=store_type,
-            )
-        )
-    return default_sp
-
-
-def _set_store_user_group(path, user, group):
-    """Set the :group on unix systems, leaving the user unchanged.
-
-    It is the caller's responsibility to ensure the group exists
-    and the correct users are added to it.
-    Lazily import the pwd module as this isn't available on Windows.
-
-    :params Path path: path to the store.
-    :params str user: Name of the user who owns the store.
-    :params str group: Name of the group that has access to the store.
-    """
-    import grp
-
-    try:
-        group_info = grp.getgrnam(group)
-        usr_idx = group_info.gr_mem.index(user)
-    except ValueError:
-        raise UserNotInGroupError("The given user is not in the given group.")
-    except KeyError:
-        raise GroupNameNotFoundError(
-            "The group name was not found in the database."
-        )
-    else:
-        os.chown(
-            str(path.resolve()), group_info.gr_mem[usr_idx], group_info.gr_gid
-        )
+    store_path.mkdir(mode=mode, parents=True, exist_ok=True)
+    return store_path
