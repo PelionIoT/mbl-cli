@@ -113,10 +113,10 @@ Create a developer certificate and inject it into the target device.
 
 This command will instruct MBL-CLI to perform the following actions.
 
-- Obtain or create a developer certificate and [update authenticity certificate](https://cloud.mbed.com/docs/current/updating-firmware/update-auth-cert.html).
+- Obtain or create a developer certificate and an [update authenticity certificate](https://cloud.mbed.com/docs/current/updating-firmware/update-auth-cert.html).
 - Inject the certificates into the selected device's secure storage.
 
- MBL-CLI will search the Team Store for a device certificate if the `--create-dev-cert` option is omitted. If `--create-dev-cert` is given, MBL-CLI will create a new certificate using the Pelion Service API, provision the device, and store the certificate in your Team Store for later use.
+ MBL-CLI will search the [Team Store](#persistent-storage) for a device certificate if the `--create-dev-cert` option is omitted. If `--create-dev-cert` is given, MBL-CLI will create a new certificate using the Pelion Service API, provision the device, and store the certificate in your Team Store for later use.
 
 ```bash
 mbl-cli provision-pelion <dev-cert-name> <update-default-resources-path> [--create-dev-cert]
