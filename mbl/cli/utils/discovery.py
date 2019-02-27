@@ -10,6 +10,7 @@ import subprocess
 import time
 from collections import namedtuple
 from enum import Enum
+from threading import Lock
 
 import zeroconf
 
@@ -91,7 +92,8 @@ class DeviceGetter:
         while not listener.devices and (time.time() < end_time):
             time.sleep(SLEEP_TIME)
             try:
-                raw_output = _avahi_browse()
+                with Lock():
+                    raw_output = _avahi_browse()
             except FileNotFoundError:
                 self.browser = zeroconf.ServiceBrowser(
                     self.zconf, self.ADDR, listener
