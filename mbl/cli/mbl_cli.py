@@ -22,7 +22,7 @@ def _main():
         if args.verbose:
             traceback.print_exc()
         else:
-            print(error)
+            print(error, file=sys.stderr)
         return 1
     else:
         return 0
