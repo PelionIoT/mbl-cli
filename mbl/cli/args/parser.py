@@ -111,7 +111,7 @@ def parse_args(description):
     provision.add_argument(
         "update_cert_name",
         help="Name of the update certificate to fetch (or parse from an "
-        "`update_default_resources.c` file and store if -p is given). "
+        "update_default_resources.c file and store if -p is given). "
         "Certificates can only be fetched if they've already been added "
         "to the Team Store.",
     )
