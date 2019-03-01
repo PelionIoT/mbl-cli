@@ -6,6 +6,7 @@
 """Wrappers for the mbed-cloud-sdk."""
 
 from mbed_cloud import CertificatesAPI, AccountManagementAPI
+import array
 
 
 def find_api_key_name(api_key):
@@ -89,11 +90,13 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
     Store the data as key/value pairs (variable name/value) in a
     dictionary.
 
-    match_str_pre is used to split the include statements from the
+    `match_str_pre` is used to split the include statements from the
     header body. It should be the last preprocessor statement at the top
-    of the header.
-    match_str_var is used to match the variable names (all variables in
-    these certs have a consistent naming scheme, match_str_var is passed
+    of the header. (`match_str_pre` is passed directly to str.find. This is
+    not a RE!)
+
+    `match_str_var` is used to match the variable names (all variables in
+    these certs have a consistent naming scheme, `match_str_var` is passed
     directly to str.find. This is not a RE!)
 
     :param str cert_header: The certificate header to parse.
@@ -108,19 +111,39 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
     out_map = dict()
     for statement in cpp_statements:
         statement = statement.replace("\n", "")
-        # skip preprocessor directives
-        if statement.startswith("#"):
+        # skip statements that aren't var assignments
+        if "=" not in statement:
             continue
-        var_name, val = statement.split(" = ")
-        # sanitise the string tokens
-        var_pp_name = var_name[var_name.find(match_str_var) :].replace(
-            r"[]", ""
+        var_name_and_type, raw_val = statement.split(" = ")
+        # ignore sizeof variables
+        if "sizeof(" in raw_val:
+            continue
+        # slice out the variable type before the name
+        var_name_begin = var_name_and_type.find(match_str_var)
+        if var_name_begin is -1:
+            raise ValueError("{} var match not found.".format(match_str_var))
+        processed_name = (
+            var_name_and_type[var_name_begin:].replace(r"[]", "").strip()
         )
-        val_pp = (
-            val.replace(r" '", "")
-            .replace(r'"', "")
-            .replace(",", "\n")
-            .strip(r"{} ")
+        # remove unwanted characters from the variable value string.
+        # if replace or strip fail they do it silently, so this covers
+        # all the "unwanted character" cases in these headers.
+        processed_value = (
+            raw_val.replace(r" '", "")  # 'c' -> c
+            .replace(r'"', "")  # "bootstrapServer" -> bootstrapServer
+            .replace(" ", "")  # 0x7f_ -> 0x7f (_ represents whitespace)
+            .strip(r"{} \r")  # {0x7f}\r -> 0x7f
         )
-        out_map[var_pp_name] = val_pp
+        # try to split on commas, the resulting list will be of length 1
+        # if this value is a single string or int. If it's an array then
+        # we'll get a list with len > 1.
+        values = processed_value.split(",")
+        if len(values) > 1:
+            # is an array of hexadecimal values
+            fmt_arr = [int(av, 16) for av in values]
+            out_val = array.array("B", fmt_arr).tobytes()
+        else:
+            # is a single string or int/uint value
+            out_val = values[0].encode()
+        out_map[processed_name] = out_val
     return out_map

@@ -6,8 +6,6 @@
 """Select action handler."""
 
 
-import sys
-
 from mbl.cli.utils import device, file_handler
 
 from . import list_action
