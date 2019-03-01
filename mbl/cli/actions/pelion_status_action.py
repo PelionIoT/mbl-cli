@@ -5,8 +5,12 @@
 
 """pelion-status action handler."""
 
-from mbl.cli.utils.ssh import SSHSession
+import shlex
+
 from mbl.cli.actions import utils
+from mbl.cli.utils.ssh import SSHSession
+
+from . import utils
 
 
 def execute(args):
@@ -14,7 +18,9 @@ def execute(args):
     device = utils.create_device(args)
     with SSHSession(device) as ssh:
         ssh.run_cmd(
-            "/opt/arm/pelion-provisioning-util --get-pelion-status",
+            "{} --get-pelion-status".format(
+                shlex.quote(utils.PROVISIONING_UTIL_PATH)
+            ),
             check=True,
             writeout=True,
         )

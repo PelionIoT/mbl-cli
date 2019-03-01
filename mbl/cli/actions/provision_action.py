@@ -6,6 +6,7 @@
 """Entry point for the pelion-provision command."""
 
 import os
+import shlex
 
 from mbl.cli.utils.cloudapi import (
     DevCredentialsAPI,
@@ -51,7 +52,7 @@ def _get_api_key():
     store_handle = Store("user")
     key = store_handle.api_key
     if not key:
-        raise AttributeError("You have not added an API key to the store.")
+        raise ValueError("You have not added an API key to the store.")
     return key
 
 
@@ -78,40 +79,52 @@ def _save_certificate(cert_name, cert_data):
 @utils.ssh_session
 def _prepare_remote_dir(target_dir, ssh):
     # rm any existing /provisioning-certs directory on the target.
-    # It's fine for this to fail silently as usually we don't
-    # expect this directory to exist.
-    ssh.run_cmd("rm -r {}".format(target_dir))
+    # use rm's -f flag so we don't fail if the dir doesn't exist,
+    # as we don't expect this directory to exist at this point.
+    ssh.run_cmd("rm -r -f {}".format(shlex.quote(target_dir)), check=True)
     # create a fresh `target_dir`
-    ssh.run_cmd("mkdir -p {}".format(target_dir), check=True)
+    ssh.run_cmd("mkdir -p {}".format(shlex.quote(target_dir)), check=True)
 
 
 @utils.ssh_session
 def _transfer_certs_to_device(
-    dev_cert_paths, update_cert_paths, target_dir, ssh
+    dev_cert_paths, update_cert_paths, remote_target_dir, ssh
 ):
-    dev_dir = os.path.dirname(dev_cert_paths[0])
-    update_dir = os.path.dirname(update_cert_paths[0])
+    local_dev_dir = os.path.dirname(dev_cert_paths[0])
+    local_update_dir = os.path.dirname(update_cert_paths[0])
     # transfer the certificate payloads to the device
-    ssh.put(dev_dir, target_dir, recursive=True)
-    ssh.put(update_dir, target_dir, recursive=True)
+    ssh.put(local_dev_dir, remote_target_dir, recursive=True)
+    ssh.put(local_update_dir, remote_target_dir, recursive=True)
     # move all files to the `target_dir` root for pelion-provisioning-util
-    dev_folder_path = os.path.join(target_dir, os.path.basename(dev_dir))
-    ssh.run_cmd("mv {}/* {}".format(dev_folder_path, target_dir), check=True)
-    update_folder_path = os.path.join(target_dir, os.path.basename(update_dir))
+    remote_dev_tmpdir = os.path.join(
+        remote_target_dir, os.path.basename(local_dev_dir)
+    )
     ssh.run_cmd(
-        "mv {}/* {}".format(update_folder_path, target_dir), check=True
+        "mv {}/* {}".format(
+            shlex.quote(remote_dev_tmpdir), shlex.quote(remote_target_dir)
+        ),
+        check=True,
+    )
+    remote_update_tmpdir = os.path.join(
+        remote_target_dir, os.path.basename(local_update_dir)
+    )
+    ssh.run_cmd(
+        "mv {}/* {}".format(
+            shlex.quote(remote_update_tmpdir), shlex.quote(remote_target_dir)
+        ),
+        check=True,
     )
 
 
 @utils.ssh_session
 def _remove_remote_dir(path, ssh):
-    ssh.run_cmd("rm -r {}".format(path), check=False)
+    ssh.run_cmd("rm -r -f {}".format(shlex.quote(path)), check=True)
 
 
 @utils.ssh_session
 def _provision_device(ssh):
     ssh.run_cmd(
-        "/opt/arm/pelion-provisioning-util --provision",
+        "{} --provision".format(shlex.quote(utils.PROVISIONING_UTIL_PATH)),
         check=True,
         writeout=True,
     )
