@@ -6,12 +6,7 @@
 """List action handler."""
 
 
-import argparse
-import sys
-
 from mbl.cli.utils import discovery, text_list
-
-from . import utils
 
 
 def execute(args):

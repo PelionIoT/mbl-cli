@@ -6,9 +6,7 @@
 """Shell action handler."""
 
 
-import sys
-
-from mbl.cli.utils import shell, ssh
+from mbl.cli.utils import ssh
 
 from . import utils
 

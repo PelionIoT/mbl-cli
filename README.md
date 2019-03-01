@@ -12,10 +12,9 @@ Please see the [License][mbl-license] document for more information.
 
 Please see the [Contributing][mbl-contributing] document for more information.
 
-
 ## Prerequisites
 
-[Python > v3.5](https://python.org) and `pip`. 
+[Python > v3.5](https://python.org) and `pip`.
 
 Linux users require a few other dependencies. Install them using apt-get (this example is for Ubuntu 16.04):
 
@@ -84,7 +83,7 @@ mbl-cli list
 Obtain a shell on a device, optionally specifying the device IPv4/IPv6 address to use
 
 ```bash
-mbl-cli [address] shell 
+mbl-cli [address] shell
 ```
 
 #### Run a Single Command
@@ -100,7 +99,7 @@ mbl-cli [address] shell <command>
 Copy a file from a device, optionally specifying the device IPv4/IPv6 address to use
 
 ```bash
-mbl-cli [address] get <src> <dest> 
+mbl-cli [address] get <src> <dest>
 ```
 
 #### Put
@@ -130,19 +129,14 @@ This command will instruct MBL-CLI to perform the following actions.
 - Obtain or create a developer certificate and an [update authenticity certificate](https://cloud.mbed.com/docs/current/updating-firmware/update-auth-cert.html).
 - Inject the certificates into the selected device's secure storage.
 
- MBL-CLI will search the [Team Store](#persistent-storage) for a device certificate if the `--create-dev-cert` option is omitted. If `--create-dev-cert` is given, MBL-CLI will create a new certificate using the Pelion Service API, provision the device, and store the certificate in your Team Store for later use.
-
 ```bash
-mbl-cli provision-pelion <dev-cert-name> <update-default-resources-path> [--create-dev-cert]
+mbl-cli provision-pelion <dev-cert-name> <update-cert-name> [--create-dev-cert] [--parse-update-cert CERT_PATH]
 ```
 
-#### CreateUpdateCert
+MBL-CLI will search the [Team Store](#persistent-storage) for a device certificate if the `--create-dev-cert` option is omitted. If `--create-dev-cert` is given, MBL-CLI will create a new certificate using the Pelion Service API, provision the device, and store the certificate in your Team Store for later use.
 
-This command will generate an X.509 keypair then create and sign a public key certificate used to sign update manifests. The certificate is saved in your Team Store.
+MBL-CLI will search the [Team Store](#persistent-storage) for an update certificate if the `--parse-update-cert` option is omitted. If `--parse-update-cert` is given, MBL-CLI will parse an existing update certificate, provision the device, and store the certificate in your Team Store for later use.
 
-```bash
-mbl-cli create-update-cert
-```
 
 ### Device Provisioning Support
 
@@ -226,10 +220,12 @@ mbl-cli save-api-key <api-key>
 Run the provisioning command.
 
 ```bash
-mbl-cli provision-pelion  <cert-name> <update-cert-path> --create-dev-cert
+mbl-cli provision-pelion  <dev-cert-name> <update-cert-name> -c -p <path-to-update-cert> 
 ```
 
-This command will provision your selected device with the developer and update certificates. You must pass in a name for your developer certificate and the path to the `update_default_resources.c` file created using the manifest-tool. Because we passed in `--create-dev-cert` MBL-CLI will create a new developer certificate with the given name, then save it in the Team Store for use with other devices. If we had omitted this option, MBL-CLI would search the Team Store for a dev certificate with the given name. After obtaining the certificates, MBL-CLI will inject it into your selected device's secure storage.
+This command will provision your selected device with the developer and update certificates. You must pass in a name for your developer certificate and the path to the `update_default_resources.c` file created using the manifest-tool. Because we passed in `-c` MBL-CLI will create a new developer certificate with the given name, then save it in the Team Store for use with other devices. If we had omitted this option, MBL-CLI would search the Team Store for a dev certificate with the given name. Because we passed in `-p` MBL-CLI will parse an existing `update_default_resources.c` certificate, then save it in the Team Store under the given name for use with other devices. If we had omitted this option, MBL-CLI would search the Team Store for an update certificate with the given name.
+
+After obtaining the certificates, MBL-CLI will inject it into your selected device's secure storage.
 
 [mbl-license]: LICENSE.md
 [mbl-contributing]: CONTRIBUTING.md

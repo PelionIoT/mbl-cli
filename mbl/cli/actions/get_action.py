@@ -5,10 +5,6 @@
 
 """Get action handler."""
 
-import sys
-import threading
-import time
-
 from mbl.cli.utils import ssh
 
 from . import utils

@@ -60,7 +60,9 @@ class Store:
         path_to_store = _get_or_create_store(store_type)
         self._config = file_handler.from_json(path_to_store / "config.json")
         if not self._config:
-            self._config = dict(location=str(path_to_store))
+            self._config = dict(
+                location=str(path_to_store), api_key="", dev_certs=dict()
+            )
 
     @property
     def api_key(self):
@@ -68,11 +70,11 @@ class Store:
 
         :returns str: API key
         """
-        return self._config["api_keys"]
+        return self._config["api_key"]
 
     @api_key.setter
     def api_key(self, key):
-        self._config["api_keys"] = key.strip()
+        self._config["api_key"] = key.strip()
 
     @property
     def certificate_paths(self):
@@ -103,7 +105,7 @@ class Store:
             c_path = pathlib.Path(self._config["location"], name)
             c_path.mkdir(exist_ok=True, parents=True)
             c_path = c_path / "{}.bin".format(item)
-            file_handler.to_text_file(c_path, certificate[item])
+            file_handler.to_binary_file(c_path, certificate[item])
             p_list.append(str(c_path))
         self.certificate_paths[name] = p_list
         self.save()
