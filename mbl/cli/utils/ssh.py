@@ -130,15 +130,14 @@ class SSHSession:
                 _, stdout, stderr = ssh_chan_output
                 exit_status = stdout.channel.recv_exit_status()
                 if exit_status != 0:
+                    msg = "Command returned a non-zero exit code: {}".format(
+                        exit_status
+                    )
                     if stderr.readable():
                         buf = stderr.read().decode()
                         if buf:
                             msg = "{}".format(buf)
-                        else:
-                            msg = "Remote command returned a non-zero exit code: {}".format(
-                                exit_status
-                            )
-                        raise SSHCallError(msg)
+                    raise SSHCallError(msg)
             if writeout:
                 for out_fd in ssh_chan_output:
                     if out_fd.readable():

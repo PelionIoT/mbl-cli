@@ -17,11 +17,11 @@ PROVISIONING_UTIL_PATH = "/opt/arm/pelion-provisioning-util"
 
 
 def ssh_session(func):
-    """
-    SSH session decorator. 
+    """SSH session decorator.
+
     This decorator will handle SSH connection and teardown.
     Decorate a function with this and give it an 'ssh' kwarg.
-    The decorator passes in an instance of SSHSession to the ssh kwarg. 
+    The decorator passes in an instance of SSHSession to the ssh kwarg.
     """
     # retain metadata from the 'wrapped' function 'object'.
     @functools.wraps(func)
