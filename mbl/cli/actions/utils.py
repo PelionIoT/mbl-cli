@@ -11,10 +11,19 @@ import socket
 from mbl.cli.utils import device, file_handler, ssh
 
 
-# decorator
+# The path to the "pelion-provisioning-util" utility on the target.
+# Lives here until there's a need to move it to its own file.
+PROVISIONING_UTIL_PATH = "/opt/arm/pelion-provisioning-util"
+
+
 def ssh_session(func):
-    """SSH session decorator."""
-    # wrapper
+    """
+    SSH session decorator. 
+    This decorator will handle SSH connection and teardown.
+    Decorate a function with this and give it an 'ssh' kwarg.
+    The decorator passes in an instance of SSHSession to the ssh kwarg. 
+    """
+    # retain metadata from the 'wrapped' function 'object'.
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         with ssh.SSHSession(
