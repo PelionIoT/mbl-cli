@@ -9,10 +9,12 @@
 import functools
 import hashlib
 import os
-import platform
-import sys
-import paramiko
 import pathlib
+import platform
+import shlex
+import sys
+
+import paramiko
 import scp
 
 from . import shell
@@ -39,12 +41,14 @@ def scp_progress(filename, size, sent):
         print("\x1b[2K", end="")
 
 
-def scp_session(transfer_func):
+def _scp_session(transfer_func):
     """Start an scp session on the client.
 
-    SSHSession method decorator.
+    Teardown the SCP session when the SCPClient context manager exits.
+
+    This decorator can only be used with methods of the SSHSession class.
     """
-    # wrapper
+    # retain metadata from the wrapped function 'object'.
     @functools.wraps(transfer_func)
     def wrapper(self, local_path, remote_path, recursive=False):
         with scp.SCPClient(
@@ -55,11 +59,6 @@ def scp_session(transfer_func):
                 local_path=local_path,
                 remote_path=remote_path,
                 scp_client=scp_client,
-                recursive=recursive,
-            )
-            self._validate_scp_transfer(
-                local_path=local_path,
-                remote_path=remote_path,
                 recursive=recursive,
             )
 
@@ -98,14 +97,14 @@ class SSHSession:
         self._client.close()
         return False
 
-    @scp_session
+    @_scp_session
     def put(self, local_path, remote_path, recursive, scp_client=None):
         """Send data via scp."""
         scp_client.put(
             local_path, remote_path=remote_path, recursive=recursive
         )
 
-    @scp_session
+    @_scp_session
     def get(self, remote_path, local_path, recursive, scp_client=None):
         """Get data via scp."""
         scp_client.get(remote_path, local_path, recursive=recursive)
@@ -121,18 +120,24 @@ class SSHSession:
         """Execute a command over SSH.
 
         :param cmd str: The shell command to execute over ssh.
-        :param check bool: Raise an exception when the cmd returns an error.
+        :param check bool: Raise when the cmd returns a non-zero exit code.
         :param writeout bool: Print the returned stdout/err to sys.stdout.
         """
-        # closure handles printing stdout/err and optional exception raising
-        # on receipt of remote stderr msgs.
+        # closure handles optional printing stdout/err and optional
+        # exception raising if the remote command's exit code is non-zero.
         def _check_print_out(ssh_chan_output, check, writeout):
             if check:
                 _, stdout, stderr = ssh_chan_output
-                if stderr.readable():
-                    buf = stderr.read().decode()
-                    if buf:
-                        msg = "The command returned an error: {}".format(buf)
+                exit_status = stdout.channel.recv_exit_status()
+                if exit_status != 0:
+                    if stderr.readable():
+                        buf = stderr.read().decode()
+                        if buf:
+                            msg = "{}".format(buf)
+                        else:
+                            msg = "Remote command returned a non-zero exit code: {}".format(
+                                exit_status
+                            )
                         raise SSHCallError(msg)
             if writeout:
                 for out_fd in ssh_chan_output:
@@ -151,90 +156,6 @@ class SSHSession:
         else:
             _check_print_out(cmd_output, check, writeout)
             return cmd_output
-
-    def _validate_scp_transfer(self, local_path, remote_path, recursive=False):
-        """Ensure an SCP transfer succeeded."""
-        if recursive:
-            self._validate_directory_transfer(local_path, remote_path)
-        else:
-            self._validate_file_transfer(local_path, remote_path)
-
-    def _validate_file_transfer(self, local_path, remote_path):
-        rlocal_path, rremote_path = self._resolve_local_and_remote_file_paths(
-            local_path, remote_path
-        )
-        _, out, err = self.run_cmd("md5sum {}".format(rremote_path))
-        remote_file_checksum = out.read().decode().split(" ")[0]
-        with open(rlocal_path, "rb") as local_file:
-            local_file_checksum = hashlib.md5(local_file.read()).hexdigest()
-        if local_file_checksum != remote_file_checksum:
-            raise SCPValidationFailed(
-                "\nRemote file md5sum: {}\nLocal file md5sum: {}\n"
-                "\nYour file may not have been transferred correctly!".format(
-                    remote_file_checksum, local_file_checksum
-                )
-            )
-
-    def _validate_directory_transfer(self, local_path, remote_path):
-        rlocal_path, rrem_path = self._resolve_local_and_remote_dir_paths(
-            local_path, remote_path
-        )
-        local_hashes, remote_hashes = str(), str()
-        local_subpaths = pathlib.Path(rlocal_path).glob("**/*")
-        for path in local_subpaths:
-            if path.is_file():
-                rem_abspath = os.path.join(rrem_path, path.name)
-                _, out, err = self.run_cmd(
-                    """ md5sum "{}" """.format(rem_abspath)
-                )
-                remote_hashes += out.read().decode().split()[0]
-                with open(str(path), "rb") as file_to_hash:
-                    local_hashes += hashlib.md5(
-                        file_to_hash.read()
-                    ).hexdigest()
-        if local_hashes != remote_hashes.strip():
-            raise SCPValidationFailed(
-                "\nRemote files md5sum: {}\nLocal files md5sum: {}\n"
-                "\nYour files may not have been transferred correctly!".format(
-                    remote_hashes, local_hashes
-                )
-            )
-
-    def _resolve_local_and_remote_dir_paths(self, local_path, remote_path):
-        local_path = local_path.rstrip(os.sep)
-        remote_path = remote_path.rstrip("/")
-        local_dirname = os.path.basename(local_path)
-        remote_dirname = os.path.basename(remote_path)
-        if local_dirname != remote_dirname:
-            _, out, err = self.run_cmd("ls -la {}".format(remote_path))
-            if local_dirname != "." and local_dirname in out.read().decode():
-                # remote_path is the parent directory (or "."),
-                # resolve the full path to the target dir just transferred.
-                return local_path, os.path.join(remote_path, local_dirname)
-            elif remote_dirname != "." and remote_dirname in os.listdir(
-                local_path
-            ):
-                # local_path is the parent directory (or "."),
-                # resolve the full path to the target dir just transferred.
-                return os.path.join(local_path, remote_dirname), remote_path
-            return local_path, remote_path
-
-    def _resolve_local_and_remote_file_paths(self, local_path, remote_path):
-        local_path = local_path.rstrip(os.sep)
-        remote_path = remote_path.rstrip("/")
-        local_basename = os.path.basename(local_path)
-        remote_basename = os.path.basename(remote_path)
-        if os.path.isdir(local_path):
-            local_path = os.path.join(local_path, remote_basename)
-        elif os.path.isfile(local_path):
-            if local_basename != remote_basename:
-                remote_path = os.path.join(remote_path, local_basename)
-        else:
-            raise IOError(
-                "Paths could not be resolved.\nLocal path: {}"
-                "\nRemote path: {}".format(local_path, remote_path)
-            )
-        return local_path, remote_path
 
 
 class SCPValidationFailed(Exception):
