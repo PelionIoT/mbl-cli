@@ -22,10 +22,24 @@ Linux users require a few other dependencies. Install them using apt-get (this e
 
 ## Installation
 
-The CLI is distributed using pypi. To install the tool use `pip`
+To install the MBL-CLI, first clone the repository.
 
 ```bash
-pip install mbl-cli
+git clone git@github.com:armmbed/mbl-cli-python.git
+```
+
+Ensure your `pwd` is the `mbl-cli-python` directory (contains `setup.py`).
+
+```bash
+cd mbl-cli-python
+```
+
+Use `pip` to install the MBL-CLI. We recommended to install in a python [venv](https://www.python.org/dev/peps/pep-0405/).
+
+Ensure you install using the python3 version of pip (and your python version is 3.5 or later).
+
+```bash
+pip install .
 ```
 
 ## Usage
