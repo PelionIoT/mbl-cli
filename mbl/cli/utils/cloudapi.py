@@ -114,21 +114,30 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
         # skip statements that aren't var assignments
         if "=" not in statement:
             continue
-        var_name, val = statement.split(" = ")
+        var_name_and_type, raw_val = statement.split(" = ")
         # ignore sizeof variables
-        if "sizeof(" in val:
+        if "sizeof(" in raw_val:
             continue
-        # sanitise the string tokens
-        var_pp_name = (
-            var_name[var_name.find(match_str_var) :].replace(r"[]", "").strip()
+        # slice out the variable type before the name
+        var_name_begin = var_name_and_type.find(match_str_var)
+        if var_name_begin is -1:
+            raise ValueError("{} var match not found.".format(match_str_var))
+        processed_name = (
+            var_name_and_type[var_name_begin:].replace(r"[]", "").strip()
         )
-        val_pp = (
-            val.replace(r" '", "")
-            .replace(r'"', "")
-            .replace(" ", "")
-            .strip(r"{} \r")
+        # remove unwanted characters from the variable value string.
+        # if replace or strip fail they do it silently, so this covers
+        # all the "unwanted character" cases in these headers.
+        processed_value = (
+            raw_val.replace(r" '", "")  # 'c' -> c
+            .replace(r'"', "")  # "bootstrapServer" -> bootstrapServer
+            .replace(" ", "")  # 0x7f_ -> 0x7f (_ represents whitespace)
+            .strip(r"{} \r")  # {0x7f}\r -> 0x7f
         )
-        values = val_pp.split(",")
+        # try to split on commas, the resulting list will be of length 1
+        # if this value is a single string or int. If it's an array then
+        # we'll get a list with len > 1.
+        values = processed_value.split(",")
         if len(values) > 1:
             # is an array of hexadecimal values
             fmt_arr = [int(av, 16) for av in values]
@@ -136,5 +145,5 @@ def _parse_cert_header(cert_header, match_str_pre, match_str_var):
         else:
             # is a single string or int/uint value
             out_val = values[0].encode()
-        out_map[var_pp_name] = out_val
+        out_map[processed_name] = out_val
     return out_map
