@@ -22,28 +22,27 @@ def ssh_session(func):
     This decorator will handle SSH connection and teardown.
     Decorate a function with this and give it an 'ssh' kwarg.
     The decorator passes in an instance of SSHSession to the ssh kwarg.
+    You must also give the decorated function an `address` argument.
+    The address is used by the create_device call if a user passes in a ipv6/4
+    address through the cli.
     """
     # retain metadata from the 'wrapped' function 'object'.
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        with ssh.SSHSession(
-            device.create_device(**file_handler.read_device_file())
-        ) as session:
-            func(*args, **kwargs, ssh=session)
+    def wrapper(**kwargs):
+        with ssh.SSHSession(create_device(kwargs["address"])) as session:
+            func(**kwargs, ssh=session)
 
     return wrapper
 
 
-def create_device(args):
+def create_device(address=None):
     """Create a device from either a file or args, depending on args.
 
     :param args Namespace: args from the cli parser.
     """
-    if args.address:
-        if is_valid_ipv4_address(args.address) or is_valid_ipv6_address(
-            args.address
-        ):
-            data = {"hostname": "", "address": args.address}
+    if address:
+        if is_valid_ipv4_address(address) or is_valid_ipv6_address(address):
+            data = {"hostname": "", "address": address}
         else:
             raise ValueError("Invalid address given.")
     else:

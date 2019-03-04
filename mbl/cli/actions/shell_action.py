@@ -13,7 +13,7 @@ from . import utils
 
 def execute(args):
     """Entry point for the shell action."""
-    dev = utils.create_device(args)
+    dev = utils.create_device(args.address)
 
     with ssh.SSHSession(dev) as ssh_session:
         if args.cmd:
