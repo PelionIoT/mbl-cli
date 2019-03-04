@@ -27,7 +27,7 @@ def execute(args):
             )
         except SSHCallError:
             raise IOError(
-            "Your device is not correctly configured for Pelion Device "
-            "Management. You must provision your device using the"
-            " provision-pelion command."
-        )
+                "Your device is not correctly configured for Pelion Device "
+                "Management. You must provision your device using the"
+                " provision-pelion command."
+            )

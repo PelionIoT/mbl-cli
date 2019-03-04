@@ -25,11 +25,9 @@ def ssh_session(func):
     """
     # retain metadata from the 'wrapped' function 'object'.
     @functools.wraps(func)
-    def wrapper(*args, cli, **kwargs):
-        with ssh.SSHSession(
-            create_device(cli)
-        ) as session:
-            func(*args, **kwargs, ssh=session)
+    def wrapper(**kwargs):
+        with ssh.SSHSession(create_device(kwargs["cli"])) as session:
+            func(**kwargs, ssh=session)
 
     return wrapper
 
