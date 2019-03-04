@@ -15,7 +15,7 @@ from . import utils
 
 def execute(args):
     """Entry point for the get-pelion-status command."""
-    device = utils.create_device(args)
+    device = utils.create_device(args.address)
     with SSHSession(device) as ssh:
         try:
             ssh.run_cmd(
@@ -26,8 +26,12 @@ def execute(args):
                 writeout=True,
             )
         except SSHCallError:
-            raise IOError(
+            raise PelionConfigurationError(
                 "Your device is not correctly configured for Pelion Device "
-                "Management. You must provision your device using the"
-                " provision-pelion command."
+                "Management. You must provision your device using the "
+                "provision-pelion command."
             )
+
+
+class PelionConfigurationError(Exception):
+    """Device is not configured correctly for Pelion device management."""

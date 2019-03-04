@@ -11,5 +11,5 @@ from . import utils
 def execute(args):
     """Entry point for which action."""
     args.address = None
-    device = utils.create_device(args)
+    device = utils.create_device(args.address)
     print("{} ({})".format(device.hostname, device.address))

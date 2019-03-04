@@ -38,17 +38,17 @@ def execute(args):
     # transfer the certificates to the device and provision it
     # by calling an on-device module.
     target_dir = "/scratch/provisioning-certs"
-    _prepare_remote_dir(target_dir=target_dir, cli=args)
+    _prepare_remote_dir(target_dir=target_dir, address=args.address)
     try:
         _transfer_certs_to_device(
             dev_cert_paths=dev_cert_paths,
             update_cert_paths=update_cert_paths,
             remote_target_dir=target_dir,
-            cli=args,
+            address=args.address,
         )
-        _provision_device(cli=args)
+        _provision_device(address=args.address)
     finally:
-        _remove_remote_dir(path=target_dir, cli=args)
+        _remove_remote_dir(path=target_dir, address=args.address)
 
 
 def _get_api_key():
@@ -80,7 +80,7 @@ def _save_certificate(cert_name, cert_data):
 
 
 @utils.ssh_session
-def _prepare_remote_dir(target_dir, ssh=None, cli=None):
+def _prepare_remote_dir(target_dir, ssh=None, address=None):
     # rm any existing /provisioning-certs directory on the target.
     # use rm's -f flag so we don't fail if the dir doesn't exist,
     # as we don't expect this directory to exist at this point.
@@ -91,7 +91,11 @@ def _prepare_remote_dir(target_dir, ssh=None, cli=None):
 
 @utils.ssh_session
 def _transfer_certs_to_device(
-    dev_cert_paths, update_cert_paths, remote_target_dir, ssh=None, cli=None
+    dev_cert_paths,
+    update_cert_paths,
+    remote_target_dir,
+    ssh=None,
+    address=None,
 ):
     local_dev_dir = os.path.dirname(dev_cert_paths[0])
     local_update_dir = os.path.dirname(update_cert_paths[0])
@@ -120,12 +124,12 @@ def _transfer_certs_to_device(
 
 
 @utils.ssh_session
-def _remove_remote_dir(path, ssh=None, cli=None):
+def _remove_remote_dir(path, ssh=None, address=None):
     ssh.run_cmd("rm -r -f {}".format(shlex.quote(path)), check=True)
 
 
 @utils.ssh_session
-def _provision_device(ssh=None, cli=None):
+def _provision_device(ssh=None, address=None):
     ssh.run_cmd(
         "{} --provision".format(shlex.quote(utils.PROVISIONING_UTIL_PATH)),
         check=True,
