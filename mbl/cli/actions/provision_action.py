@@ -38,14 +38,14 @@ def execute(args):
     # transfer the certificates to the device and provision it
     # by calling an on-device module.
     target_dir = "/scratch/provisioning-certs"
-    _prepare_remote_dir(target_dir)
+    _prepare_remote_dir(target_dir, cli=args)
     try:
         _transfer_certs_to_device(
-            dev_cert_paths, update_cert_paths, target_dir
+            dev_cert_paths, update_cert_paths, target_dir, cli=args
         )
-        _provision_device()
+        _provision_device(cli=args)
     finally:
-        _remove_remote_dir(target_dir)
+        _remove_remote_dir(target_dir, cli=args)
 
 
 def _get_api_key():
