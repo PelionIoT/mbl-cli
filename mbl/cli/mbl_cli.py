@@ -19,10 +19,14 @@ def _main():
         args = parser.parse_args(description=__doc__)
         args.func(args)
     except Exception as error:
+        if hasattr(error, "return_code"):
+            ret_code = error.return_code
+        else:
+            ret_code = 1
         if args.verbose:
             traceback.print_exc()
         else:
             print(error, file=sys.stderr)
-        return 1
+        return ret_code
     else:
         return 0

@@ -18,9 +18,8 @@ def execute(args):
     with ssh.SSHSession(dev) as ssh_session:
         if args.cmd:
             print("Running a command on the device...")
-            stdin, stdout, stderr = ssh_session.run_cmd(args.cmd)
-            for line in stdout.read().splitlines():
-                print(line.decode())
+            ssh_session.run_cmd(args.cmd, check=True, writeout=True)
+
         else:
             print("Starting an interactive shell...")
             ssh_session.start_shell()

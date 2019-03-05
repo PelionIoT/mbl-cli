@@ -126,6 +126,14 @@ class SSHSession:
         # closure handles optional printing stdout/err and optional
         # exception raising if the remote command's exit code is non-zero.
         def _check_print_out(ssh_chan_output, check, writeout):
+            if writeout:
+                for out_fd in ssh_chan_output:
+                    while out_fd.readable():
+                        buf = out_fd.readline()
+                        if buf:
+                            print(buf, end="")
+                        else:
+                            break
             if check:
                 _, stdout, stderr = ssh_chan_output
                 exit_status = stdout.channel.recv_exit_status()
@@ -137,16 +145,10 @@ class SSHSession:
                         buf = stderr.read().decode()
                         if buf:
                             msg = "{}".format(buf)
-                    raise SSHCallError(msg)
-            if writeout:
-                for out_fd in ssh_chan_output:
-                    if out_fd.readable():
-                        buf = out_fd.read().decode()
-                        if buf:
-                            print(buf)
+                    raise SSHCallError(msg, code=exit_status)
 
         try:
-            cmd_output = self._client.exec_command(cmd, timeout=30)
+            cmd_output = self._client.exec_command(cmd)
         except paramiko.SSHException as ssh_error:
             raise IOError(
                 "The command `{}` failed to execute, "
@@ -163,3 +165,8 @@ class SCPValidationFailed(Exception):
 
 class SSHCallError(Exception):
     """SSH remote command failed."""
+
+    def __init__(self, *args, code=None, **kwargs):
+        """Initialise the exception with a return_code attribute."""
+        self.return_code = code
+        super().__init__(*args, **kwargs)
