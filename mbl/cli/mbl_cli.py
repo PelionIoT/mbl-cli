@@ -36,4 +36,4 @@ def _main():
             print(error, file=sys.stderr)
         return ret_code
     else:
-        return 0
+        return ExitCode.SUCCESS.value
