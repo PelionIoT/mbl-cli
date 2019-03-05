@@ -17,6 +17,7 @@ from mbl.cli.args import parser
 
 class ExitCode(enum.Enum):
     """Application return codes."""
+
     SUCCESS = 0
     ERROR = 256
 
