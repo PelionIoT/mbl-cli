@@ -13,8 +13,8 @@ class IndexedTextList(UserList):
 
     def __str__(self):
         """Return all list items as multi-line string."""
-        return "\n".join(self)
-
-    def append(self, item):
-        """Append item as a string with numbered index."""
-        super().append("{}: {}".format(len(self) + 1, item))
+        self.sort(key=lambda x: x.split(": ")[1])
+        output_string = str()
+        for index, item in enumerate(self):
+            output_string += "{}: {}\n".format(index + 1, item)
+        return output_string
