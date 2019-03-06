@@ -33,6 +33,5 @@ class TestTextList:
 
     def test_list_formatted_correctly(self, _text_list):
         """Check the formatting is correct."""
-        for index, returned_item in enumerate(_text_list):
-            assert "{}".format(index + 1) in returned_item
-            assert re.match(r"[0-9]\: [a-zA-Z]*", returned_item) is not None
+        for returned_item in _text_list:
+            assert re.match(r"[a-zA-Z]*", returned_item) is not None

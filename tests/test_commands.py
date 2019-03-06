@@ -69,7 +69,7 @@ class TestListCommand:
         """Check a text list is produced and formatted correctly."""
         text_list = list_action.execute(Args())
         assert text_list == [
-            r"1: mbed-linux-os-9999: fe80::d079:8191:9140:c56%eth3"
+            r"mbed-linux-os-9999: fe80::d079:8191:9140:c56%eth3"
         ]
 
 
@@ -99,7 +99,7 @@ class TestSelectCommand:
     ):
         """Test save_device_info called with correct args."""
         mock_list.execute.return_value = [
-            r"1: mbed-linux-os-9999: fe80::d079:8191:9140:c56%eth3"
+            r"mbed-linux-os-9999: fe80::d079:8191:9140:c56%eth3"
         ]
         mock_input.return_value = "1"
         select_action.execute(Args())

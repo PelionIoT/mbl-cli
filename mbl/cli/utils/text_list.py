@@ -16,5 +16,5 @@ class IndexedTextList(UserList):
         self.sort(key=lambda x: x.split(": ")[1])
         output_string = str()
         for index, item in enumerate(self):
-            output_string += "{}: {}\n".format(index+1, item)
+            output_string += "{}: {}\n".format(index + 1, item)
         return output_string
