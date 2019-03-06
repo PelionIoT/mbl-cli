@@ -20,7 +20,7 @@ def execute(args):
         if user_input <= 0:
             raise ValueError
         selected_device = list_of_devices[user_input - 1]
-        index, name, addr = selected_device.split(": ")
+        name, addr = selected_device.split(": ")
     except (ValueError, IndexError):
         raise IndexError("Enter a valid device index as shown in the list.")
     else:
