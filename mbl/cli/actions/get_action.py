@@ -22,4 +22,4 @@ def execute(args):
             recursive=args.recursive,
         )
 
-    print("\n\nCompleted without error.")
+    print("\n\nTransfer completed.")
