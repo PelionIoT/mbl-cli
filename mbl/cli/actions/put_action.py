@@ -6,8 +6,6 @@
 """Put action handler."""
 
 
-import sys
-
 from mbl.cli.utils import ssh
 
 from . import utils
@@ -25,4 +23,4 @@ def execute(args):
             recursive=args.recursive,
         )
 
-    print("\n\nCompleted without error.")
+    print("\n\nTransfer completed.")

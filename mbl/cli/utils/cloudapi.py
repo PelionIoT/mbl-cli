@@ -5,23 +5,27 @@
 
 """Wrappers for the mbed-cloud-sdk."""
 
-from mbed_cloud import CertificatesAPI, AccountManagementAPI
 import array
 
+from mbed_cloud import AccountManagementAPI, CertificatesAPI
+from mbed_cloud._backends.iam.rest import ApiException
 
-def find_api_key_name(api_key):
+
+def valid_api_key(api_key):
     """Query the Pelion API to retrieve an API key's name.
 
     :param str api_key: full API key to find the name of.
     :raises ValueError: if the API key isn't found.
     """
-    api = AccountManagementAPI({"api_key": api_key})
-    for known_api_key in api.list_api_keys():
-        # The last 32 characters of the API key are 'secret'
-        # and aren't included in the key returned by the api.
-        if known_api_key.key == api_key[:-32]:
-            return known_api_key.name
-    raise ValueError("API key not recognised by Pelion.")
+    try:
+        api = AccountManagementAPI({"api_key": api_key})
+        for known_api_key in api.list_api_keys():
+            # The last 32 characters of the API key are 'secret'
+            # and aren't included in the key returned by the api.
+            if known_api_key.key == api_key[:-32]:
+                return True
+    except ApiException:
+        return False
 
 
 class DevCredentialsAPI:

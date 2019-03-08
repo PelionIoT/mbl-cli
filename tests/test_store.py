@@ -9,7 +9,6 @@
 from unittest import mock
 
 import pytest
-import pathlib
 from mbl.cli.utils import store
 
 

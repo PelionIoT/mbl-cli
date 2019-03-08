@@ -38,5 +38,4 @@ def _main():
         return ret_code
     except KeyboardInterrupt:
         print("User quit.", file=sys.stderr)
-    else:
-        return ExitCode.SUCCESS.value
+    return ExitCode.SUCCESS.value

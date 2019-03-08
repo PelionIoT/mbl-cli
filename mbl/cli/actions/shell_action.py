@@ -19,7 +19,6 @@ def execute(args):
         if args.cmd:
             print("Running a command on the device...")
             ssh_session.run_cmd(args.cmd, check=True, writeout=True)
-
         else:
             print("Starting an interactive shell...")
             ssh_session.start_shell()

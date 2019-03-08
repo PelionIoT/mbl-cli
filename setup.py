@@ -6,7 +6,6 @@
 """Setuptools entry point."""
 
 from setuptools import setup, find_packages
-import os
 
 
 def read(file_name):

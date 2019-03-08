@@ -12,9 +12,6 @@ from mbl.cli.utils.cloudapi import (
     DevCredentialsAPI,
     parse_existing_update_cert,
 )
-from mbl.cli.utils.device import create_device
-from mbl.cli.utils.file_handler import read_device_file
-from mbl.cli.utils.ssh import SSHSession
 from mbl.cli.utils.store import Store
 
 from . import utils
