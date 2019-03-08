@@ -13,8 +13,6 @@ def execute(args):
     """Execute the save-api-key action."""
     store_handle = Store("user")
     if not valid_api_key(args.key):
-        raise ValueError(
-            "API key not recognised by Pelion Device Management."
-        )
+        raise ValueError("API key not recognised by Pelion Device Management.")
     store_handle.api_key = args.key
     store_handle.save()
