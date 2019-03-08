@@ -9,9 +9,11 @@ import functools
 import select
 import socket
 import struct
+import subprocess
 import sys
-
 from abc import abstractmethod
+
+from paramiko.ssh_exception import SSHException
 
 # Maximum number of bytes to read from the ssh channel.
 MAX_READ_BYTES = 1024
@@ -78,6 +80,16 @@ class PosixSSHShell(SSHShell):
                 rlist[0].fileno(), termios_.FIONREAD, "  "
             )
             buffer_size = struct.unpack("h", buffered_raw)[0]
+            tty_height, tty_width = subprocess.check_output(
+                ["stty", "size"]
+            ).split()
+            # resize tty
+            try:
+                self.chan.resize_pty(
+                    width=int(tty_width), height=int(tty_height)
+                )
+            except SSHException:
+                pass
             # read ssh input and write to stdout
             if self.chan in rlist:
                 try:
@@ -89,16 +101,16 @@ class PosixSSHShell(SSHShell):
                         "The system is going down for reboot NOW!"
                         in chan_input
                     ):
-                        raise ShellTerminate
+                        raise ShellTerminate()
                     elif not chan_input:
-                        raise ShellTerminate
+                        raise ShellTerminate()
                     else:
                         sys.stdout.write(chan_input)
                         sys.stdout.flush()
                 except socket.timeout:
                     pass
                 except ShellTerminate:
-                    sys.stdout.write("\r\nShell terminated.\r\n")
+                    print("\nShell terminated.")
                     break
             # send stdin to the ssh channel
             if sys.stdin in rlist:
@@ -131,13 +143,14 @@ class WindowsSSHShell(SSHShell):
 
         write_task = threading.Thread(
             target=write_to_stdout, args=(self.chan,)
-        ).start()
+        )
+        write_task.start()
         try:
             while True:
                 stdin_data = sys.stdin.read(1)
                 if not stdin_data:
                     write_task.join()
-                    raise EOFError
+                    raise EOFError()
                 else:
                     self.chan.send(stdin_data)
         except EOFError:
