@@ -96,7 +96,7 @@ class SSHSession:
                 self.device.address,
                 username=self.device.username,
                 password=self.device.password,
-            ) 
+            )
         return self
 
     def __exit__(self, *exception_info):
