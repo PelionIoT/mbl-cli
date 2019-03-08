@@ -9,6 +9,7 @@
 import functools
 import logging
 import platform
+import time
 
 import paramiko
 import scp
@@ -83,11 +84,19 @@ class SSHSession:
 
     def __enter__(self):
         """Enter the context, connect to the ssh session."""
-        self._client.connect(
-            self.device.address,
-            username=self.device.username,
-            password=self.device.password,
-        )
+        try:
+            self._client.connect(
+                self.device.address,
+                username=self.device.username,
+                password=self.device.password,
+            )
+        except paramiko.SSHException:
+            time.sleep(0.2)
+            self._client.connect(
+                self.device.address,
+                username=self.device.username,
+                password=self.device.password,
+            )
         return self
 
     def __exit__(self, *exception_info):
