@@ -7,8 +7,7 @@
 
 import shlex
 
-from mbl.cli.actions import utils
-from mbl.cli.utils.ssh import SSHSession, SSHCallError
+from mbl.cli.utils.ssh import SSHCallError, SSHSession
 
 from . import utils
 

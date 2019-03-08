@@ -7,17 +7,15 @@
 
 
 import functools
-import hashlib
-import os
-import pathlib
+import logging
 import platform
-import shlex
-import sys
 
 import paramiko
 import scp
 
 from . import shell
+
+logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 
 
 def scp_progress(filename, size, sent):

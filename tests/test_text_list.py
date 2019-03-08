@@ -6,7 +6,6 @@
 """Text list tests."""
 
 import re
-import sys
 
 import pytest
 

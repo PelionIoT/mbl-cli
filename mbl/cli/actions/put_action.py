@@ -6,8 +6,6 @@
 """Put action handler."""
 
 
-import sys
-
 from mbl.cli.utils import ssh
 
 from . import utils
