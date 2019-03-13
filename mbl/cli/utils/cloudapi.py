@@ -9,6 +9,7 @@ import array
 
 from mbed_cloud import AccountManagementAPI, CertificatesAPI
 from mbed_cloud._backends.iam.rest import ApiException
+from mbed_cloud.exceptions import CloudApiException
 
 
 def valid_api_key(api_key):
@@ -73,10 +74,19 @@ class DevCredentialsAPI:
 
         :param str name: name of the developer certificate to create.
         """
-        cert = self._cert_api.add_developer_certificate(name=name)
-        return _parse_cert_header(
-            cert.header_file, "#include <inttypes.h>", "MBED_CLOUD_DEV_"
-        )
+        try:
+            cert = self._cert_api.add_developer_certificate(name=name)
+            return _parse_cert_header(
+                cert.header_file, "#include <inttypes.h>", "MBED_CLOUD_DEV_"
+            )
+        except CloudApiException as err:
+            if err.reason == "Conflict":
+                raise ValueError(
+                    "The developer certificate you are trying to create "
+                    "already exists in the Pelion Device Management Portal."
+                )
+            else:
+                raise
 
 
 def parse_existing_update_cert(update_cert_header_path):
