@@ -34,7 +34,6 @@ def execute(args):
             remote_stdout = output[1]
             if remote_stdout.readable():
                 print(remote_stdout.read().decode())
-                print(output[1].read().decode())
 
 
 class PelionConfigurationError(Exception):
