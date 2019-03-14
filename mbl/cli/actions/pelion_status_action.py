@@ -31,7 +31,9 @@ def execute(args):
                 "provision-pelion command."
             )
         else:
-            if output[1].readable():
+            remote_stdout = output[1]
+            if remote_stdout.readable():
+                print(remote_stdout.read().decode())
                 print(output[1].read().decode())
 
 
