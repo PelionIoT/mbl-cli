@@ -134,13 +134,13 @@ class SSHSession:
         # exception raising if the remote command's exit code is non-zero.
         def _check_print_out(ssh_chan_output, check, writeout):
             if writeout:
-                _, out_fd, _ = ssh_chan_output
-                while out_fd.readable():
-                    buf = out_fd.readline()
-                    if buf:
-                        print(buf, end="")
-                    else:
-                        break
+                for out_fd in ssh_chan_output:
+                    while out_fd.readable():
+                        buf = out_fd.readline()
+                        if buf:
+                            print(buf, end="")
+                        else:
+                            break
             if check:
                 _, stdout, stderr = ssh_chan_output
                 exit_status = stdout.channel.recv_exit_status()
