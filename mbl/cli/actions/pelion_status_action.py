@@ -17,12 +17,12 @@ def execute(args):
     device = utils.create_device(args.address)
     with SSHSession(device) as ssh:
         try:
-            ssh.run_cmd(
+            output = ssh.run_cmd(
                 "{} --get-pelion-status".format(
                     shlex.quote(utils.PROVISIONING_UTIL_PATH)
                 ),
                 check=True,
-                writeout=True,
+                writeout=False,
             )
         except SSHCallError:
             raise PelionConfigurationError(
@@ -30,6 +30,10 @@ def execute(args):
                 "Management. You must provision your device using the "
                 "provision-pelion command."
             )
+        else:
+            remote_stdout = output[1]
+            if remote_stdout.readable():
+                print(remote_stdout.read().decode())
 
 
 class PelionConfigurationError(Exception):
