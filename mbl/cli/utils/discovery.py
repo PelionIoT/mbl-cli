@@ -142,6 +142,8 @@ def _avahi_browse():
     return subprocess.Popen(
         [
             "avahi-browse",
+            "-d",
+            "local",
             "--terminate",
             "--resolve",
             "--no-fail",
