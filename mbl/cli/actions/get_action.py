@@ -14,6 +14,7 @@ def execute(args):
     """Entry point for the get cli command."""
     dev = utils.create_device(args.address)
     print("Getting {} from device: {}\n".format(args.src_path, dev.hostname))
+    ssh.SUPPRESS_PROGRESS = args.quiet
 
     with ssh.SSHSession(dev) as ssh_session:
         ssh_session.get(
