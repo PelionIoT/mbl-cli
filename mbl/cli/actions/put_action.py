@@ -15,6 +15,7 @@ def execute(args):
     """Entry point for the put action."""
     dev = utils.create_device(args.address)
     print("Putting {} on device: {}\n".format(args.src_path, dev.hostname))
+    ssh.SUPPRESS_PROGRESS = args.quiet
 
     with ssh.SSHSession(dev) as ssh_session:
         ssh_session.put(
