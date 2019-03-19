@@ -18,10 +18,12 @@ from . import shell
 
 logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 
+SUPPRESS_PROGRESS = False
+
 
 def scp_progress(filename, size, sent):
     """Display the progress of an scp transfer."""
-    if sent:
+    if sent and not SUPPRESS_PROGRESS:
         try:
             fname = filename.decode()
         except AttributeError:

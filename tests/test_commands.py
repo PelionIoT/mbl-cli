@@ -60,6 +60,7 @@ class Args:
     dst_path = ""
     recursive = False
     cmd = ""
+    quiet = False
 
 
 class TestListCommand:

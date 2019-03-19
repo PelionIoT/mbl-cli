@@ -37,6 +37,13 @@ def parse_args(description):
     parser.add_argument(
         "-v", "--verbose", help="Enable verbose logging.", action="store_true"
     )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        help="Stop messages from remote commands.",
+        action="store_true",
+    )
+
     command_group = parser.add_subparsers(
         title="mbl-cli supports the following commands",
         description=_load_description_text(),
@@ -96,7 +103,6 @@ def parse_args(description):
     shell.set_defaults(func=shell_action.execute)
 
     save_api_key = command_group.add_parser("save-api-key")
-
     save_api_key.add_argument("key", help="The API key to store.")
     save_api_key.set_defaults(func=save_api_key_action.execute)
 
