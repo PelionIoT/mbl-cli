@@ -38,7 +38,10 @@ def parse_args(description):
         "-v", "--verbose", help="Enable verbose logging.", action="store_true"
     )
     parser.add_argument(
-        "-q", "--quiet", help="Stop messages from remote commands.", action="store_true"
+        "-q",
+        "--quiet",
+        help="Stop messages from remote commands.",
+        action="store_true",
     )
 
     command_group = parser.add_subparsers(
