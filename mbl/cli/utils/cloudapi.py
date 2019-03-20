@@ -8,7 +8,6 @@
 import array
 
 from mbed_cloud import AccountManagementAPI, CertificatesAPI
-from mbed_cloud._backends.iam.rest import ApiException
 from mbed_cloud.exceptions import CloudApiException
 
 
