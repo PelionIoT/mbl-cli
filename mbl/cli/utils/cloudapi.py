@@ -19,6 +19,7 @@ def valid_api_key(api_key):
     """
     api = AccountManagementAPI({"api_key": api_key})
     try:
+        # We need to make a call to the api for the key to be validated.
         api.get_account()
     except CloudApiException:
         return False
