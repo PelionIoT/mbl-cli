@@ -16,17 +16,13 @@ def valid_api_key(api_key):
     """Query the Pelion API to retrieve an API key's name.
 
     :param str api_key: full API key to find the name of.
-    :raises ValueError: if the API key isn't found.
     """
+    api = AccountManagementAPI({"api_key": api_key})
     try:
-        api = AccountManagementAPI({"api_key": api_key})
-        for known_api_key in api.list_api_keys():
-            # The last 32 characters of the API key are 'secret'
-            # and aren't included in the key returned by the api.
-            if known_api_key.key == api_key[:-32]:
-                return True
-    except ApiException:
+        api.get_account()
+    except CloudApiException:
         return False
+    return True
 
 
 class DevCredentialsAPI:
