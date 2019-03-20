@@ -103,7 +103,6 @@ def _transfer_certs_to_device(
     remote_dev_tmpdir = "/".join(
         [remote_target_dir, os.path.basename(local_dev_dir)]
     )
-    print(remote_dev_tmpdir)
     ssh.run_cmd(
         "mv {}/* {}".format(
             shlex.quote(remote_dev_tmpdir), shlex.quote(remote_target_dir)
