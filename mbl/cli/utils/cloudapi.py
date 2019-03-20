@@ -12,9 +12,9 @@ from mbed_cloud.exceptions import CloudApiException
 
 
 def valid_api_key(api_key):
-    """Query the Pelion API to retrieve an API key's name.
+    """Call the Pelion Account Management API to validate an API key.
 
-    :param str api_key: full API key to find the name of.
+    :param str api_key: API key to validate.
     """
     api = AccountManagementAPI({"api_key": api_key})
     try:
