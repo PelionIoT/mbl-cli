@@ -150,7 +150,7 @@ def _avahi_browse():
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-    ).communicate()[0]
+    ).communicate(timeout=TIMEOUT)[0]
 
 
 def _parse_avahi_output(raw_output):
