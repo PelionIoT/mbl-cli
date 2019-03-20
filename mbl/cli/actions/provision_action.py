@@ -100,17 +100,18 @@ def _transfer_certs_to_device(
     ssh.put(local_dev_dir, remote_target_dir, recursive=True)
     ssh.put(local_update_dir, remote_target_dir, recursive=True)
     # move all files to the `target_dir` root for pelion-provisioning-util
-    remote_dev_tmpdir = os.path.join(
-        remote_target_dir, os.path.basename(local_dev_dir)
+    remote_dev_tmpdir = "/".join(
+        [remote_target_dir, os.path.basename(local_dev_dir)]
     )
+    print(remote_dev_tmpdir)
     ssh.run_cmd(
         "mv {}/* {}".format(
             shlex.quote(remote_dev_tmpdir), shlex.quote(remote_target_dir)
         ),
         check=True,
     )
-    remote_update_tmpdir = os.path.join(
-        remote_target_dir, os.path.basename(local_update_dir)
+    remote_update_tmpdir = "/".join(
+        [remote_target_dir, os.path.basename(local_update_dir)]
     )
     ssh.run_cmd(
         "mv {}/* {}".format(
