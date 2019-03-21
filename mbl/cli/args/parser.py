@@ -29,6 +29,12 @@ def parse_args(description):
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
+        "-V",
+        "--version",
+        help="Show the version and exit.",
+        action="store_true",
+    )
+    parser.add_argument(
         "-a",
         "--address",
         help="The ipv4/6 address or hostname of the device"
@@ -145,7 +151,7 @@ def parse_args(description):
     # We want to fail gracefully, with a consistent
     # help message, in the no argument case.
     # So here's an obligatory hasattr hack.
-    if not hasattr(args_namespace, "func"):
+    if not hasattr(args_namespace, "func") and not args_namespace.version:
         parser.error("No arguments given!")
     else:
         return args_namespace
