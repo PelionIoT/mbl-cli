@@ -8,25 +8,21 @@
 import array
 
 from mbed_cloud import AccountManagementAPI, CertificatesAPI
-from mbed_cloud._backends.iam.rest import ApiException
 from mbed_cloud.exceptions import CloudApiException
 
 
 def valid_api_key(api_key):
-    """Query the Pelion API to retrieve an API key's name.
+    """Call the Pelion Account Management API to validate an API key.
 
-    :param str api_key: full API key to find the name of.
-    :raises ValueError: if the API key isn't found.
+    :param str api_key: API key to validate.
     """
+    api = AccountManagementAPI({"api_key": api_key})
     try:
-        api = AccountManagementAPI({"api_key": api_key})
-        for known_api_key in api.list_api_keys():
-            # The last 32 characters of the API key are 'secret'
-            # and aren't included in the key returned by the api.
-            if known_api_key.key == api_key[:-32]:
-                return True
-    except ApiException:
+        # We need to make a call to the api for the key to be validated.
+        api.get_account()
+    except CloudApiException:
         return False
+    return True
 
 
 class DevCredentialsAPI:
