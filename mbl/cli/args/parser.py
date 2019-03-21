@@ -19,6 +19,8 @@ from mbl.cli.actions import (
     provision_action,
     save_api_key_action,
     pelion_status_action,
+    delete_cert_action,
+    list_certs_action,
 )
 
 
@@ -145,6 +147,15 @@ def parse_args(description):
 
     query_pelion = command_group.add_parser("get-pelion-status")
     query_pelion.set_defaults(func=pelion_status_action.execute)
+
+    delete_cert = command_group.add_parser("delete-certificate")
+    delete_cert.add_argument(
+        "name", help="Name of the developer certificate to delete"
+    )
+    delete_cert.set_defaults(func=delete_cert_action.execute)
+
+    list_certs = command_group.add_parser("list-certificates")
+    list_certs.set_defaults(func=list_certs_action.execute)
 
     args_namespace = parser.parse_args()
 
