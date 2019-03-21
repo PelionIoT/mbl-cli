@@ -11,7 +11,7 @@ A toolbox for managing target devices running Mbed Linux OS.
 import enum
 import sys
 import traceback
-
+import pkg_resources
 from mbl.cli.args import parser
 
 
@@ -25,6 +25,9 @@ class ExitCode(enum.Enum):
 def _main():
     try:
         args = parser.parse_args(description=__doc__)
+        if args.version:
+            print(pkg_resources.get_distribution("mbl-cli").version)
+            return ExitCode.SUCCESS.value
         args.func(args)
     except Exception as error:
         if hasattr(error, "return_code"):
