@@ -32,7 +32,7 @@ Exceptions:
 """
 
 import pathlib
-
+import shutil
 from . import file_handler
 
 DEFAULT_STORE_RECORD = {
@@ -109,6 +109,27 @@ class Store:
             p_list.append(str(c_path))
         self.certificate_paths[name] = p_list
         self.save()
+
+    def delete_certificate(self, name):
+        """Delete a certificate from the store."""
+        if name not in self.certificate_paths.keys():
+            raise ValueError(
+                "Certificate '{}' not found in the store, so could not be"
+                " deleted.".format(name)
+            )
+        try:
+            shutil.rmtree(
+                str(pathlib.Path(self._config["location"], name).resolve())
+            )
+        except OSError:
+            raise OSError(
+                "There was an error removing the certificate files."
+                " The certificate has been removed from the store config."
+                " Please check and delete the files manually."
+            )
+        finally:
+            del self.certificate_paths[name]
+            self.save()
 
 
 class StoreLocationsRecord:

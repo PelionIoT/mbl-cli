@@ -39,7 +39,7 @@ class DevCredentialsAPI:
     def existing_cert_names(self):
         """List all existing certificate names known to the Pelion account."""
         return [
-            self._cert_api.get_certificate(c["id"]).name
+            self._cert_api.get_certificate(c.id).name
             for c in self._cert_api.list_certificates()
         ]
 
@@ -50,8 +50,8 @@ class DevCredentialsAPI:
 
         :param str name: name of the developer certificate to create.
         """
-        for c in self._cert_api.list_certificates():
-            this_cert = self._cert_api.get_certificate(c["id"])
+        for cert in self._cert_api.list_certificates():
+            this_cert = self._cert_api.get_certificate(cert["id"])
             if this_cert.name == name:
                 return _parse_cert_header(
                     this_cert.header_file,
@@ -76,13 +76,22 @@ class DevCredentialsAPI:
                 cert.header_file, "#include <inttypes.h>", "MBED_CLOUD_DEV_"
             )
         except CloudApiException as err:
-            if err.reason == "Conflict":
-                raise ValueError(
-                    "The developer certificate you are trying to create "
-                    "already exists in the Pelion Device Management Portal."
-                )
-            else:
+            if err.reason != "Conflict":
                 raise
+            raise ValueError(
+                "The developer certificate you are trying to create "
+                "already exists in the Pelion Device Management Portal."
+            )
+
+    def delete_developer_certificate(self, name):
+        """Delete an existing developer certificate from device management."""
+        for cert in self._cert_api.list_certificates():
+            if cert.name == name:
+                self._cert_api.delete_certificate(cert.id)
+                return
+        raise ValueError(
+            "Certificate '{}' was not found in Device Management.".format(name)
+        )
 
 
 def parse_existing_update_cert(update_cert_header_path):
