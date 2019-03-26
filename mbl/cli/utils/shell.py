@@ -73,7 +73,11 @@ class PosixSSHShell(SSHShell):
     @termios_tty
     def run(self, termios_, fcntl_):
         """Terminal IO."""
-        while True:
+        while (
+            self.chan.recv_ready()
+            or self.chan.recv_stderr_ready()
+            or not self.chan.closed
+        ):
             rlist, wlist, elist = select.select([self.chan, sys.stdin], [], [])
             # check how many bytes are waiting to be read
             buffered_raw = fcntl_.ioctl(
@@ -97,12 +101,7 @@ class PosixSSHShell(SSHShell):
                         chan_input = self.chan.recv(MAX_READ_BYTES).decode()
                     except UnicodeDecodeError:
                         continue
-                    if (
-                        "The system is going down for reboot NOW!"
-                        in chan_input
-                    ):
-                        raise ShellTerminate()
-                    elif not chan_input:
+                    if not chan_input:
                         raise ShellTerminate()
                     else:
                         sys.stdout.write(chan_input)
@@ -110,7 +109,7 @@ class PosixSSHShell(SSHShell):
                 except socket.timeout:
                     pass
                 except ShellTerminate:
-                    print("\nShell terminated.")
+                    print("\r\nShell terminated.", end="\r\n")
                     break
             # send stdin to the ssh channel
             if sys.stdin in rlist:
