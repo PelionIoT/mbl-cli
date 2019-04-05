@@ -20,3 +20,7 @@ def pytest_report_teststatus(report):
             report.nodeid.replace(" ", "_")
         )
         return report.outcome, "*", lava
+
+
+def pytest_addoption(parser):
+    parser.addoption("--address")
