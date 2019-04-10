@@ -14,12 +14,13 @@ class TestListCommand:
         if _address:
             cli_cmd = "mbl-cli -a {} shell 'su -l -c reboot'".format(_address)
         else:
+            _address = pexpect.run("mbl-cli which").decode().split("(")[1].split(")")[0].strip()
             cli_cmd = "mbl-cli shell 'su -l -c reboot'"
         reboot_output, exit_status = pexpect.run(cli_cmd, withexitstatus=True)
-        assert exit_status == 0
+        assert exit_status is 0 or exit_status is 255
 
         time.sleep(40)
-        for i in range(15):
+        for _ in range(15):
             mbl_cli = pexpect.run("mbl-cli list")
             ipv4_match = re.search(
                 r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mbl_cli.decode()
