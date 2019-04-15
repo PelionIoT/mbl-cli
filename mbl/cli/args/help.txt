@@ -11,7 +11,7 @@ interact directly with your device's shell
   shell               Obtain an interactive shell, or run a single command, on a device.
 
 provision devices for cloud-based device management
-  save-api-key        Save a Pelion Cloud developer API key to persistent storage.
+  save-api-key        Save a Pelion Device Management API key to persistent storage.
   provision-pelion    Provision the selected device with developer and update authority certificates.
   get-pelion-status   Check if the device is correctly configured for Pelion Device Management.
   list-certificates   List known developer and update certificates stored locally and in Pelion Device Management.
