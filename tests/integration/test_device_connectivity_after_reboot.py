@@ -14,9 +14,15 @@ class TestListCommand:
         if _address:
             cli_cmd = "mbl-cli -a {} shell 'su -l -c reboot'".format(_address)
         else:
-            _address = pexpect.run("mbl-cli which").decode().split("(")[1].split(")")[0].strip()
+            _address = pexpect.run(
+                "mbl-cli which"
+            ).decode().split("(")[1].split(")")[0].strip()
             cli_cmd = "mbl-cli shell 'su -l -c reboot'"
-        reboot_output, exit_status = pexpect.run(cli_cmd, withexitstatus=True)
+        cli_reboot = pexpect.spawn(cli_cmd, timeout=120)
+        cli_reboot.expect(pexpect.EOF)
+        cli_reboot.close()
+        exit_status = cli_reboot.exitstatus
+
         assert exit_status is 0 or exit_status is 255
 
         time.sleep(40)
@@ -30,5 +36,6 @@ class TestListCommand:
             )
             if ip_match is not None:
                 break
+
         assert ip_match
         assert not ipv4_match
