@@ -1,0 +1,14 @@
+metadata:
+    format: "Lava-Test Test Definition 1.0"
+    name: MBL CLI Basic Commands
+    description: "Test the MBL CLI basic commands"
+
+run:
+    steps:
+        # Install the test dependencies
+        - pip3 install pexpect
+        - pip3 install pytest
+        # Don't stop the test run when pytest returns an error code on test failure.
+        - set -e
+        # Run the test suite.
+        - pytest --verbose --color=no ./tests/integration
