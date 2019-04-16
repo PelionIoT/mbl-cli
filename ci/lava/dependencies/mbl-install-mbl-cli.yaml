@@ -12,11 +12,8 @@ run:
         # Install the prerequsite packages detailed in the README.md,
         # and python3-pip because the lxc-container does not include 
         # these by default.
-        - apt-get install -q -q --yes python3-pip python3-cffi libssl-dev libffi-dev python3-dev
+        - apt-get install -q -q --yes python3-cffi libssl-dev libffi-dev python3-dev
           
-        # Ensure pip version is the latest (8.1.1 doesn't support wheel deployment)
-        - pip3 -qqq install --upgrade pip
-
         # Install the mbl-cli
-        - pip3 -qqq install -e .
+        - pip3 -qqq install .
 
