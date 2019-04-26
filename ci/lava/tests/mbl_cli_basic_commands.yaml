@@ -3,8 +3,31 @@ metadata:
     name: MBL CLI Basic Commands
     description: "Test the MBL CLI basic commands"
 
+    params:
+        #
+        # CREATE_VIRTUAL_ENV specifies how to create the Python virtual
+        #                    environment, including the path to the virtual
+        #                    environment.
+        #
+        #
+        CREATE_VIRTUAL_ENV:
+
+        #
+        # ACTIVATE_VIRTUAL_ENV specifies the command to activate the Python
+        #                      virtual environment.
+        ACTIVATE_VIRTUAL_ENV:
+
+        #
+        # DEACTIVATE_VIRTUAL_ENV specifies the command to deactivate the Python
+        #                        virtual environment.
+        DEACTIVATE_VIRTUAL_ENV:
+
 run:
     steps:
+        # Create and activate the python venv
+        - $CREATE_VIRTUAL_ENV
+        - $ACTIVATE_VIRTUAL_ENV
+
         # Install the test dependencies
         - pip3 install pexpect
         - pip3 install pytest
@@ -12,3 +35,6 @@ run:
         - set -e
         # Run the test suite.
         - pytest --verbose --color=no ./tests/integration
+
+        # Deactivate the python venv
+        - $DEACTIVATE_VIRTUAL_ENV

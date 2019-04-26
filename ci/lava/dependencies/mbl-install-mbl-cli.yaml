@@ -7,13 +7,38 @@ metadata:
     name: Install the mbl-cli into a LXC Container
     description: "MBL CLI Installation"
 
+    params:
+        #
+        # CREATE_VIRTUAL_ENV specifies how to create the Python virtual
+        #                    environment, including the path to the virtual
+        #                    environment.
+        #
+        #
+        CREATE_VIRTUAL_ENV:
+
+        #
+        # ACTIVATE_VIRTUAL_ENV specifies the command to activate the Python
+        #                      virtual environment.
+        ACTIVATE_VIRTUAL_ENV:
+
+        #
+        # DEACTIVATE_VIRTUAL_ENV specifies the command to deactivate the Python
+        #                        virtual environment.
+        DEACTIVATE_VIRTUAL_ENV:
+
 run:
     steps:
+        # Create and activate the python venv
+        - $CREATE_VIRTUAL_ENV
+        - $ACTIVATE_VIRTUAL_ENV
+
         # Install the prerequsite packages detailed in the README.md,
-        # and python3-pip because the lxc-container does not include 
+        # and python3-pip because the lxc-container does not include
         # these by default.
         - apt-get install -q -q --yes python3-cffi libssl-dev libffi-dev python3-dev
-          
+
         # Install the mbl-cli
         - pip3 -qqq install .
 
+        # Deactivate the python venv
+        - $DEACTIVATE_VIRTUAL_ENV
