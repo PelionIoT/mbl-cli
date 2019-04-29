@@ -5,36 +5,18 @@ metadata:
 
     params:
         #
-        # CREATE_VIRTUAL_ENV specifies how to create the Python virtual
-        #                    environment, including the path to the virtual
-        #                    environment.
+        # virtual_env_path specifies the path to the Python virtual environment
         #
-        #
-        CREATE_VIRTUAL_ENV:
-
-        #
-        # ACTIVATE_VIRTUAL_ENV specifies the command to activate the Python
-        #                      virtual environment.
-        ACTIVATE_VIRTUAL_ENV:
-
-        #
-        # DEACTIVATE_VIRTUAL_ENV specifies the command to deactivate the Python
-        #                        virtual environment.
-        DEACTIVATE_VIRTUAL_ENV:
+        virtual_env_path:
 
 run:
     steps:
-        # Create and activate the python venv
-        - $CREATE_VIRTUAL_ENV
-        - $ACTIVATE_VIRTUAL_ENV
 
         # Install the test dependencies
-        - pip3 install pexpect
-        - pip3 install pytest
+        - $virtual_env_path/pip3 install pexpect
+        - $virtual_env_path/pip3 install pytest
         # Don't stop the test run when pytest returns an error code on test failure.
         - set -e
         # Run the test suite.
-        - pytest --verbose --color=no ./tests/integration
+        - $virtual_env_path/pytest --verbose --color=no ./tests/integration
 
-        # Deactivate the python venv
-        - $DEACTIVATE_VIRTUAL_ENV
