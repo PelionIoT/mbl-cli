@@ -9,28 +9,21 @@ metadata:
 
     params:
         #
-        # CREATE_VIRTUAL_ENV specifies how to create the Python virtual
-        #                    environment, including the path to the virtual
-        #                    environment.
+        # virtual_env specifies the name of the virtual environment
         #
-        #
-        CREATE_VIRTUAL_ENV:
-
-        #
-        # ACTIVATE_VIRTUAL_ENV specifies the command to activate the Python
-        #                      virtual environment.
-        ACTIVATE_VIRTUAL_ENV:
-
-        #
-        # DEACTIVATE_VIRTUAL_ENV specifies the command to deactivate the Python
-        #                        virtual environment.
-        DEACTIVATE_VIRTUAL_ENV:
+        virtual_env_path:
 
 run:
     steps:
-        # Create and activate the python venv
-        - $CREATE_VIRTUAL_ENV
-        - $ACTIVATE_VIRTUAL_ENV
+          # Create and activate the python venv
+        - python3 -m venv $virtual_env_path
+
+          # Get packages in order to get pip3
+        - apt-get install -q -q --yes curl ca-certificates
+
+          # Install pip3
+        - curl https://bootstrap.pypa.io/get-pip.py | $virtual_env_path/python3
+
 
         # Install the prerequsite packages detailed in the README.md,
         # and python3-pip because the lxc-container does not include
@@ -38,7 +31,5 @@ run:
         - apt-get install -q -q --yes python3-cffi libssl-dev libffi-dev python3-dev
 
         # Install the mbl-cli
-        - pip3 -qqq install .
+        - $virtual_env_path/pip3 -qqq install .
 
-        # Deactivate the python venv
-        - $DEACTIVATE_VIRTUAL_ENV
