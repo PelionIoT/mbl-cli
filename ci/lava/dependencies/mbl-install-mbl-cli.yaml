@@ -18,13 +18,13 @@ run:
     steps:
           # Create and activate the python venv
         - python3 -m venv $virtual_env_name
-        - . $virtual_envpath/activate
+        - . $virtual_env_path/activate
 
           # Get packages in order to get pip3
         - apt-get install -q -q --yes curl ca-certificates
 
           # Install pip3
-        - curl https://bootstrap.pypa.io/get-pip.py | $virtual_env_path/python3
+        - curl https://bootstrap.pypa.io/get-pip.py | python3
 
 
         # Install the prerequsite packages detailed in the README.md,
