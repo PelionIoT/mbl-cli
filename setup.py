@@ -14,6 +14,12 @@ def read(file_name):
         return readme.read()
 
 
+def readlines(file_name):
+    """Read a file, return the contents as a list."""
+    with open(file_name, "r") as txt_file:
+        return txt_file.readlines()
+
+
 setup(
     name="mbl-cli",
     version="2.0.0",
@@ -30,13 +36,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-    install_requires=[
-        "paramiko>=2.4.2",
-        "scp>=0.13.0",
-        "zeroconf>=0.21.3",
-        "mbed-cloud-sdk>=2.0.4",
-        "cryptography==2.4.2",
-    ],
+    install_requires=readlines("requirements.txt"),
     include_package_data=True,
     zip_safe=False,
     entry_points={"console_scripts": ["mbl-cli = mbl.cli.mbl_cli:_main"]},
