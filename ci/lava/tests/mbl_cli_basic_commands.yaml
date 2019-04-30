@@ -13,10 +13,11 @@ run:
     steps:
 
         # Install the test dependencies
-        - $virtual_env_path/pip3 install pexpect
-        - $virtual_env_path/pip3 install pytest
+        - . $virtual_env_path/activate
+        - pip3 install pexpect
+        - pip3 install pytest
         # Don't stop the test run when pytest returns an error code on test failure.
         - set -e
         # Run the test suite.
-        - $virtual_env_path/pytest --verbose --color=no ./tests/integration
+        - pytest --verbose --color=no ./tests/integration
 
