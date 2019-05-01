@@ -10,5 +10,5 @@ mblCliPipeline {
     daysToKeep = ""
     numToKeep = "2"
     cron = ""
-    mblToolsBranch = "master"
+    mblToolsBranch = "warrior-dev"
 }
