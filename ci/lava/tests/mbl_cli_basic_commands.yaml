@@ -3,17 +3,17 @@ metadata:
     name: MBL CLI Basic Commands
     description: "Test the MBL CLI basic commands"
 
-    params:
+    parameters:
         #
-        # virtual_env_path specifies the path to the Python virtual environment
+        # virtual_env: specifies the Python virtual environment
         #
-        virtual_env_path:
+        virtual_env:
 
 run:
     steps:
 
         # Install the test dependencies
-        - . $virtual_env_path/activate
+        - . $virtual_env/bin/activate
         - pip3 install pexpect
         - pip3 install pytest
         # Don't stop the test run when pytest returns an error code on test failure.
