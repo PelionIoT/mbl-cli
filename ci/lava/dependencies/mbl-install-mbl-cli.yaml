@@ -11,14 +11,13 @@ metadata:
         #
         # virtual_env specifies the name of the virtual environment
         #
-        virtual_env_name:
-        virtual_env_path:
+        virtual_env:
 
 run:
     steps:
           # Create and activate the python venv
-        - python3 -m venv $virtual_env_name
-        - . $virtual_env_path/activate
+        - python3 -m venv $virtual_env
+        - . $virtual_env/bin/activate
 
           # Get packages in order to get pip3
         - apt-get install -q -q --yes curl ca-certificates
