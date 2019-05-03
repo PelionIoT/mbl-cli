@@ -15,20 +15,16 @@ metadata:
 
 run:
     steps:
-          # Create and activate the python venv
+        # Create and activate the python venv
         - python3 -m venv $virtual_env
         - . $virtual_env/bin/activate
 
-          # Get packages in order to get pip3
-        - apt-get install -q -q --yes curl ca-certificates
-
-          # Install pip3
-        - curl https://bootstrap.pypa.io/get-pip.py | python3
+        # Upgrade version of pip3
+        - pip3 install --upgrade pip
 
 
-        # Install the prerequsite packages detailed in the README.md,
-        # and python3-pip because the lxc-container does not include
-        # these by default.
+        # Install the prerequsite packages detailed in the README.md
+        # because the lxc-container does not include these by default.
         - apt-get install -q -q --yes python3-cffi libssl-dev libffi-dev python3-dev
 
         # Install the mbl-cli
