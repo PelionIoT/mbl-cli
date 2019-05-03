@@ -29,4 +29,5 @@ run:
 
         # Install the mbl-cli
         - pip3 install .
+        - pip3 freeze
 
