@@ -20,7 +20,7 @@ run:
         - . $virtual_env/bin/activate
 
         # Upgrade version of pip3
-        - pip3 install --upgrade pip
+        - pip3 install --upgrade pip --progress-bar off
 
 
         # Install the prerequsite packages detailed in the README.md
@@ -28,6 +28,5 @@ run:
         - apt-get install -q -q --yes python3-cffi libssl-dev libffi-dev python3-dev
 
         # Install the mbl-cli
-        - pip3 install .
-        - pip3 freeze
+        - pip3 install . --progress-bar off
 
