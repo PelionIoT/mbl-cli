@@ -20,7 +20,7 @@ run:
         - . $virtual_env/bin/activate
 
         # Upgrade version of pip3
-        - pip3 install --upgrade pip --progress-bar off
+        - pip3 install --upgrade pip
 
 
         # Install the prerequsite packages detailed in the README.md
