@@ -12,6 +12,7 @@ metadata:
 run:
     steps:
         # Install the test dependencies
+        # This assumes the virtual environment has been created by mbl-install-mbl-cli.yaml
         - . $virtual_env/bin/activate
         - pip3 install pexpect
         - pip3 install pytest
