@@ -7,13 +7,25 @@ metadata:
     name: Install the mbl-cli into a LXC Container
     description: "MBL CLI Installation"
 
+    params:
+        #
+        # virtual_env specifies the name of the virtual environment
+        #
+        virtual_env:
+
 run:
     steps:
-        # Install the prerequsite packages detailed in the README.md,
-        # and python3-pip because the lxc-container does not include 
-        # these by default.
+        # Create and activate the python venv
+        - python3 -m venv $virtual_env
+        - . $virtual_env/bin/activate
+
+        # Upgrade version of pip3
+        - pip3 install --upgrade pip
+
+        # Install the prerequsite packages detailed in the README.md
+        # because the lxc-container does not include these by default.
         - apt-get install -q -q --yes python3-cffi libssl-dev libffi-dev python3-dev
-          
+
         # Install the mbl-cli
-        - pip3 -qqq install .
+        - pip3 install . --progress-bar off
 
