@@ -19,4 +19,3 @@ run:
         - set -e
         # Run the test suite.
         - pytest --verbose --color=no ./tests/integration
-
