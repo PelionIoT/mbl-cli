@@ -1,7 +1,7 @@
 metadata:
-    format: "Lava-Test Test Definition 1.0"
+    format: Lava-Test Test Definition 1.0
     name: MBL CLI Basic Commands
-    description: "Test the MBL CLI basic commands"
+    description: Test the MBL CLI basic commands
 
     parameters:
         #
