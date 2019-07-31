@@ -15,8 +15,7 @@ metadata:
 
 run:
     steps:
-        # Create and activate the python venv
-        - python3 -m venv $virtual_env
+        # Activate the python venv
         - . $virtual_env/bin/activate
 
         # Upgrade version of pip3
