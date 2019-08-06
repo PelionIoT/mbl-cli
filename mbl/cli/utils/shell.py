@@ -7,10 +7,11 @@
 
 import functools
 import select
-import socket
 import struct
+import shutil
 import subprocess
 import sys
+
 from abc import abstractmethod
 
 from paramiko.ssh_exception import SSHException
@@ -73,52 +74,49 @@ class PosixSSHShell(SSHShell):
     @termios_tty
     def run(self, termios_, fcntl_):
         """Terminal IO."""
-        while (
-            self.chan.recv_ready()
-            or self.chan.recv_stderr_ready()
-            or not self.chan.closed
-        ):
+        while not self.chan.closed:
             rlist, wlist, elist = select.select([self.chan, sys.stdin], [], [])
-            # check how many bytes are waiting to be read
-            buffered_raw = fcntl_.ioctl(
-                rlist[0].fileno(), termios_.FIONREAD, "  "
-            )
-            buffer_size = struct.unpack("h", buffered_raw)[0]
-            tty_height, tty_width = subprocess.check_output(
-                ["stty", "size"]
-            ).split()
-            # resize tty
+            buffer_size = self._get_chan_buffer_size(fcntl_, termios_, rlist)
+            self._set_tty_size()
             try:
-                self.chan.resize_pty(
-                    width=int(tty_width), height=int(tty_height)
-                )
-            except SSHException:
-                pass
-            # read ssh input and write to stdout
-            if self.chan in rlist:
-                try:
-                    try:
-                        chan_input = self.chan.recv(MAX_READ_BYTES).decode()
-                    except UnicodeDecodeError:
-                        continue
-                    if not chan_input:
-                        raise ShellTerminate()
-                    else:
-                        sys.stdout.write(chan_input)
-                        sys.stdout.flush()
-                except socket.timeout:
-                    pass
-                except ShellTerminate:
-                    print("\r\nShell terminated.", end="\r\n")
-                    break
-            # send stdin to the ssh channel
-            if sys.stdin in rlist:
-                # read all waiting bytes from stdin
-                stdin = sys.stdin.read(buffer_size)
-                if not stdin:
-                    break
-                else:
-                    self.chan.send(stdin)
+                if self.chan in rlist:
+                    self._write_chan_to_stdout()
+                if sys.stdin in rlist:
+                    self._write_stdin_to_chan(buffer_size)
+            except ShellTerminate:
+                print("\r\nShell terminated.", end="\r\n")
+                break
+
+    def _write_chan_to_stdout(self):
+        try:
+            chan_input = self.chan.recv(MAX_READ_BYTES).decode()
+        except UnicodeDecodeError:
+            return
+        if not chan_input:
+            raise ShellTerminate()
+        sys.stdout.write(chan_input)
+        sys.stdout.flush()
+
+    def _set_tty_size(self):
+        term_size = shutil.get_terminal_size()
+        try:
+            self.chan.resize_pty(
+                width=term_size.columns, height=term_size.lines
+            )
+        except SSHException:
+            return
+
+    def _write_stdin_to_chan(self, buffer_size):
+        stdin = sys.stdin.read(buffer_size)
+        if not stdin:
+            raise ShellTerminate()
+        num_bytes = self.chan.send(stdin)
+        if not num_bytes:
+            raise ShellTerminate()
+
+    def _get_chan_buffer_size(self, fcntl_, termios_, rlist):
+        buffered_raw = fcntl_.ioctl(rlist[0].fileno(), termios_.FIONREAD, "  ")
+        return struct.unpack("h", buffered_raw)[0]
 
 
 class WindowsSSHShell(SSHShell):
