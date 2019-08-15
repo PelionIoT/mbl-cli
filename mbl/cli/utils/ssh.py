@@ -155,7 +155,7 @@ class SSHSession:
                     raise SSHCallError(msg, code=exit_status)
 
         try:
-            cmd_output = self._client.exec_command(cmd, timeout=60)
+            cmd_output = self._client.exec_command(cmd, timeout=300)
         except paramiko.SSHException as ssh_error:
             raise IOError(
                 "The command `{}` failed to execute, "
