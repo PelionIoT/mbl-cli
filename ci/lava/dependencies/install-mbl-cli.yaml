@@ -18,9 +18,6 @@ run:
         # Activate the python venv
         - . $virtual_env/bin/activate
 
-        # Upgrade version of pip3
-        - pip3 install --upgrade pip
-
         # Install the prerequsite packages detailed in the README.md
         # because the lxc-container does not include these by default.
         - apt-get install -q -q --yes python3-cffi libssl-dev libffi-dev python3-dev
