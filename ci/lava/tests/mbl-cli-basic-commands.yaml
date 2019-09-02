@@ -15,7 +15,6 @@ run:
         # This assumes the virtual environment has been created by mbl-install-mbl-cli.yaml
         - . $virtual_env/bin/activate
         - pip3 install pexpect
-        - pip3 install pytest
         # Don't stop the test run when pytest returns an error code on test failure.
         - set -e
         # Run the test suite.
