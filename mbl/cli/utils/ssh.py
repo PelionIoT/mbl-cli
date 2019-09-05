@@ -139,10 +139,10 @@ class SSHSession:
                 for out_fd in ssh_chan_output:
                     while out_fd.readable():
                         buf = out_fd.readline()
-                        if buf:
-                            print(buf, end="")
-                        else:
+                        if not buf:
                             break
+                        print(buf, end="")
+
             if check:
                 _, stdout, stderr = ssh_chan_output
                 exit_status = stdout.channel.recv_exit_status()
@@ -155,7 +155,7 @@ class SSHSession:
                     raise SSHCallError(msg, code=exit_status)
 
         try:
-            cmd_output = self._client.exec_command(cmd)
+            cmd_output = self._client.exec_command(cmd, timeout=300)
         except paramiko.SSHException as ssh_error:
             raise IOError(
                 "The command `{}` failed to execute, "
