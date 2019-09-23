@@ -1,0 +1,40 @@
+// Copyright (c) 2019 Arm Limited and Contributors. All rights reserved.
+
+// SPDX-License-Identifier: BSD-3-Clause
+
+
+#ifndef __MBED_CLOUD_DEV_CREDENTIALS_H__
+#define __MBED_CLOUD_DEV_CREDENTIALS_H__
+
+#include <inttypes.h>
+
+const char MBED_CLOUD_DEV_BOOTSTRAP_ENDPOINT_NAME[] = "00000";
+const char MBED_CLOUD_DEV_ACCOUNT_ID[] = "000000";
+const char MBED_CLOUD_DEV_BOOTSTRAP_SERVER_URI[] = "www.example.com";
+
+const uint8_t MBED_CLOUD_DEV_BOOTSTRAP_DEVICE_CERTIFICATE[] = 
+{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+const uint8_t MBED_CLOUD_DEV_BOOTSTRAP_SERVER_ROOT_CA_CERTIFICATE[] = 
+{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+const uint8_t MBED_CLOUD_DEV_BOOTSTRAP_DEVICE_PRIVATE_KEY[] = 
+{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+const char MBED_CLOUD_DEV_MANUFACTURER[] = "dev_manufacturer";
+
+const char MBED_CLOUD_DEV_MODEL_NUMBER[] = "dev_model_num";
+
+const char MBED_CLOUD_DEV_SERIAL_NUMBER[] = "0";
+
+const char MBED_CLOUD_DEV_DEVICE_TYPE[] = "dev_device_type";
+
+const char MBED_CLOUD_DEV_HARDWARE_VERSION[] = "dev_hardware_version";
+
+const uint32_t MBED_CLOUD_DEV_MEMORY_TOTAL_KB = 0;
+
+const uint32_t MBED_CLOUD_DEV_BOOTSTRAP_DEVICE_CERTIFICATE_SIZE = sizeof(MBED_CLOUD_DEV_BOOTSTRAP_DEVICE_CERTIFICATE);
+const uint32_t MBED_CLOUD_DEV_BOOTSTRAP_SERVER_ROOT_CA_CERTIFICATE_SIZE = sizeof(MBED_CLOUD_DEV_BOOTSTRAP_SERVER_ROOT_CA_CERTIFICATE);
+const uint32_t MBED_CLOUD_DEV_BOOTSTRAP_DEVICE_PRIVATE_KEY_SIZE = sizeof(MBED_CLOUD_DEV_BOOTSTRAP_DEVICE_PRIVATE_KEY);
+
+#endif //__MBED_CLOUD_DEV_CREDENTIALS_H__

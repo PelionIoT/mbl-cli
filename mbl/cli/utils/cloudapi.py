@@ -51,7 +51,7 @@ class DevCredentialsAPI:
         :param str name: name of the developer certificate to create.
         """
         for cert in self._cert_api.list_certificates():
-            this_cert = self._cert_api.get_certificate(cert["id"])
+            this_cert = self._cert_api.get_certificate(cert.id)
             if this_cert.name == name:
                 return _parse_cert_header(
                     this_cert.header_file,
@@ -59,7 +59,7 @@ class DevCredentialsAPI:
                     "MBED_CLOUD_DEV_",
                 )
         raise ValueError(
-            "The developer certificate does not exist."
+            "The developer certificate does not exist. "
             "Available certificates: \n{}".format(
                 "\n".join(self.existing_cert_names)
             )
