@@ -23,14 +23,20 @@ class CertID:
 
 class CertData:
     def __init__(self, name):
-        self.header_file = (SRC_PATH / "mbed_cloud_dev_credentials.c").read_text()
+        self.header_file = (
+            SRC_PATH / "mbed_cloud_dev_credentials.c"
+        ).read_text()
         self.name = name
 
 
 @pytest.fixture
 def _mock_cert_api():
-    with mock.patch("mbl.cli.utils.cloudapi.CertificatesAPI", autospec=True) as cert_api:
-        cert_api.return_value.list_certificates.return_value = [CertID() for c in VALID_CERT_NAMES]
+    with mock.patch(
+        "mbl.cli.utils.cloudapi.CertificatesAPI", autospec=True
+    ) as cert_api:
+        cert_api.return_value.list_certificates.return_value = [
+            CertID() for c in VALID_CERT_NAMES
+        ]
         yield cert_api()
 
 
@@ -60,4 +66,3 @@ class TestDeveloperCertificates:
         dev_creds = cloudapi.DevCredentialsAPI("")
         crt = dev_creds.create_dev_credentials("test_cert")
         assert isinstance(crt, dict)
-
