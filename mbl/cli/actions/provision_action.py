@@ -25,13 +25,28 @@ def execute(args):
         # parse and save the update certificate data in the team store
         update_cert_data = parse_existing_update_cert(args.update_cert_path)
         _save_certificate(update_cert_name, update_cert_data)
+
     if args.create_dev_cert:
         # Create a dev cert using the Pelion Service API and save it.
         dev_cert_data = _create_certificate(_get_api_key(), dev_cert_name)
         _save_certificate(dev_cert_name, dev_cert_data)
+
     # get the parsed certificate data file paths from the store
-    dev_cert_paths = _get_certificate_paths(dev_cert_name)
-    update_cert_paths = _get_certificate_paths(update_cert_name)
+    try:
+        dev_cert_paths = _get_certificate_path_from_store(dev_cert_name)
+    except ValueError:
+        print(
+            "Developer certificate not found in the local store. Trying to "
+            "find a certificate with the given name in Pelion Device "
+            "Management"
+        )
+        dev_cert_data = _get_certificate_from_pelion(
+            _get_api_key(), dev_cert_name
+        )
+        _save_certificate(dev_cert_name, dev_cert_data)
+        dev_cert_paths = _get_certificate_path_from_store(dev_cert_name)
+
+    update_cert_paths = _get_certificate_path_from_store(update_cert_name)
     # transfer the certificates to the device and provision it
     # by calling an on-device module.
     target_dir = "/scratch/provisioning-certs"
@@ -56,7 +71,7 @@ def _get_api_key():
     return key
 
 
-def _get_certificate_paths(cert_name):
+def _get_certificate_path_from_store(cert_name):
     sh = Store("team")
     try:
         return sh.certificate_paths[cert_name]
@@ -64,6 +79,11 @@ def _get_certificate_paths(cert_name):
         raise ValueError(
             "Certificate '{}' not found in the store.".format(cert_name)
         )
+
+
+def _get_certificate_from_pelion(api_key, cert_name):
+    dev_creds_api = DevCredentialsAPI(api_key)
+    return dev_creds_api.get_dev_credentials(cert_name)
 
 
 def _create_certificate(api_key, cert_name):
