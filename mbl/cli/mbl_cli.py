@@ -19,28 +19,48 @@ class ExitCode(enum.Enum):
     """Application return codes."""
 
     SUCCESS = 0
-    ERROR = 256
+    ERROR = 255
+
+
+def _print_version():
+    print(pkg_resources.get_distribution("mbl-cli").version)
+    return ExitCode.SUCCESS.value
+
+
+def _run(args):
+    args.func(args)
+
+
+def _set_error_code(error):
+    if hasattr(error, "return_code"):
+        return error.return_code
+    else:
+        return ExitCode.ERROR.value
+
+
+def _print_error_message(msg, verbose=False):
+    if verbose:
+        traceback.print_exc()
+    else:
+        print(msg, file=sys.stderr)
 
 
 def _main():
     try:
         args = parser.parse_args(description=__doc__)
+
         if args.version:
-            print(pkg_resources.get_distribution("mbl-cli").version)
-            return ExitCode.SUCCESS.value
-        args.func(args)
+            return _print_version()
+
+        # Run a command
+        _run(args)
+
     except Exception as error:
-        if hasattr(error, "return_code"):
-            ret_code = error.return_code
-        else:
-            ret_code = ExitCode.ERROR.value
-        if args.verbose:
-            traceback.print_exc()
-        else:
-            print(error, file=sys.stderr)
-        return ret_code
+        _print_error_message(error, args.verbose)
+        return _set_error_code(error)
+
     except KeyboardInterrupt:
-        print("User quit.", file=sys.stderr)
-        if args.verbose:
-            traceback.print_exc()
+        _print_error_message("User quit.", args.verbose)
+        return ExitCode.ERROR.value
+
     return ExitCode.SUCCESS.value

@@ -22,7 +22,7 @@ def readlines(file_name):
 
 setup(
     name="mbl-cli",
-    version="2.0.0",
+    version="2.0.1",
     description="Mbed Linux OS Command Line Tool",
     long_description=read("README.md"),
     author="Arm Ltd.",
