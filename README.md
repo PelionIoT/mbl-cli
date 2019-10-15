@@ -19,3 +19,4 @@ https://os.mbed.com/docs/mbed-linux-os/master/develop-apps/the-mbl-command-line-
 
 [mbl-license]: LICENSE.md
 [mbl-contributing]: CONTRIBUTING.md
+[mbl-docs]: https://os.mbed.com/docs/mbed-linux-os/latest/develop-apps/the-mbl-command-line-interface.html
