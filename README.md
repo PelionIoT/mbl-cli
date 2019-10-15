@@ -14,7 +14,7 @@ Please see the [Contributing][mbl-contributing] document for more information.
 
 # Documentation
 
-https://os.mbed.com/docs/mbed-linux-os/master/develop-apps/the-mbl-command-line-interface.html
+Please visit the [website][mbl-docs] for all the information on installing and using MBL CLI.
 
 
 [mbl-license]: LICENSE.md
