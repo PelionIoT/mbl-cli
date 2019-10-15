@@ -8,6 +8,7 @@
 
 import functools
 import logging
+import pathlib
 import platform
 import time
 
@@ -66,13 +67,15 @@ def _scp_session(transfer_func):
     return wrapper
 
 
-class SSHClientNoAuth(paramiko.SSHClient):
+class SSHClientWithNoAuthSupport(paramiko.SSHClient):
     """SSH Client which handles 'no auth' SSH devices."""
 
     def _auth(self, username, *args):
         """Override to invoke the transport directly when SSH auth is None."""
-        self._transport.auth_none(username)
-        return
+        try:
+            self._transport.auth_none(username)
+        except paramiko.SSHException:
+            super()._auth(username, *args)
 
 
 class SSHSession:
@@ -81,24 +84,12 @@ class SSHSession:
     def __init__(self, device):
         """:param device DeviceInfo: A device info object."""
         self.device = device
-        self._client = SSHClientNoAuth()
+        self._client = SSHClientWithNoAuthSupport()
         self._client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def __enter__(self):
         """Enter the context, connect to the ssh session."""
-        try:
-            self._client.connect(
-                self.device.address,
-                username=self.device.username,
-                password=self.device.password,
-            )
-        except paramiko.SSHException:
-            time.sleep(0.2)
-            self._client.connect(
-                self.device.address,
-                username=self.device.username,
-                password=self.device.password,
-            )
+        self._connect()
         return self
 
     def __exit__(self, *exception_info):
@@ -164,6 +155,36 @@ class SSHSession:
         else:
             _check_print_out(cmd_output, check, writeout)
             return cmd_output
+
+    def _connect(self):
+        config = paramiko.SSHConfig()
+        conf_path = pathlib.Path().home() / ".ssh" / "config"
+
+        if conf_path.exists():
+            config.parse(conf_path.open())
+            cdict = config.lookup(self.device.hostname)
+        else:
+            cdict = None
+
+        try:
+            self._client.connect(
+                self.device.address,
+                username=self.device.username,
+                password=self.device.password
+                if self.device.password
+                else None,
+                key_filename=cdict["identityfile"] if cdict else None,
+            )
+        except paramiko.SSHException:
+            time.sleep(0.2)
+            self._client.connect(
+                self.device.address,
+                username=self.device.username,
+                password=self.device.password
+                if self.device.password
+                else None,
+                key_filename=cdict["identityfile"] if cdict else None,
+            )
 
 
 class SCPValidationFailed(Exception):

@@ -43,6 +43,12 @@ def parse_args(description):
         " you want to communicate with. ",
     )
     parser.add_argument(
+        "-c",
+        "--config-hostname",
+        help="The hostname specified in ~/.ssh/config",
+        default="*",
+    )
+    parser.add_argument(
         "-v", "--verbose", help="Enable verbose logging.", action="store_true"
     )
     parser.add_argument(
