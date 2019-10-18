@@ -46,7 +46,7 @@ def parse_args(description):
         "-c",
         "--config-hostname",
         help="The hostname specified in ~/.ssh/config",
-        default="*",
+        default="mbl-device",
     )
     parser.add_argument(
         "-v", "--verbose", help="Enable verbose logging.", action="store_true"
