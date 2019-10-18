@@ -29,13 +29,15 @@ def ssh_session(func):
     # retain metadata from the 'wrapped' function 'object'.
     @functools.wraps(func)
     def wrapper(**kwargs):
-        with ssh.SSHSession(create_device(kwargs["address"])) as session:
+        with ssh.SSHSession(
+            create_device(kwargs["address"], kwargs["hostname"])
+        ) as session:
             func(**kwargs, ssh=session)
 
     return wrapper
 
 
-def create_device(address=None):
+def create_device(address=None, hostname=None):
     """Create a device from either a file or args, depending on args.
 
     :param args Namespace: args from the cli parser.
@@ -47,6 +49,7 @@ def create_device(address=None):
             raise ValueError("Invalid address given.")
     else:
         data = file_handler.read_device_file()
+    data["hostname"] = hostname
     return device.create_device(**data)
 
 

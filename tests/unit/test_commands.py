@@ -61,6 +61,7 @@ class Args:
     recursive = False
     cmd = ""
     quiet = False
+    config_hostname = "*"
 
 
 class TestListCommand:
@@ -199,11 +200,14 @@ class TestShellCommand:
 
     def test_ssh_client_is_called_correctly(self, args):
         with mock.patch(
-            "mbl.cli.utils.ssh.SSHClientNoAuth", autospec=True
+            "mbl.cli.utils.ssh.SSHClientWithNoAuthSupport", autospec=True
         ) as client:
             with mock.patch("mbl.cli.utils.ssh.shell") as shell:
                 shell_action.execute(args)
                 client().connect.assert_called_once_with(
-                    args.address, username="root", password=""
+                    args.address,
+                    username="root",
+                    password=None,
+                    key_filename=None,
                 )
                 assert client().invoke_shell.called
