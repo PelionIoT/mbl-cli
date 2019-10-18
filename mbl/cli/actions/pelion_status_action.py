@@ -14,7 +14,7 @@ from . import utils
 
 def execute(args):
     """Entry point for the get-pelion-status command."""
-    device = utils.create_device(args.address)
+    device = utils.create_device(args.address, args.config_hostname)
     with SSHSession(device) as ssh:
         try:
             output = ssh.run_cmd(
