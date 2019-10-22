@@ -13,8 +13,8 @@ from . import utils
 
 def execute(args):
     """Entry point for the put action."""
-    dev = utils.create_device(args.address)
-    print("Putting {} on device: {}\n".format(args.src_path, dev.hostname))
+    dev = utils.create_device(args.address, args.config_hostname)
+    print("Putting {} on device.\n".format(args.src_path))
     ssh.SUPPRESS_PROGRESS = args.quiet
 
     with ssh.SSHSession(dev) as ssh_session:
