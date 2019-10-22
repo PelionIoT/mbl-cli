@@ -109,7 +109,7 @@ class TestPutCommand:
 class TestGetCommand:
     def test_getting_a_file_from_device(self, dut_address):
         output = pexpect.spawn(
-            "mbl-cli -a {} get . /var/log/mbl-cloud-client.log".format(
+            "mbl-cli -a {} get /var/log/mbl-cloud-client.log .".format(
                 dut_address
             )
         )
@@ -119,7 +119,7 @@ class TestGetCommand:
 
     def test_getting_a_dir_from_device(self, dut_address):
         mbl_cli = pexpect.spawn(
-            "mbl-cli -a {} get -r . /var/log".format(dut_address)
+            "mbl-cli -a {} get -r /var/log .".format(dut_address)
         )
         mbl_cli.expect(pexpect.EOF)
         mbl_cli.close()
