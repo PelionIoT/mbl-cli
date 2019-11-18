@@ -25,6 +25,26 @@ jobs:
           name: Sanity check
           command: mbl-tools/ci/sanity-check/run-me.sh --no-tty --workdir repo-under-test
 
+  test:
+    docker:
+      - image: circleci/python:3.7.5
+    steps:
+      - checkout
+      - run:
+          name: Create virtual environment
+          command: python3 -m venv mbl-cli-test-venv
+      - run:
+          name: Install pytest
+          command: mbl-cli-test-venv/bin/python -m pip install pytest
+      - run:
+          name: Install mbl-cli
+          command: mbl-cli-test-venv/bin/python -m pip install .
+      - run:
+          name: Run unit tests
+          command: mbl-cli-test-venv/bin/pytest tests/unit --junit-xml=test-results/mbl-cli/test-results.xml
+      - store_test_results:
+          path: test-results
+
 workflows:
   version: 2
 
@@ -32,3 +52,4 @@ workflows:
     jobs:
       - licenses
       - sanity
+      - test
