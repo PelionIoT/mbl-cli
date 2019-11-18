@@ -176,7 +176,7 @@ class SSHSession:
                 key_filename=cdict["identityfile"] if cdict else None,
             )
         except paramiko.SSHException:
-            time.sleep(0.2)
+            time.sleep(2)
             self._client.connect(
                 self.device.address,
                 username=self.device.username,
