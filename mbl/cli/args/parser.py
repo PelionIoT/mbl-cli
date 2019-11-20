@@ -55,7 +55,7 @@ def parse_args(description):
         "-q",
         "--quiet",
         help="Stop messages from remote commands.",
-        action="store_true",
+        action="count",
     )
 
     command_group = parser.add_subparsers(

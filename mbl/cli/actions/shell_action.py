@@ -19,7 +19,11 @@ def execute(args):
         if args.cmd:
             if not args.quiet:
                 print("Running a command on the device...")
-            ssh_session.run_cmd(args.cmd, check=True, writeout=not args.quiet)
+            ssh_session.run_cmd(
+                args.cmd,
+                check=True,
+                writeout=(not args.quiet >= 2)
+            )
         else:
             if not args.quiet:
                 print("Starting an interactive shell...")
