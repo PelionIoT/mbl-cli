@@ -89,7 +89,7 @@ class SSHSession:
 
     def __enter__(self):
         """Enter the context, connect to the ssh session."""
-        self._connect(num_retries=3, timeout=5)
+        self._connect()
         return self
 
     def __exit__(self, *exception_info):
@@ -156,7 +156,7 @@ class SSHSession:
             _check_print_out(cmd_output, check, writeout)
             return cmd_output
 
-    def _connect(self, num_retries, timeout):
+    def _connect(self):
         config = paramiko.SSHConfig()
         conf_path = pathlib.Path().home() / ".ssh" / "config"
 
@@ -166,22 +166,15 @@ class SSHSession:
         else:
             cdict = None
 
-        for i in range(num_retries):
-            try:
-                self._client.connect(
-                    self.device.address,
-                    username=self.device.username,
-                    password=self.device.password
-                    if self.device.password
-                    else None,
-                    key_filename=cdict["identityfile"] if cdict else None,
-                )
-            except paramiko.SSHException:
-                if i == num_retries:
-                    raise
-                time.sleep(timeout)
-                continue
-            break
+        self._client.connect(
+            self.device.address,
+            username=self.device.username,
+            password=self.device.password
+            if self.device.password
+            else None,
+            key_filename=cdict["identityfile"] if cdict else None,
+            banner_timeout=30
+        )
 
 
 class SCPValidationFailed(Exception):
