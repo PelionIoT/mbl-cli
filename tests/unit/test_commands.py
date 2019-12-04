@@ -209,5 +209,6 @@ class TestShellCommand:
                     username="root",
                     password=None,
                     key_filename=None,
+                    banner_timeout=30,
                 )
                 assert client().invoke_shell.called
