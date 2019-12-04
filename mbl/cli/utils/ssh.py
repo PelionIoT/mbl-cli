@@ -166,25 +166,13 @@ class SSHSession:
         else:
             cdict = None
 
-        try:
-            self._client.connect(
-                self.device.address,
-                username=self.device.username,
-                password=self.device.password
-                if self.device.password
-                else None,
-                key_filename=cdict["identityfile"] if cdict else None,
-            )
-        except paramiko.SSHException:
-            time.sleep(2)
-            self._client.connect(
-                self.device.address,
-                username=self.device.username,
-                password=self.device.password
-                if self.device.password
-                else None,
-                key_filename=cdict["identityfile"] if cdict else None,
-            )
+        self._client.connect(
+            self.device.address,
+            username=self.device.username,
+            password=self.device.password if self.device.password else None,
+            key_filename=cdict["identityfile"] if cdict else None,
+            banner_timeout=30,
+        )
 
 
 class SCPValidationFailed(Exception):
