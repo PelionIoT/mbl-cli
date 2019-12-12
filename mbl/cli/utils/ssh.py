@@ -156,7 +156,7 @@ class SSHSession:
             _check_print_out(cmd_output, check, writeout)
             return cmd_output
 
-    def _connect(self):
+    def _connect(self, retry_limit=3, retry_interval_s=5):
         config = paramiko.SSHConfig()
         conf_path = pathlib.Path().home() / ".ssh" / "config"
 
@@ -166,13 +166,27 @@ class SSHSession:
         else:
             cdict = None
 
-        self._client.connect(
-            self.device.address,
-            username=self.device.username,
-            password=self.device.password if self.device.password else None,
-            key_filename=cdict["identityfile"] if cdict else None,
-            banner_timeout=30,
-        )
+        # There are often "SSH Protocol Banner" timeouts while waiting for the
+        # server to present us with its SSH protocol banner.
+        # We set paramiko's `banner_timeout` parameter, but that rarely solves
+        # the problem. Therefore we retry the connection `retry_limit` times
+        # to try and decrease the rate of failure.
+        for _ in range(retry_limit):
+            try:
+                self._client.connect(
+                    self.device.address,
+                    username=self.device.username,
+                    password=self.device.password
+                    if self.device.password
+                    else None,
+                    key_filename=cdict["identityfile"] if cdict else None,
+                    banner_timeout=60,
+                )
+            except paramiko.SSHException:
+                time.sleep(retry_interval_s)
+                continue
+            else:
+                break
 
 
 class SCPValidationFailed(Exception):
